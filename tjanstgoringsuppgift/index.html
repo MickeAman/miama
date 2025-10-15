@@ -23,37 +23,45 @@
     }
   </script>
   <style>
-    body {
-      background: linear-gradient(135deg, #1a2930 0%, #2c4a5a 50%, #1a2930 100%);
-      min-height: 100vh;
-    }
+    @media screen {
+      body {
+        background: linear-gradient(135deg, #1a2930 0%, #2c4a5a 50%, #1a2930 100%);
+        min-height: 100vh;
+      }
 
 ```
+  .print-only { 
+    display: none !important;
+  }
+}
+
 @media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  /* Dölja allt utom print-only */
+  body > div:not(.print-only),
+  .screen-only,
+  body > *:not(.print-only) {
+    display: none !important;
+    visibility: hidden !important;
   }
   
+  /* Visa endast print */
+  .print-only {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Rensa bakgrund och styling */
   html, body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
-    width: 210mm;
-    height: 297mm;
+    width: 100%;
+    height: 100%;
   }
   
-  .screen-only { 
-    display: none !important; 
-    visibility: hidden !important;
-    position: absolute !important;
-    left: -9999px !important;
-  }
-  
-  .print-only { 
-    display: block !important;
-    visibility: visible !important;
-    position: relative !important;
+  body {
+    background: white !important;
+    background-image: none !important;
   }
   
   /* Tvinga allt på en sida */
@@ -66,7 +74,7 @@
     page-break-inside: avoid !important;
   }
   
-  /* Komprimera lite för att få plats */
+  /* Komprimera för att få plats */
   .print-only > div {
     font-size: 10pt !important;
   }
@@ -91,13 +99,6 @@
   @page {
     margin: 15mm;
     size: A4;
-  }
-}
-
-@media screen {
-  .print-only { 
-    display: none !important;
-    visibility: hidden !important;
   }
 }
 ```
@@ -210,7 +211,7 @@
       return (
         <div className="min-h-screen bg-gray-50">
           {/* Mobil/Desktop redigeringsvy */}
-          <div className="screen-only max-w-4xl mx-auto p-4">
+          <div className="screen-only max-w-4xl mx-auto p-4" style={{printColorAdjust: 'exact'}}>
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-4 border border-military-green">
               <div className="text-center mb-6 pb-4 border-b border-military-green">
                 <div className="inline-block bg-military-green px-6 py-2 rounded-full mb-2">
@@ -340,7 +341,7 @@
                 <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
                   <span className="text-2xl">📱</span> Fyller du i på mobil?
                 </h3>
-                <p className="text-sm text-gray-400 mb-3">Så här skriver du ut:</p>
+                <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
                 <ol className="text-sm text-gray-400 mb-4 space-y-1 list-decimal list-inside">
                   <li>Klicka "Kopiera länk" nedan</li>
                   <li>Skicka länken till dig själv (SMS/email)</li>
@@ -358,9 +359,9 @@
 
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-4">
                 <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
-                  <span className="text-2xl">🖥️</span> Dela eller spara som PDF?
+                  <span className="text-2xl">🖥️</span> Är du på datorn?
                 </h3>
-                <p className="text-sm text-gray-400 mb-3">Tryck bara på knappen för att skriva ut:</p>
+                <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
                 
                 <button
                   onClick={() => window.print()}
