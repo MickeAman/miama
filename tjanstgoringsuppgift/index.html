@@ -30,70 +30,28 @@
       }
 
 ```
-  .print-only { 
+  #print-content { 
     display: none !important;
   }
 }
 
 @media print {
-  /* Dölja allt utom print-only */
-  body > div:not(.print-only),
-  .screen-only,
-  body > *:not(.print-only) {
+  #root {
     display: none !important;
-    visibility: hidden !important;
   }
   
-  /* Visa endast print */
-  .print-only {
+  #print-content {
     display: block !important;
-    visibility: visible !important;
   }
   
-  /* Rensa bakgrund och styling */
   html, body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
-    width: 100%;
-    height: 100%;
-  }
-  
-  body {
-    background: white !important;
-    background-image: none !important;
-  }
-  
-  /* Tvinga allt på en sida */
-  .print-only {
-    page-break-inside: avoid !important;
-    page-break-after: avoid !important;
   }
   
   table {
     page-break-inside: avoid !important;
-  }
-  
-  /* Komprimera för att få plats */
-  .print-only > div {
-    font-size: 10pt !important;
-  }
-  
-  table {
-    font-size: 9pt !important;
-  }
-  
-  td, th {
-    padding: 4px !important;
-  }
-  
-  .signatures {
-    font-size: 8pt !important;
-    margin-top: 20px !important;
-  }
-  
-  .sig-line {
-    margin-top: 15px !important;
   }
   
   @page {
@@ -107,6 +65,10 @@
 </head>
 <body>
   <div id="root"></div>
+
+  <!-- Separat print content UTANFÖR React -->
+
+  <div id="print-content"></div>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
@@ -183,6 +145,116 @@
         localStorage.setItem('uppgifter', JSON.stringify(uppgifter));
       }, [uppgifter]);
 
+      // Uppdatera print content när data ändras
+      useEffect(() => {
+        updatePrintContent();
+      }, [grundInfo, uppgifter]);
+
+      const updatePrintContent = () => {
+        const printDiv = document.getElementById('print-content');
+        const emptyRows = Math.max(0, 10 - uppgifter.length);
+        
+        printDiv.innerHTML = `
+          <div style="font-family: Arial, sans-serif; padding: 15mm; font-size: 10pt;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+              <img src="logo-left.png" alt="Logo" style="height: 60px;" onerror="this.style.display='none'" />
+              <div style="text-align: center; flex: 1;">
+                <div style="font-size: 9pt; font-weight: bold;">
+                  GÖTEBORGS GARNISON<br/>
+                  ELFSBORGSGRUPPEN
+                </div>
+                <div style="font-size: 14pt; font-weight: bold; margin-top: 15px;">
+                  ENSKILD<br/>
+                  TJÄNSTGÖRINGSUPPGIFT
+                </div>
+              </div>
+              <img src="logo-right.png" alt="Logo" style="height: 60px;" onerror="this.style.display='none'" />
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 2px solid black;">
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold; width: 25%;">Namn</td>
+                  <td style="border: 1px solid black; padding: 5px; width: 50%;">${grundInfo.namn}</td>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold; width: 25%;">Org:</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Personnr</td>
+                  <td style="border: 1px solid black; padding: 5px;">${grundInfo.personnr}</td>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Akt:</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Förband</td>
+                  <td style="border: 1px solid black; padding: 5px;">${grundInfo.forband}</td>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Ö-tid:</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Förbandsnr</td>
+                  <td style="border: 1px solid black; padding: 5px;" colspan="2">${grundInfo.forbandsnr}</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Månad</td>
+                  <td style="border: 1px solid black; padding: 5px;" colspan="2">${grundInfo.manad}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 2px solid black;">
+              <thead>
+                <tr>
+                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0;">Datum</th>
+                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0; width: 50%;">Arbetsuppgift</th>
+                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0;">Antal Tim</th>
+                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0;">Km</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${uppgifter.map(u => `
+                  <tr>
+                    <td style="border: 1px solid black; padding: 5px;">${u.datum}</td>
+                    <td style="border: 1px solid black; padding: 5px;">${u.arbetsuppgift}</td>
+                    <td style="border: 1px solid black; padding: 5px; text-align: center;">${u.tim}</td>
+                    <td style="border: 1px solid black; padding: 5px; text-align: center;">${u.km || ''}</td>
+                  </tr>
+                `).join('')}
+                ${Array(emptyRows).fill(0).map(() => `
+                  <tr>
+                    <td style="border: 1px solid black; padding: 5px; height: 22px;">&nbsp;</td>
+                    <td style="border: 1px solid black; padding: 5px;">&nbsp;</td>
+                    <td style="border: 1px solid black; padding: 5px;">&nbsp;</td>
+                    <td style="border: 1px solid black; padding: 5px;">&nbsp;</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+
+            <div style="display: flex; justify-content: space-between; font-size: 8pt; margin-top: 20px;">
+              <div style="width: 30%;">
+                <div style="margin-bottom: 3px; font-weight: bold;">Ovanstående uppgifter vidimeras:</div>
+                <div>Göteborg 20___-___-___</div>
+                <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 3px;">Namnteckning</div>
+                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Namnförtydligande</div>
+                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Befattning:</div>
+              </div>
+              <div style="width: 30%;">
+                <div style="margin-bottom: 3px; font-weight: bold;">Ovanstående uppgifter bestyrks:</div>
+                <div>Göteborg 20___-___-___</div>
+                <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 3px;">Namnteckning</div>
+                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Namnförtydligande</div>
+                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Befattning:</div>
+              </div>
+              <div style="width: 30%;">
+                <div style="margin-bottom: 3px; font-weight: bold;">Indaterat:</div>
+                <div>Göteborg 20___-___-___</div>
+                <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 3px;">Namnteckning</div>
+                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Namnförtydligande</div>
+                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Befattning:</div>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
       const laggTillUppgift = () => {
         if (nyRad.datum && nyRad.arbetsuppgift) {
           setUppgifter([...uppgifter, { ...nyRad, id: Date.now() }]);
@@ -209,268 +281,164 @@
       };
 
       return (
-        <div className="min-h-screen bg-gray-50">
-          {/* Mobil/Desktop redigeringsvy */}
-          <div className="screen-only max-w-4xl mx-auto p-4" style={{printColorAdjust: 'exact'}}>
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-4 border border-military-green">
-              <div className="text-center mb-6 pb-4 border-b border-military-green">
-                <div className="inline-block bg-military-green px-6 py-2 rounded-full mb-2">
-                  <span className="text-yellow-400 font-bold text-sm tracking-widest">433 GATHENHIELMS</span>
-                </div>
-                <h1 className="text-3xl font-bold text-white mb-1">Tjänstgöringsuppgift</h1>
-                <p className="text-military-tan text-sm tracking-wide">MARINA HEMVÄRNSKOMPANI</p>
+        <div className="max-w-4xl mx-auto p-4">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-4 border border-military-green">
+            <div className="text-center mb-6 pb-4 border-b border-military-green">
+              <div className="inline-block bg-military-green px-6 py-2 rounded-full mb-2">
+                <span className="text-yellow-400 font-bold text-sm tracking-widest">433 GATHENHIELMS</span>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <input
-                  type="text"
-                  placeholder="Namn"
-                  value={grundInfo.namn}
-                  onChange={(e) => setGrundInfo({...grundInfo, namn: e.target.value})}
-                  className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Personnummer"
-                  value={grundInfo.personnr}
-                  onChange={(e) => setGrundInfo({...grundInfo, personnr: e.target.value})}
-                  className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Förband"
-                  value={grundInfo.forband}
-                  onChange={(e) => setGrundInfo({...grundInfo, forband: e.target.value})}
-                  className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Förbandsnr"
-                  value={grundInfo.forbandsnr}
-                  onChange={(e) => setGrundInfo({...grundInfo, forbandsnr: e.target.value})}
-                  className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Månad (t.ex. Oktober 2025)"
-                  value={grundInfo.manad}
-                  onChange={(e) => setGrundInfo({...grundInfo, manad: e.target.value})}
-                  className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none md:col-span-2"
-                />
-              </div>
+              <h1 className="text-3xl font-bold text-white mb-1">Tjänstgöringsuppgift</h1>
+              <p className="text-military-tan text-sm tracking-wide">MARINA HEMVÄRNSKOMPANI</p>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <input
+                type="text"
+                placeholder="Namn"
+                value={grundInfo.namn}
+                onChange={(e) => setGrundInfo({...grundInfo, namn: e.target.value})}
+                className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Personnummer"
+                value={grundInfo.personnr}
+                onChange={(e) => setGrundInfo({...grundInfo, personnr: e.target.value})}
+                className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Förband"
+                value={grundInfo.forband}
+                onChange={(e) => setGrundInfo({...grundInfo, forband: e.target.value})}
+                className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Förbandsnr"
+                value={grundInfo.forbandsnr}
+                onChange={(e) => setGrundInfo({...grundInfo, forbandsnr: e.target.value})}
+                className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Månad (t.ex. Oktober 2025)"
+                value={grundInfo.manad}
+                onChange={(e) => setGrundInfo({...grundInfo, manad: e.target.value})}
+                className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none md:col-span-2"
+              />
+            </div>
+
+            <div className="border-t border-gray-700 pt-4 mb-4">
+              <h2 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+                <span className="text-military-green">▸</span> Lägg till uppgift
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-xs text-gray-400 mb-1">Datum</label>
+                  <input
+                    type="date"
+                    value={nyRad.datum}
+                    onChange={(e) => setNyRad({...nyRad, datum: e.target.value})}
+                    className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-military-green focus:outline-none"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs text-gray-400 mb-1">Arbetsuppgift</label>
+                  <input
+                    type="text"
+                    placeholder="t.ex. Båtunderhåll"
+                    value={nyRad.arbetsuppgift}
+                    onChange={(e) => setNyRad({...nyRad, arbetsuppgift: e.target.value})}
+                    className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Timmar</label>
+                  <input
+                    type="number"
+                    placeholder="8"
+                    value={nyRad.tim}
+                    onChange={(e) => setNyRad({...nyRad, tim: e.target.value})}
+                    className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Kilometer</label>
+                  <input
+                    type="number"
+                    placeholder="50"
+                    value={nyRad.km}
+                    onChange={(e) => setNyRad({...nyRad, km: e.target.value})}
+                    className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={laggTillUppgift}
+                className="w-full bg-military-green text-white rounded p-2 flex items-center justify-center gap-2 hover:bg-opacity-90"
+              >
+                <Plus /> Lägg till
+              </button>
+            </div>
+
+            {uppgifter.length > 0 && (
               <div className="border-t border-gray-700 pt-4 mb-4">
                 <h2 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
-                  <span className="text-military-green">▸</span> Lägg till uppgift
+                  <span className="text-military-green">▸</span> Inlagda uppgifter
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-                  <div className="col-span-2 md:col-span-1">
-                    <label className="block text-xs text-gray-400 mb-1">Datum</label>
-                    <input
-                      type="date"
-                      value={nyRad.datum}
-                      onChange={(e) => setNyRad({...nyRad, datum: e.target.value})}
-                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-military-green focus:outline-none"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs text-gray-400 mb-1">Arbetsuppgift</label>
-                    <input
-                      type="text"
-                      placeholder="t.ex. Båtunderhåll"
-                      value={nyRad.arbetsuppgift}
-                      onChange={(e) => setNyRad({...nyRad, arbetsuppgift: e.target.value})}
-                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">Timmar</label>
-                    <input
-                      type="number"
-                      placeholder="8"
-                      value={nyRad.tim}
-                      onChange={(e) => setNyRad({...nyRad, tim: e.target.value})}
-                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">Kilometer</label>
-                    <input
-                      type="number"
-                      placeholder="50"
-                      value={nyRad.km}
-                      onChange={(e) => setNyRad({...nyRad, km: e.target.value})}
-                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={laggTillUppgift}
-                  className="w-full bg-military-green text-white rounded p-2 flex items-center justify-center gap-2 hover:bg-opacity-90"
-                >
-                  <Plus /> Lägg till
-                </button>
-              </div>
-
-              {uppgifter.length > 0 && (
-                <div className="border-t border-gray-700 pt-4 mb-4">
-                  <h2 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
-                    <span className="text-military-green">▸</span> Inlagda uppgifter
-                  </h2>
-                  <div className="space-y-2">
-                    {uppgifter.map(u => (
-                      <div key={u.id} className="flex items-center gap-2 bg-gray-800 border border-gray-700 p-3 rounded hover:border-military-green transition-colors">
-                        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-300">
-                          <span className="font-medium text-white">{u.datum}</span>
-                          <span className="col-span-1 md:col-span-2">{u.arbetsuppgift}</span>
-                          <span className="text-military-tan">{u.tim}h {u.km && `/ ${u.km}km`}</span>
-                        </div>
-                        <button
-                          onClick={() => taBortUppgift(u.id)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          <Trash2 />
-                        </button>
+                <div className="space-y-2">
+                  {uppgifter.map(u => (
+                    <div key={u.id} className="flex items-center gap-2 bg-gray-800 border border-gray-700 p-3 rounded hover:border-military-green transition-colors">
+                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-300">
+                        <span className="font-medium text-white">{u.datum}</span>
+                        <span className="col-span-1 md:col-span-2">{u.arbetsuppgift}</span>
+                        <span className="text-military-tan">{u.tim}h {u.km && `/ ${u.km}km`}</span>
                       </div>
-                    ))}
-                  </div>
+                      <button
+                        onClick={() => taBortUppgift(u.id)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        <Trash2 />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
-
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-6">
-                <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
-                  <span className="text-2xl">📱</span> Fyller du i på mobil?
-                </h3>
-                <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
-                <ol className="text-sm text-gray-400 mb-4 space-y-1 list-decimal list-inside">
-                  <li>Klicka "Kopiera länk" nedan</li>
-                  <li>Skicka länken till dig själv (SMS/email)</li>
-                  <li>Öppna länken på datorn</li>
-                  <li>Tryck Ctrl+P (PC) eller Cmd+P (Mac)</li>
-                </ol>
-                
-                <button
-                  onClick={kopieraLank}
-                  className="w-full bg-military-blue text-white rounded p-3 flex items-center justify-center gap-2 hover:brightness-110 transition-all font-semibold shadow-lg"
-                >
-                  <Copy /> {kopierad ? '✓ Länk kopierad!' : 'Kopiera länk'}
-                </button>
               </div>
+            )}
 
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-4">
-                <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
-                  <span className="text-2xl">🖥️</span> Är du på datorn?
-                </h3>
-                <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
-                
-                <button
-                  onClick={() => window.print()}
-                  className="w-full bg-military-green text-white rounded p-3 flex items-center justify-center gap-2 hover:brightness-110 transition-all font-semibold shadow-lg"
-                >
-                  <Printer /> Skriv ut formulär
-                </button>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-6">
+              <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
+                <span className="text-2xl">📱</span> Fyller du i på mobil?
+              </h3>
+              <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
+              <ol className="text-sm text-gray-400 mb-4 space-y-1 list-decimal list-inside">
+                <li>Klicka "Kopiera länk" nedan</li>
+                <li>Skicka länken till dig själv (SMS/email)</li>
+                <li>Öppna länken på datorn</li>
+                <li>Tryck Ctrl+P (PC) eller Cmd+P (Mac)</li>
+              </ol>
+              
+              <button
+                onClick={kopieraLank}
+                className="w-full bg-military-blue text-white rounded p-3 flex items-center justify-center gap-2 hover:brightness-110 transition-all font-semibold shadow-lg"
+              >
+                <Copy /> {kopierad ? '✓ Länk kopierad!' : 'Kopiera länk'}
+              </button>
             </div>
-          </div>
 
-          {/* Utskriftsversion */}
-          <div className="print-only">
-            <div style={{fontFamily: 'Arial, sans-serif', padding: '15mm', fontSize: '10pt'}}>
-              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px'}}>
-                <img src="logo-left.png" alt="Logo" style={{height: '60px'}} />
-                <div style={{textAlign: 'center', flex: 1}}>
-                  <div style={{fontSize: '9pt', fontWeight: 'bold'}}>
-                    GÖTEBORGS GARNISON<br/>
-                    ELFSBORGSGRUPPEN
-                  </div>
-                  <div style={{fontSize: '14pt', fontWeight: 'bold', marginTop: '15px'}}>
-                    ENSKILD<br/>
-                    TJÄNSTGÖRINGSUPPGIFT
-                  </div>
-                </div>
-                <img src="logo-right.png" alt="Logo" style={{height: '60px'}} />
-              </div>
-
-              <table style={{width: '100%', borderCollapse: 'collapse', marginBottom: '15px', border: '2px solid black'}}>
-                <tbody>
-                  <tr>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold', width: '25%'}}>Namn</td>
-                    <td style={{border: '1px solid black', padding: '5px', width: '50%'}}>{grundInfo.namn}</td>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold', width: '25%'}}>Org:</td>
-                  </tr>
-                  <tr>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold'}}>Personnr</td>
-                    <td style={{border: '1px solid black', padding: '5px'}}>{grundInfo.personnr}</td>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold'}}>Akt:</td>
-                  </tr>
-                  <tr>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold'}}>Förband</td>
-                    <td style={{border: '1px solid black', padding: '5px'}}>{grundInfo.forband}</td>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold'}}>Ö-tid:</td>
-                  </tr>
-                  <tr>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold'}}>Förbandsnr</td>
-                    <td style={{border: '1px solid black', padding: '5px'}} colSpan="2">{grundInfo.forbandsnr}</td>
-                  </tr>
-                  <tr>
-                    <td style={{border: '1px solid black', padding: '5px', fontWeight: 'bold'}}>Månad</td>
-                    <td style={{border: '1px solid black', padding: '5px'}} colSpan="2">{grundInfo.manad}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <table style={{width: '100%', borderCollapse: 'collapse', marginBottom: '15px', border: '2px solid black'}}>
-                <thead>
-                  <tr>
-                    <th style={{border: '1px solid black', padding: '5px', backgroundColor: '#f0f0f0'}}>Datum</th>
-                    <th style={{border: '1px solid black', padding: '5px', backgroundColor: '#f0f0f0', width: '50%'}}>Arbetsuppgift</th>
-                    <th style={{border: '1px solid black', padding: '5px', backgroundColor: '#f0f0f0'}}>Antal Tim</th>
-                    <th style={{border: '1px solid black', padding: '5px', backgroundColor: '#f0f0f0'}}>Km</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {uppgifter.map((u, i) => (
-                    <tr key={i}>
-                      <td style={{border: '1px solid black', padding: '5px'}}>{u.datum}</td>
-                      <td style={{border: '1px solid black', padding: '5px'}}>{u.arbetsuppgift}</td>
-                      <td style={{border: '1px solid black', padding: '5px', textAlign: 'center'}}>{u.tim}</td>
-                      <td style={{border: '1px solid black', padding: '5px', textAlign: 'center'}}>{u.km}</td>
-                    </tr>
-                  ))}
-                  {[...Array(Math.max(0, 10 - uppgifter.length))].map((_, i) => (
-                    <tr key={`empty-${i}`}>
-                      <td style={{border: '1px solid black', padding: '5px', height: '22px'}}>&nbsp;</td>
-                      <td style={{border: '1px solid black', padding: '5px'}}>&nbsp;</td>
-                      <td style={{border: '1px solid black', padding: '5px'}}>&nbsp;</td>
-                      <td style={{border: '1px solid black', padding: '5px'}}>&nbsp;</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginTop: '20px'}}>
-                <div style={{width: '30%'}}>
-                  <div style={{marginBottom: '3px', fontWeight: 'bold'}}>Ovanstående uppgifter vidimeras:</div>
-                  <div>Göteborg 20___-___-___</div>
-                  <div style={{marginTop: '20px', borderTop: '1px solid black', paddingTop: '3px'}}>Namnteckning</div>
-                  <div style={{marginTop: '10px', borderTop: '1px solid black', paddingTop: '3px'}}>Namnförtydligande</div>
-                  <div style={{marginTop: '10px', borderTop: '1px solid black', paddingTop: '3px'}}>Befattning:</div>
-                </div>
-                <div style={{width: '30%'}}>
-                  <div style={{marginBottom: '3px', fontWeight: 'bold'}}>Ovanstående uppgifter bestyrks:</div>
-                  <div>Göteborg 20___-___-___</div>
-                  <div style={{marginTop: '20px', borderTop: '1px solid black', paddingTop: '3px'}}>Namnteckning</div>
-                  <div style={{marginTop: '10px', borderTop: '1px solid black', paddingTop: '3px'}}>Namnförtydligande</div>
-                  <div style={{marginTop: '10px', borderTop: '1px solid black', paddingTop: '3px'}}>Befattning:</div>
-                </div>
-                <div style={{width: '30%'}}>
-                  <div style={{marginBottom: '3px', fontWeight: 'bold'}}>Indaterat:</div>
-                  <div>Göteborg 20___-___-___</div>
-                  <div style={{marginTop: '20px', borderTop: '1px solid black', paddingTop: '3px'}}>Namnteckning</div>
-                  <div style={{marginTop: '10px', borderTop: '1px solid black', paddingTop: '3px'}}>Namnförtydligande</div>
-                  <div style={{marginTop: '10px', borderTop: '1px solid black', paddingTop: '3px'}}>Befattning:</div>
-                </div>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-4">
+              <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
+                <span className="text-2xl">🖥️</span> Är du på datorn?
+              </h3>
+              <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
+              
+              <button
+                onClick={() => window.print()}
+                className="w-full bg-military-green text-white rounded p-3 flex items-center justify-center gap-2 hover:brightness-110 transition-all font-semibold shadow-lg"
+              >
+                <Printer /> Skriv ut formulär
+              </button>
             </div>
           </div>
         </div>
