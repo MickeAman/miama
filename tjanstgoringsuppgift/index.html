@@ -30,39 +30,75 @@
 
 ```
 @media print {
-  .screen-only { display: none !important; }
-  .print-only { display: block !important; }
-  body { margin: 0; background: white; }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 210mm;
+    height: 297mm;
+  }
+  
+  .screen-only { 
+    display: none !important; 
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+  }
+  
+  .print-only { 
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+  }
   
   /* Tvinga allt på en sida */
   .print-only {
-    page-break-inside: avoid;
-    page-break-after: avoid;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
   }
+  
   table {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
   }
   
   /* Komprimera lite för att få plats */
   .print-only > div {
     font-size: 10pt !important;
   }
+  
   table {
     font-size: 9pt !important;
   }
+  
   td, th {
     padding: 4px !important;
   }
+  
   .signatures {
     font-size: 8pt !important;
     margin-top: 20px !important;
   }
+  
   .sig-line {
     margin-top: 15px !important;
   }
+  
+  @page {
+    margin: 15mm;
+    size: A4;
+  }
 }
+
 @media screen {
-  .print-only { display: none; }
+  .print-only { 
+    display: none !important;
+    visibility: hidden !important;
+  }
 }
 ```
 
@@ -227,33 +263,45 @@
                   <span className="text-military-green">▸</span> Lägg till uppgift
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-                  <input
-                    type="date"
-                    value={nyRad.datum}
-                    onChange={(e) => setNyRad({...nyRad, datum: e.target.value})}
-                    className="bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-military-green focus:outline-none col-span-2 md:col-span-1"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Arbetsuppgift"
-                    value={nyRad.arbetsuppgift}
-                    onChange={(e) => setNyRad({...nyRad, arbetsuppgift: e.target.value})}
-                    className="bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none col-span-2"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Tim"
-                    value={nyRad.tim}
-                    onChange={(e) => setNyRad({...nyRad, tim: e.target.value})}
-                    className="bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Km"
-                    value={nyRad.km}
-                    onChange={(e) => setNyRad({...nyRad, km: e.target.value})}
-                    className="bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
-                  />
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="block text-xs text-gray-400 mb-1">Datum</label>
+                    <input
+                      type="date"
+                      value={nyRad.datum}
+                      onChange={(e) => setNyRad({...nyRad, datum: e.target.value})}
+                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white focus:border-military-green focus:outline-none"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs text-gray-400 mb-1">Arbetsuppgift</label>
+                    <input
+                      type="text"
+                      placeholder="t.ex. Båtunderhåll"
+                      value={nyRad.arbetsuppgift}
+                      onChange={(e) => setNyRad({...nyRad, arbetsuppgift: e.target.value})}
+                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Timmar</label>
+                    <input
+                      type="number"
+                      placeholder="8"
+                      value={nyRad.tim}
+                      onChange={(e) => setNyRad({...nyRad, tim: e.target.value})}
+                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Kilometer</label>
+                    <input
+                      type="number"
+                      placeholder="50"
+                      value={nyRad.km}
+                      onChange={(e) => setNyRad({...nyRad, km: e.target.value})}
+                      className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
+                    />
+                  </div>
                 </div>
                 <button
                   onClick={laggTillUppgift}
@@ -310,7 +358,7 @@
 
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-4">
                 <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
-                  <span className="text-2xl">🖥️</span> Vill du dela/spara som PDF?
+                  <span className="text-2xl">🖥️</span> Dela eller spara som PDF?
                 </h3>
                 <p className="text-sm text-gray-400 mb-3">Tryck bara på knappen för att skriva ut:</p>
                 
