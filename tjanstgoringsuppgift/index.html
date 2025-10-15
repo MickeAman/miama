@@ -152,107 +152,123 @@
 
       const updatePrintContent = () => {
         const printDiv = document.getElementById('print-content');
-        const emptyRows = Math.max(0, 10 - uppgifter.length);
+        const rowsPerPage = 12; // Max rader per sida
+        const totalPages = Math.ceil(uppgifter.length / rowsPerPage) || 1;
         
-        printDiv.innerHTML = `
-          <div style="font-family: Arial, sans-serif; padding: 15mm; font-size: 10pt;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-              <img src="logo-left.png" alt="Logo" style="height: 60px;" onerror="this.style.display='none'" />
-              <div style="text-align: center; flex: 1;">
-                <div style="font-size: 9pt; font-weight: bold;">
-                  GÖTEBORGS GARNISON<br/>
-                  ELFSBORGSGRUPPEN
+        const createPage = (pageUppgifter, pageNum, totalPages) => {
+          const emptyRows = Math.max(0, rowsPerPage - pageUppgifter.length);
+          
+          return `
+            <div style="font-family: Arial, sans-serif; padding: 12mm; font-size: 9pt; page-break-after: ${pageNum < totalPages ? 'always' : 'auto'};">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <img src="logo-left.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'" />
+                <div style="text-align: center; flex: 1;">
+                  <div style="font-size: 8pt; font-weight: bold;">
+                    GÖTEBORGS GARNISON<br/>
+                    ELFSBORGSGRUPPEN
+                  </div>
+                  <div style="font-size: 12pt; font-weight: bold; margin-top: 8px;">
+                    ENSKILD<br/>
+                    TJÄNSTGÖRINGSUPPGIFT
+                  </div>
                 </div>
-                <div style="font-size: 14pt; font-weight: bold; margin-top: 15px;">
-                  ENSKILD<br/>
-                  TJÄNSTGÖRINGSUPPGIFT
+                <img src="logo-right.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'" />
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 2px solid black;">
+                <tbody>
+                  <tr>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold; width: 25%;">Namn</td>
+                    <td style="border: 1px solid black; padding: 4px; width: 50%;">${grundInfo.namn}</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold; width: 25%;">Org:</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Personnr</td>
+                    <td style="border: 1px solid black; padding: 4px;">${grundInfo.personnr}</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Akt:</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Förband</td>
+                    <td style="border: 1px solid black; padding: 4px;">${grundInfo.forband}</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Ö-tid:</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Förbandsnr</td>
+                    <td style="border: 1px solid black; padding: 4px;" colspan="2">${grundInfo.forbandsnr}</td>
+                  </tr>
+                  <tr>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Månad</td>
+                    <td style="border: 1px solid black; padding: 4px;" colspan="2">${grundInfo.manad}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 2px solid black;">
+                <thead>
+                  <tr>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0;">Datum</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 50%;">Arbetsuppgift</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0;">Antal Tim</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0;">Km</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${pageUppgifter.map(u => `
+                    <tr>
+                      <td style="border: 1px solid black; padding: 4px;">${u.datum}</td>
+                      <td style="border: 1px solid black; padding: 4px;">${u.arbetsuppgift}</td>
+                      <td style="border: 1px solid black; padding: 4px; text-align: center;">${u.tim}</td>
+                      <td style="border: 1px solid black; padding: 4px; text-align: center;">${u.km || ''}</td>
+                    </tr>
+                  `).join('')}
+                  ${Array(emptyRows).fill(0).map(() => `
+                    <tr>
+                      <td style="border: 1px solid black; padding: 4px; height: 20px;">&nbsp;</td>
+                      <td style="border: 1px solid black; padding: 4px;">&nbsp;</td>
+                      <td style="border: 1px solid black; padding: 4px;">&nbsp;</td>
+                      <td style="border: 1px solid black; padding: 4px;">&nbsp;</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+
+              <div style="display: flex; justify-content: space-between; font-size: 7pt; margin-top: 12px;">
+                <div style="width: 30%;">
+                  <div style="margin-bottom: 2px; font-weight: bold;">Ovanstående uppgifter vidimeras:</div>
+                  <div>Göteborg 20___-___-___</div>
+                  <div style="margin-top: 15px; border-top: 1px solid black; padding-top: 2px;">Namnteckning</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Namnförtydligande</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning:</div>
+                </div>
+                <div style="width: 30%;">
+                  <div style="margin-bottom: 2px; font-weight: bold;">Ovanstående uppgifter bestyrks:</div>
+                  <div>Göteborg 20___-___-___</div>
+                  <div style="margin-top: 15px; border-top: 1px solid black; padding-top: 2px;">Namnteckning</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Namnförtydligande</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning:</div>
+                </div>
+                <div style="width: 30%;">
+                  <div style="margin-bottom: 2px; font-weight: bold;">Indaterat:</div>
+                  <div>Göteborg 20___-___-___</div>
+                  <div style="margin-top: 15px; border-top: 1px solid black; padding-top: 2px;">Namnteckning</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Namnförtydligande</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning:</div>
                 </div>
               </div>
-              <img src="logo-right.png" alt="Logo" style="height: 60px;" onerror="this.style.display='none'" />
             </div>
-
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 2px solid black;">
-              <tbody>
-                <tr>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold; width: 25%;">Namn</td>
-                  <td style="border: 1px solid black; padding: 5px; width: 50%;">${grundInfo.namn}</td>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold; width: 25%;">Org:</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Personnr</td>
-                  <td style="border: 1px solid black; padding: 5px;">${grundInfo.personnr}</td>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Akt:</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Förband</td>
-                  <td style="border: 1px solid black; padding: 5px;">${grundInfo.forband}</td>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Ö-tid:</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Förbandsnr</td>
-                  <td style="border: 1px solid black; padding: 5px;" colspan="2">${grundInfo.forbandsnr}</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid black; padding: 5px; font-weight: bold;">Månad</td>
-                  <td style="border: 1px solid black; padding: 5px;" colspan="2">${grundInfo.manad}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 2px solid black;">
-              <thead>
-                <tr>
-                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0;">Datum</th>
-                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0; width: 50%;">Arbetsuppgift</th>
-                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0;">Antal Tim</th>
-                  <th style="border: 1px solid black; padding: 5px; background-color: #f0f0f0;">Km</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${uppgifter.map(u => `
-                  <tr>
-                    <td style="border: 1px solid black; padding: 5px;">${u.datum}</td>
-                    <td style="border: 1px solid black; padding: 5px;">${u.arbetsuppgift}</td>
-                    <td style="border: 1px solid black; padding: 5px; text-align: center;">${u.tim}</td>
-                    <td style="border: 1px solid black; padding: 5px; text-align: center;">${u.km || ''}</td>
-                  </tr>
-                `).join('')}
-                ${Array(emptyRows).fill(0).map(() => `
-                  <tr>
-                    <td style="border: 1px solid black; padding: 5px; height: 22px;">&nbsp;</td>
-                    <td style="border: 1px solid black; padding: 5px;">&nbsp;</td>
-                    <td style="border: 1px solid black; padding: 5px;">&nbsp;</td>
-                    <td style="border: 1px solid black; padding: 5px;">&nbsp;</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-
-            <div style="display: flex; justify-content: space-between; font-size: 8pt; margin-top: 20px;">
-              <div style="width: 30%;">
-                <div style="margin-bottom: 3px; font-weight: bold;">Ovanstående uppgifter vidimeras:</div>
-                <div>Göteborg 20___-___-___</div>
-                <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 3px;">Namnteckning</div>
-                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Namnförtydligande</div>
-                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Befattning:</div>
-              </div>
-              <div style="width: 30%;">
-                <div style="margin-bottom: 3px; font-weight: bold;">Ovanstående uppgifter bestyrks:</div>
-                <div>Göteborg 20___-___-___</div>
-                <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 3px;">Namnteckning</div>
-                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Namnförtydligande</div>
-                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Befattning:</div>
-              </div>
-              <div style="width: 30%;">
-                <div style="margin-bottom: 3px; font-weight: bold;">Indaterat:</div>
-                <div>Göteborg 20___-___-___</div>
-                <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 3px;">Namnteckning</div>
-                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Namnförtydligande</div>
-                <div style="margin-top: 10px; border-top: 1px solid black; padding-top: 3px;">Befattning:</div>
-              </div>
-            </div>
-          </div>
-        `;
+          `;
+        };
+        
+        // Dela upp uppgifter i sidor
+        let pages = '';
+        for (let i = 0; i < totalPages; i++) {
+          const start = i * rowsPerPage;
+          const end = Math.min(start + rowsPerPage, uppgifter.length);
+          const pageUppgifter = uppgifter.slice(start, end);
+          pages += createPage(pageUppgifter, i + 1, totalPages);
+        }
+        
+        printDiv.innerHTML = pages;
       };
 
       const laggTillUppgift = () => {
