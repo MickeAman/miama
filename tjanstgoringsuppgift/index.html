@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tjänstgöringsuppgift</title>
+  <title>Enskild tjänsterapport</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -22,100 +22,54 @@
     }
   </script>
 <style>
-  /* screen styles */
   @media screen {
     body {
       background: linear-gradient(135deg, #1a2930 0%, #2c4a5a 50%, #1a2930 100%);
       min-height: 100vh;
     }
-    /* never show print markup on screen */
-    #print-content {
-      display: none !important;
-    }
+    #print-content { display: none !important; }
   }
-
-  /* print styles */
   @media print {
-    /* nuke everything by default */
-    body * {
-      visibility: hidden !important;
-    }
-
-    /* show only the print area */
-    #print-content, #print-content * {
-      visibility: visible !important;
-    }
-
-    /* also make sure the app root is fully hidden (extra safety) */
-    #root {
-      display: none !important;
-    }
-
-    /* ensure the print area participates in normal flow */
-    #print-content {
-      display: block !important;
-      position: static !important;
-    }
-
+    body * { visibility: hidden !important; }
+    #print-content, #print-content * { visibility: visible !important; }
+    #root { display: none !important; }
+    #print-content { display: block !important; position: static !important; }
     html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: #ffffff !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      margin: 0 !important; padding: 0 !important; background: #ffffff !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
-
-    table {
-      page-break-inside: avoid !important;
-    }
-
-    /* page setup */
-    @page {
-      size: A4;
-      margin: 15mm;
-    }
-
-    /* optional: block images everywhere except inside #print-content */
-    img {
-      display: none !important;
-    }
-    #print-content img {
-      display: inline !important;
-    }
+    table { page-break-inside: avoid !important; }
+    @page { size: A4; margin: 15mm; }
+    img { display: none !important; }
+    #print-content img { display: inline !important; }
   }
 </style>
 </head>
 <body>
   <div id="root"></div>
-
-  <!-- Separat print content UTANFÖR React -->
   <div id="print-content"></div>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Lucide icons as inline SVG
     const Plus = () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
     );
-
     const Trash2 = () => (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polyline points="3 6 5 6 21 6"></polyline>
         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
       </svg>
     );
-
     const Copy = () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
       </svg>
     );
-
     const Printer = () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -137,11 +91,9 @@
       const [nyRad, setNyRad] = useState({ datum: '', arbetsuppgift: '', tim: '', km: '', ansvarig: '' });
       const [kopierad, setKopierad] = useState(false);
 
-      // Ladda data från URL eller localStorage
       useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const deladeData = urlParams.get('data');
-        
         if (deladeData) {
           try {
             const decoded = JSON.parse(atob(deladeData));
@@ -158,27 +110,17 @@
         }
       }, []);
 
-      useEffect(() => {
-        localStorage.setItem('grundInfo', JSON.stringify(grundInfo));
-      }, [grundInfo]);
-
-      useEffect(() => {
-        localStorage.setItem('uppgifter', JSON.stringify(uppgifter));
-      }, [uppgifter]);
-
-      // Uppdatera print content när data ändras
-      useEffect(() => {
-        updatePrintContent();
-      }, [grundInfo, uppgifter]);
+      useEffect(() => { localStorage.setItem('grundInfo', JSON.stringify(grundInfo)); }, [grundInfo]);
+      useEffect(() => { localStorage.setItem('uppgifter', JSON.stringify(uppgifter)); }, [uppgifter]);
+      useEffect(() => { updatePrintContent(); }, [grundInfo, uppgifter]);
 
       const updatePrintContent = () => {
         const printDiv = document.getElementById('print-content');
-        const rowsPerPage = 12; // Max rader per sida
+        const rowsPerPage = 12;
         const totalPages = Math.ceil(uppgifter.length / rowsPerPage) || 1;
-        
+
         const createPage = (pageUppgifter, pageNum, totalPages) => {
           const emptyRows = Math.max(0, rowsPerPage - pageUppgifter.length);
-          
           return `
             <div style="font-family: Arial, sans-serif; padding: 12mm; font-size: 9pt; page-break-after: ${pageNum < totalPages ? 'always' : 'auto'};">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -190,7 +132,7 @@
                   </div>
                   <div style="font-size: 12pt; font-weight: bold; margin-top: 8px;">
                     ENSKILD<br/>
-                    TJÄNSTGÖRINGSUPPGIFT
+                    TJÄNSTERAPPORT
                   </div>
                 </div>
                 <img src="logo-right.png" alt="Logo" style="height: 50px;" onerror="this.style.display='none'" />
@@ -201,24 +143,24 @@
                   <tr>
                     <td style="border: 1px solid black; padding: 4px; font-weight: bold; width: 25%;">Namn</td>
                     <td style="border: 1px solid black; padding: 4px; width: 50%;">${grundInfo.namn}</td>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold; width: 25%;">Org:</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold; width: 25%;">OrgE</td>
                   </tr>
                   <tr>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Personnr</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Personnummer</td>
                     <td style="border: 1px solid black; padding: 4px;">${grundInfo.personnr}</td>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Akt:</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Ärendenr</td>
                   </tr>
                   <tr>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Förband</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Förband/Enhet</td>
                     <td style="border: 1px solid black; padding: 4px;">${grundInfo.forband}</td>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Ö-tid:</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Övertid (h)</td>
                   </tr>
                   <tr>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Förbandsnr</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Förbandskod</td>
                     <td style="border: 1px solid black; padding: 4px;" colspan="2">${grundInfo.forbandsnr}</td>
                   </tr>
                   <tr>
-                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Månad</td>
+                    <td style="border: 1px solid black; padding: 4px; font-weight: bold;">Månad/år</td>
                     <td style="border: 1px solid black; padding: 4px;" colspan="2">${grundInfo.manad}</td>
                   </tr>
                 </tbody>
@@ -228,10 +170,10 @@
                 <thead>
                   <tr>
                     <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 12%;">Datum</th>
-                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 38%;">Arbetsuppgift</th>
-                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 20%;">Ansvarig</th>
-                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 15%;">Antal Tim</th>
-                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 15%;">Km</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 38%;">Uppdrag/Tjänsteåtgärd</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 20%;">Förman/Beställare</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 15%;">Timmar</th>
+                    <th style="border: 1px solid black; padding: 4px; background-color: #f0f0f0; width: 15%;">Km (tjänsteresa)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -258,32 +200,31 @@
 
               <div style="display: flex; justify-content: space-between; font-size: 7pt; margin-top: 12px;">
                 <div style="width: 30%;">
-                  <div style="margin-bottom: 2px; font-weight: bold;">Ovanstående uppgifter vidimeras:</div>
-                  <div>Göteborg 20___-___-___</div>
+                  <div style="margin-bottom: 2px; font-weight: bold;">Uppgifterna vidimeras:</div>
+                  <div>Ort och datum: Göteborg 20___-___-___</div>
                   <div style="margin-top: 15px; border-top: 1px solid black; padding-top: 2px;">Namnteckning</div>
                   <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Namnförtydligande</div>
-                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning:</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning</div>
                 </div>
                 <div style="width: 30%;">
-                  <div style="margin-bottom: 2px; font-weight: bold;">Ovanstående uppgifter bestyrks:</div>
-                  <div>Göteborg 20___-___-___</div>
+                  <div style="margin-bottom: 2px; font-weight: bold;">Bestyrks av chef:</div>
+                  <div>Ort och datum: Göteborg 20___-___-___</div>
                   <div style="margin-top: 15px; border-top: 1px solid black; padding-top: 2px;">Namnteckning</div>
                   <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Namnförtydligande</div>
-                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning:</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning</div>
                 </div>
                 <div style="width: 30%;">
-                  <div style="margin-bottom: 2px; font-weight: bold;">Indaterat:</div>
-                  <div>Göteborg 20___-___-___</div>
+                  <div style="margin-bottom: 2px; font-weight: bold;">Registrerat:</div>
+                  <div>Ort och datum: Göteborg 20___-___-___</div>
                   <div style="margin-top: 15px; border-top: 1px solid black; padding-top: 2px;">Namnteckning</div>
                   <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Namnförtydligande</div>
-                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning:</div>
+                  <div style="margin-top: 8px; border-top: 1px solid black; padding-top: 2px;">Befattning</div>
                 </div>
               </div>
             </div>
           `;
         };
-        
-        // Dela upp uppgifter i sidor
+
         let pages = '';
         for (let i = 0; i < totalPages; i++) {
           const start = i * rowsPerPage;
@@ -291,7 +232,6 @@
           const pageUppgifter = uppgifter.slice(start, end);
           pages += createPage(pageUppgifter, i + 1, totalPages);
         }
-        
         printDiv.innerHTML = pages;
       };
 
@@ -301,16 +241,12 @@
           setNyRad({ datum: '', arbetsuppgift: '', tim: '', km: '', ansvarig: '' });
         }
       };
-
-      const taBortUppgift = (id) => {
-        setUppgifter(uppgifter.filter(u => u.id !== id));
-      };
+      const taBortUppgift = (id) => { setUppgifter(uppgifter.filter(u => u.id !== id)); };
 
       const kopieraLank = async () => {
         const data = { grundInfo, uppgifter };
         const encoded = btoa(JSON.stringify(data));
         const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
-        
         try {
           await navigator.clipboard.writeText(url);
           setKopierad(true);
@@ -327,7 +263,7 @@
               <div className="inline-block bg-military-green px-6 py-2 rounded-full mb-2">
                 <span className="text-yellow-400 font-bold text-sm tracking-widest">433 GATHENHIELMS</span>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-1">Tjänstgöringsuppgift</h1>
+              <h1 className="text-3xl font-bold text-white mb-1">Enskild tjänsterapport</h1>
               <p className="text-military-tan text-sm tracking-wide">MARINA HEMVÄRNSKOMPANI</p>
             </div>
 
@@ -348,21 +284,21 @@
               />
               <input
                 type="text"
-                placeholder="Förband"
+                placeholder="Förband/Enhet"
                 value={grundInfo.forband}
                 onChange={(e) => setGrundInfo({...grundInfo, forband: e.target.value})}
                 className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
               />
               <input
                 type="text"
-                placeholder="Förbandsnr"
+                placeholder="Förbandskod"
                 value={grundInfo.forbandsnr}
                 onChange={(e) => setGrundInfo({...grundInfo, forbandsnr: e.target.value})}
                 className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
               />
               <input
                 type="text"
-                placeholder="Månad (t.ex. Oktober 2025)"
+                placeholder="Månad/år (t.ex. Oktober 2025)"
                 value={grundInfo.manad}
                 onChange={(e) => setGrundInfo({...grundInfo, manad: e.target.value})}
                 className="bg-gray-800 border border-gray-700 rounded p-3 text-white placeholder-gray-500 focus:border-military-green focus:outline-none md:col-span-2"
@@ -371,7 +307,7 @@
 
             <div className="border-t border-gray-700 pt-4 mb-4">
               <h2 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
-                <span className="text-military-green">▸</span> Lägg till uppgift
+                <span className="text-military-green">▸</span> registrera post
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                 <div className="col-span-2 md:col-span-1">
@@ -384,17 +320,17 @@
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-xs text-gray-400 mb-1">Arbetsuppgift</label>
+                  <label className="block text-xs text-gray-400 mb-1">Uppdrag/Tjänsteåtgärd</label>
                   <input
                     type="text"
-                    placeholder="t.ex. Båtunderhåll"
+                    placeholder="t.ex. Materielvård"
                     value={nyRad.arbetsuppgift}
                     onChange={(e) => setNyRad({...nyRad, arbetsuppgift: e.target.value})}
                     className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white placeholder-gray-500 focus:border-military-green focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Ansvarig</label>
+                  <label className="block text-xs text-gray-400 mb-1">Förman/Beställare</label>
                   <input
                     type="text"
                     placeholder="Namn"
@@ -416,7 +352,7 @@
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                 <div className="col-span-2 md:col-span-4">
-                  <label className="block text-xs text-gray-400 mb-1">Kilometer</label>
+                  <label className="block text-xs text-gray-400 mb-1">Kilometer (tjänsteresa)</label>
                   <input
                     type="number"
                     placeholder="50"
@@ -430,14 +366,14 @@
                 onClick={laggTillUppgift}
                 className="w-full bg-military-green text-white rounded p-2 flex items-center justify-center gap-2 hover:bg-opacity-90"
               >
-                <Plus /> Lägg till
+                <Plus /> lägg till post
               </button>
             </div>
 
             {uppgifter.length > 0 && (
               <div className="border-t border-gray-700 pt-4 mb-4">
                 <h2 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
-                  <span className="text-military-green">▸</span> Inlagda uppgifter
+                  <span className="text-military-green">▸</span> registrerade poster
                 </h2>
                 <div className="space-y-2">
                   {uppgifter.map(u => (
@@ -446,7 +382,7 @@
                         <span className="font-medium text-white">{u.datum}</span>
                         <span className="col-span-1 md:col-span-2">{u.arbetsuppgift}</span>
                         <span className="text-military-tan">{u.ansvarig || '-'}</span>
-                        <span className="text-military-tan">{u.tim}h {u.km && `/ ${u.km}km`}</span>
+                        <span className="text-military-tan">{u.tim} h {u.km && `/ ${u.km} km`}</span>
                       </div>
                       <button
                         onClick={() => taBortUppgift(u.id)}
@@ -461,36 +397,30 @@
             )}
 
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-6">
-              <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
-                <span className="text-2xl">📱</span> Vill du dela en länk?
-              </h3>
-              <p className="text-sm text-gray-400 mb-3">Dela eller spara lokalt på dator:</p>
+              <h3 className="font-bold text-lg mb-2 text-white">dela länk</h3>
+              <p className="text-sm text-gray-400 mb-3">kopiera en delbar länk eller spara lokalt:</p>
               <ol className="text-sm text-gray-400 mb-4 space-y-1 list-decimal list-inside">
-                <li>Klicka "Kopiera länk" nedan</li>
-                <li>Skicka länken till dig själv (email)</li>
-                <li>Öppna länken på datorn</li>
-                <li>Uppdrag slutför</li>
+                <li>välj “kopiera länk”</li>
+                <li>skicka länken till dig själv</li>
+                <li>öppna på dator</li>
+                <li>klart</li>
               </ol>
-              
               <button
                 onClick={kopieraLank}
                 className="w-full bg-military-blue text-white rounded p-3 flex items-center justify-center gap-2 hover:brightness-110 transition-all font-semibold shadow-lg"
               >
-                <Copy /> {kopierad ? '✓ Länk kopierad!' : 'Kopiera länk'}
+                <Copy /> {kopierad ? '✓ länk kopierad' : 'kopiera länk'}
               </button>
             </div>
 
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mt-4">
-              <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2">
-                <span className="text-2xl">🖥️</span> Dela eller spara?
-              </h3>
-              <p className="text-sm text-gray-400 mb-3">Dela eller spara som PDF:</p>
-              
+              <h3 className="font-bold text-lg mb-2 text-white">utskrift</h3>
+              <p className="text-sm text-gray-400 mb-3">skriv ut eller spara som pdf:</p>
               <button
                 onClick={() => window.print()}
                 className="w-full bg-military-green text-white rounded p-3 flex items-center justify-center gap-2 hover:brightness-110 transition-all font-semibold shadow-lg"
               >
-                <Printer /> Skriv ut formulär
+                <Printer /> skriv ut formulär
               </button>
             </div>
           </div>
