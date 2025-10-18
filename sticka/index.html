@@ -24,15 +24,22 @@
       background: #f7f7f5;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: #1a1a1a;
+      -webkit-tap-highlight-color: transparent;
     }
     input:focus, button:focus { outline: none; }
+    .input-clear {
+      position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+      background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer;
+      color: #9ca3af; /* stone-400 */
+    }
+    .input-clear:hover { color: #4b5563; } /* stone-600 */
   </style>
 </head>
 <body>
   <div id="root" class="min-h-screen flex flex-col items-center justify-center p-6"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     function Stickraknare() {
       const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || 0));
@@ -42,12 +49,14 @@
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
       const [wakeLock, setWakeLock] = useState(null);
 
+      // persist
       useEffect(() => localStorage.setItem("stick-count1", count1), [count1]);
       useEffect(() => localStorage.setItem("stick-count2", count2), [count2]);
       useEffect(() => localStorage.setItem("stick-name1", name1), [name1]);
       useEffect(() => localStorage.setItem("stick-name2", name2), [name2]);
       useEffect(() => localStorage.setItem("stick-keep-awake", keepAwake), [keepAwake]);
 
+      // wake lock
       useEffect(() => {
         if (keepAwake) requestWakeLock();
         else releaseWakeLock();
@@ -64,7 +73,6 @@
           console.log("Wake lock error:", err);
         }
       }
-
       function releaseWakeLock() {
         if (wakeLock) {
           wakeLock.release();
@@ -72,37 +80,81 @@
         }
       }
 
-      const CounterCard = ({ name, setName, count, setCount }) => (
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="text-xl font-semibold mb-3 w-full text-center bg-transparent border-b border-stone-300 focus:border-stone-500 outline-none"
-          />
-          <div className="text-6xl font-light mb-6 text-stone-900">{count}</div>
-          <button
-            onClick={() => setCount(count + 1)}
-            className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95"
-          >
-            Lägg till varv
-          </button>
-          <div className="flex justify-between mt-4 gap-2">
+      const CounterCard = ({ initialName, onCommitName, count, setCount }) => {
+        const [localName, setLocalName] = useState(initialName);
+        const inputRef = useRef(null);
+
+        // synca om initialName ändras utifrån
+        useEffect(() => { setLocalName(initialName); }, [initialName]);
+
+        const commit = () => {
+          const v = (localName || "").trim();
+          onCommitName(v || initialName); // behåll gammalt namn om tomt
+        };
+
+        const onKeyDown = (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+            // behåll fokus så tangentbordet inte fälls ned
+            requestAnimationFrame(() => inputRef.current && inputRef.current.focus());
+          }
+        };
+
+        const clearName = () => {
+          setLocalName("");
+          requestAnimationFrame(() => inputRef.current && inputRef.current.focus());
+        };
+
+        return (
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="sentences"
+                spellCheck="false"
+                value={localName}
+                onChange={(e) => setLocalName(e.target.value)}
+                onBlur={commit}
+                onKeyDown={onKeyDown}
+                className="text-xl font-semibold mb-3 w-full text-center bg-transparent border-b border-stone-300 focus:border-stone-500"
+                placeholder="Namn på räknare"
+              />
+              {localName?.length > 0 && (
+                <button type="button" aria-label="Rensa namn" className="input-clear" onClick={clearName}>
+                  ×
+                </button>
+              )}
+            </div>
+
+            <div className="text-6xl font-light mb-6 text-stone-900">{count}</div>
             <button
-              onClick={() => setCount(Math.max(0, count - 1))}
-              className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
+              onClick={() => setCount(count + 1)}
+              className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95"
             >
-              Ångra
+              Lägg till varv
             </button>
-            <button
-              onClick={() => setCount(0)}
-              className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
-            >
-              Nollställ
-            </button>
+            <div className="flex justify-between mt-4 gap-2">
+              <button
+                onClick={() => setCount(Math.max(0, count - 1))}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
+              >
+                Ångra
+              </button>
+              <button
+                onClick={() => setCount(0)}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
+              >
+                Nollställ
+              </button>
+            </div>
           </div>
-        </div>
-      );
+        );
+      };
 
       return (
         <main className="max-w-md w-full space-y-8">
@@ -124,8 +176,18 @@
             </label>
           </div>
 
-          <CounterCard name={name1} setName={setName1} count={count1} setCount={setCount1} />
-          <CounterCard name={name2} setName={setName2} count={count2} setCount={setCount2} />
+          <CounterCard
+            initialName={name1}
+            onCommitName={setName1}
+            count={count1}
+            setCount={setCount1}
+          />
+          <CounterCard
+            initialName={name2}
+            onCommitName={setName2}
+            count={count2}
+            setCount={setCount2}
+          />
 
           <footer className="text-center text-xs text-stone-400 pt-4">
             gjord med ♥ i sverige
