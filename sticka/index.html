@@ -2,10 +2,10 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stickräknare</title>
 
-  <!-- appikon och manifest -->
+  <!-- appikon + manifest -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <meta name="theme-color" content="#f7f7f5">
@@ -13,11 +13,12 @@
   <meta name="apple-mobile-web-app-title" content="Stickräknare">
   <link rel="apple-touch-icon" href="icon-512.png">
 
-  <!-- react + tailwind -->
+  <!-- react + babel + tailwind + nosleep fallback -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 
   <style>
     body {
@@ -27,83 +28,117 @@
       -webkit-tap-highlight-color: transparent;
     }
     input:focus, button:focus { outline: none; }
-    .input-clear {
-      position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
-      background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer;
-      color: #9ca3af; /* stone-400 */
-    }
-    .input-clear:hover { color: #4b5563; } /* stone-600 */
+    .input-clear { position: absolute; right: .5rem; top: 50%; transform: translateY(-50%); background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af; }
+    .input-clear:hover { color: #4b5563; }
   </style>
 </head>
 <body>
   <div id="root" class="min-h-screen flex flex-col items-center justify-center p-6"></div>
 
-  <script type="text/babel">
+  <!-- viktigt: data-presets för att JSX ska transpileras -->
+  <script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useRef } = React;
 
+    // global fallback-instans
+    const noSleep = new window.NoSleep();
+
     function Stickraknare() {
-      const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || 0));
-      const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || 0));
+      const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || "0", 10));
+      const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || "0", 10));
       const [name1, setName1] = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
       const [name2, setName2] = useState(() => localStorage.getItem("stick-name2") || "Räknare 2");
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
       const [wakeLock, setWakeLock] = useState(null);
+      const [awakeStrategy, setAwakeStrategy] = useState("off"); // "wakeLock" | "noSleep" | "off"
 
       // persist
-      useEffect(() => localStorage.setItem("stick-count1", count1), [count1]);
-      useEffect(() => localStorage.setItem("stick-count2", count2), [count2]);
+      useEffect(() => localStorage.setItem("stick-count1", String(count1)), [count1]);
+      useEffect(() => localStorage.setItem("stick-count2", String(count2)), [count2]);
       useEffect(() => localStorage.setItem("stick-name1", name1), [name1]);
       useEffect(() => localStorage.setItem("stick-name2", name2), [name2]);
-      useEffect(() => localStorage.setItem("stick-keep-awake", keepAwake), [keepAwake]);
+      useEffect(() => localStorage.setItem("stick-keep-awake", String(keepAwake)), [keepAwake]);
 
-      // wake lock
+      // enable/disable on toggle
       useEffect(() => {
-        if (keepAwake) requestWakeLock();
-        else releaseWakeLock();
-        return () => releaseWakeLock();
+        if (keepAwake) { enableKeepAwake(); }
+        else { disableKeepAwake(); }
+        return () => { disableKeepAwake(); };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [keepAwake]);
 
-      async function requestWakeLock() {
+      // reacquire on visibility change
+      useEffect(() => {
+        const onVis = async () => {
+          if (document.visibilityState === "visible" && keepAwake) {
+            await enableKeepAwake(true); // silently try again
+          }
+        };
+        document.addEventListener("visibilitychange", onVis);
+        return () => document.removeEventListener("visibilitychange", onVis);
+      }, [keepAwake]);
+
+      async function enableKeepAwake(silent = false) {
+        // try native wake lock
         try {
-          if ("wakeLock" in navigator) {
+          if ("wakeLock" in navigator && navigator.wakeLock?.request) {
             const lock = await navigator.wakeLock.request("screen");
+            // if previous existed, release it
+            if (wakeLock && wakeLock.release) { try { await wakeLock.release(); } catch(_){} }
             setWakeLock(lock);
+            setAwakeStrategy("wakeLock");
+
+            // if browser auto-releases (e.g., after screen off), listen and try to get it back when possible
+            lock.addEventListener?.("release", () => {
+              if (keepAwake && document.visibilityState === "visible") {
+                // will be re-acquired by visibility handler
+              }
+            });
+            return;
           }
         } catch (err) {
-          console.log("Wake lock error:", err);
+          if (!silent) console.log("wake lock failed, falling back to NoSleep:", err);
+        }
+        // fallback: NoSleep.js (works on iOS; requires user gesture — the checkbox click counts)
+        try {
+          noSleep.enable();
+          setAwakeStrategy("noSleep");
+        } catch (err) {
+          if (!silent) console.log("NoSleep enable failed:", err);
+          setAwakeStrategy("off");
         }
       }
-      function releaseWakeLock() {
-        if (wakeLock) {
-          wakeLock.release();
-          setWakeLock(null);
-        }
+
+      async function disableKeepAwake() {
+        // release native
+        try {
+          if (wakeLock && wakeLock.release) { await wakeLock.release(); }
+        } catch (_) {}
+        setWakeLock(null);
+        // disable fallback
+        try { noSleep.disable(); } catch (_) {}
+        setAwakeStrategy("off");
       }
 
       const CounterCard = ({ initialName, onCommitName, count, setCount }) => {
         const [localName, setLocalName] = useState(initialName);
         const inputRef = useRef(null);
 
-        // synca om initialName ändras utifrån
         useEffect(() => { setLocalName(initialName); }, [initialName]);
 
         const commit = () => {
           const v = (localName || "").trim();
-          onCommitName(v || initialName); // behåll gammalt namn om tomt
+          onCommitName(v || initialName);
         };
-
         const onKeyDown = (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
             commit();
-            // behåll fokus så tangentbordet inte fälls ned
-            requestAnimationFrame(() => inputRef.current && inputRef.current.focus());
+            requestAnimationFrame(() => inputRef.current?.focus());
           }
         };
-
         const clearName = () => {
           setLocalName("");
-          requestAnimationFrame(() => inputRef.current && inputRef.current.focus());
+          requestAnimationFrame(() => inputRef.current?.focus());
         };
 
         return (
@@ -125,9 +160,7 @@
                 placeholder="Namn på räknare"
               />
               {localName?.length > 0 && (
-                <button type="button" aria-label="Rensa namn" className="input-clear" onClick={clearName}>
-                  ×
-                </button>
+                <button type="button" aria-label="Rensa namn" className="input-clear" onClick={clearName}>×</button>
               )}
             </div>
 
@@ -168,7 +201,7 @@
               id="keep-awake"
               type="checkbox"
               checked={keepAwake}
-              onChange={(e) => setKeepAwake(e.target.checked)}
+              onChange={async (e) => setKeepAwake(e.target.checked)}
               className="w-5 h-5 accent-stone-700 cursor-pointer"
             />
             <label htmlFor="keep-awake" className="text-stone-600 text-sm select-none">
@@ -176,18 +209,12 @@
             </label>
           </div>
 
-          <CounterCard
-            initialName={name1}
-            onCommitName={setName1}
-            count={count1}
-            setCount={setCount1}
-          />
-          <CounterCard
-            initialName={name2}
-            onCommitName={setName2}
-            count={count2}
-            setCount={setCount2}
-          />
+          <p className="text-center text-xs text-stone-500 -mt-4">
+            Status: {awakeStrategy === "wakeLock" ? "Skärmlås aktivt (Wake Lock)" : awakeStrategy === "noSleep" ? "Skärmlås via NoSleep" : "Av"}
+          </p>
+
+          <CounterCard initialName={name1} onCommitName={setName1} count={count1} setCount={setCount1} />
+          <CounterCard initialName={name2} onCommitName={setName2} count={count2} setCount={setCount2} />
 
           <footer className="text-center text-xs text-stone-400 pt-4">
             gjord med ♥ i sverige
