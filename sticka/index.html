@@ -30,6 +30,16 @@
     input:focus, button:focus { outline: none; }
     .input-clear { position: absolute; right: .5rem; top: 50%; transform: translateY(-50%); background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af; }
     .input-clear:hover { color: #4b5563; }
+    .icon-btn { background: transparent; border: 0; cursor: pointer; color: #9ca3af; padding: .25rem; }
+    .icon-btn:hover { color: #4b5563; }
+    .plus-btn {
+      display:flex; align-items:center; justify-content:center;
+      width:100%; padding:14px; border-radius:12px;
+      background:#111827; color:#fff; /* stone-900 */
+      transition:transform .1s ease, filter .15s ease;
+    }
+    .plus-btn:hover { filter:brightness(1.05); }
+    .plus-btn:active { transform:scale(.98); }
   </style>
 </head>
 <body>
@@ -38,39 +48,65 @@
   <!-- viktigt: data-presets för att JSX ska transpileras -->
   <script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useRef } = React;
-
-    // global fallback-instans
-    const noSleep = new window.NoSleep();
+    const noSleep = new window.NoSleep(); // iOS-fallback
 
     function Stickraknare() {
+      /* ---- befintliga (orörda) keys ---- */
       const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || "0", 10));
       const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || "0", 10));
-      const [name1, setName1] = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
-      const [name2, setName2] = useState(() => localStorage.getItem("stick-name2") || "Räknare 2");
+      const [name1, setName1]   = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
+      const [name2, setName2]   = useState(() => localStorage.getItem("stick-name2") || "Räknare 2");
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
+
+      /* visa/dölj räknare 2 (data raderas inte) */
+      const [showSecond, setShowSecond] = useState(() => localStorage.getItem("stick-hide-2") !== "true");
+
+      /* ---- extra räknare (påverkar ej ovan keys) ---- */
+      const [extraCounters, setExtraCounters] = useState(() => {
+        try {
+          const raw = localStorage.getItem("stick-extra");
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed)
+            ? parsed.map((it, idx) => ({
+                id: it.id || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+                name: typeof it.name === "string" ? it.name : `Räknare ${idx + 3}`,
+                count: Number.isFinite(it.count) ? it.count : 0
+              }))
+            : [];
+        } catch { return []; }
+      });
+
+      /* ---- wake lock ---- */
       const [wakeLock, setWakeLock] = useState(null);
       const [awakeStrategy, setAwakeStrategy] = useState("off"); // "wakeLock" | "noSleep" | "off"
 
-      // persist
+      /* persist befintliga */
       useEffect(() => localStorage.setItem("stick-count1", String(count1)), [count1]);
       useEffect(() => localStorage.setItem("stick-count2", String(count2)), [count2]);
       useEffect(() => localStorage.setItem("stick-name1", name1), [name1]);
       useEffect(() => localStorage.setItem("stick-name2", name2), [name2]);
       useEffect(() => localStorage.setItem("stick-keep-awake", String(keepAwake)), [keepAwake]);
 
-      // enable/disable on toggle
+      /* persist visningsflagga för 2:an */
+      useEffect(() => localStorage.setItem("stick-hide-2", showSecond ? "false" : "true"), [showSecond]);
+
+      /* persist extra */
+      useEffect(() => {
+        try { localStorage.setItem("stick-extra", JSON.stringify(extraCounters)); } catch {}
+      }, [extraCounters]);
+
+      /* wake lock on/off */
       useEffect(() => {
         if (keepAwake) { enableKeepAwake(); }
         else { disableKeepAwake(); }
         return () => { disableKeepAwake(); };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [keepAwake]);
 
-      // reacquire on visibility change
+      /* reacquire on visibility */
       useEffect(() => {
         const onVis = async () => {
           if (document.visibilityState === "visible" && keepAwake) {
-            await enableKeepAwake(true); // silently try again
+            await enableKeepAwake(true);
           }
         };
         document.addEventListener("visibilitychange", onVis);
@@ -78,27 +114,18 @@
       }, [keepAwake]);
 
       async function enableKeepAwake(silent = false) {
-        // try native wake lock
         try {
           if ("wakeLock" in navigator && navigator.wakeLock?.request) {
             const lock = await navigator.wakeLock.request("screen");
-            // if previous existed, release it
-            if (wakeLock && wakeLock.release) { try { await wakeLock.release(); } catch(_){} }
+            if (wakeLock?.release) { try { await wakeLock.release(); } catch(_){} }
             setWakeLock(lock);
             setAwakeStrategy("wakeLock");
-
-            // if browser auto-releases (e.g., after screen off), listen and try to get it back when possible
-            lock.addEventListener?.("release", () => {
-              if (keepAwake && document.visibilityState === "visible") {
-                // will be re-acquired by visibility handler
-              }
-            });
+            lock.addEventListener?.("release", () => { /* visibility handler tar över */ });
             return;
           }
         } catch (err) {
-          if (!silent) console.log("wake lock failed, falling back to NoSleep:", err);
+          if (!silent) console.log("wake lock failed, fallback:", err);
         }
-        // fallback: NoSleep.js (works on iOS; requires user gesture — the checkbox click counts)
         try {
           noSleep.enable();
           setAwakeStrategy("noSleep");
@@ -107,19 +134,15 @@
           setAwakeStrategy("off");
         }
       }
-
       async function disableKeepAwake() {
-        // release native
-        try {
-          if (wakeLock && wakeLock.release) { await wakeLock.release(); }
-        } catch (_) {}
+        try { if (wakeLock?.release) await wakeLock.release(); } catch(_) {}
         setWakeLock(null);
-        // disable fallback
-        try { noSleep.disable(); } catch (_) {}
+        try { noSleep.disable(); } catch(_) {}
         setAwakeStrategy("off");
       }
 
-      const CounterCard = ({ initialName, onCommitName, count, setCount }) => {
+      /* komponent: kort för räknare */
+      const CounterCard = ({ initialName, onCommitName, count, setCount, removable=false, onRemove }) => {
         const [localName, setLocalName] = useState(initialName);
         const inputRef = useRef(null);
 
@@ -142,7 +165,14 @@
         };
 
         return (
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
+          <div className="relative bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
+            {removable && (
+              <button
+                type="button" title="Ta bort räknare" aria-label="Ta bort"
+                className="icon-btn absolute right-3 top-3 text-xl"
+                onClick={onRemove}
+              >🗑️</button>
+            )}
             <div className="relative">
               <input
                 ref={inputRef}
@@ -189,8 +219,21 @@
         );
       };
 
+      /* helpers för extra-räknare */
+      const addExtraCounter = () => {
+        const nextIndex = 3 + extraCounters.length + (showSecond ? 0 : 1); // namngivning
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        setExtraCounters([...extraCounters, { id, name: `Räknare ${nextIndex}`, count: 0 }]);
+      };
+      const updateExtra = (id, patch) => {
+        setExtraCounters(ec => ec.map(c => c.id === id ? { ...c, ...patch } : c));
+      };
+      const removeExtra = (id) => {
+        setExtraCounters(ec => ec.filter(c => c.id !== id));
+      };
+
       return (
-        <main className="max-w-md w-full space-y-8">
+        <main className="max-w-md w-full space-y-6">
           <header className="text-center">
             <h1 className="text-3xl font-semibold mb-2">Stickräknare</h1>
             <p className="text-stone-500 text-sm">Håll koll på dina varv</p>
@@ -201,24 +244,54 @@
               id="keep-awake"
               type="checkbox"
               checked={keepAwake}
-              onChange={async (e) => setKeepAwake(e.target.checked)}
+              onChange={(e) => setKeepAwake(e.target.checked)}
               className="w-5 h-5 accent-stone-700 cursor-pointer"
             />
             <label htmlFor="keep-awake" className="text-stone-600 text-sm select-none">
               Håll skärmen vaken
             </label>
           </div>
-
-          <p className="text-center text-xs text-stone-500 -mt-4">
+          <p className="text-center text-xs text-stone-500 -mt-3">
             Status: {awakeStrategy === "wakeLock" ? "Skärmlås aktivt (Wake Lock)" : awakeStrategy === "noSleep" ? "Skärmlås via NoSleep" : "Av"}
           </p>
 
-          <CounterCard initialName={name1} onCommitName={setName1} count={count1} setCount={setCount1} />
-          <CounterCard initialName={name2} onCommitName={setName2} count={count2} setCount={setCount2} />
+          {/* Räknare 1 (låst) */}
+          <CounterCard
+            initialName={name1}
+            onCommitName={setName1}
+            count={count1}
+            setCount={setCount1}
+            removable={false}
+          />
 
-          <footer className="text-center text-xs text-stone-400 pt-4">
-            gjord med ♥ i sverige
-          </footer>
+          {/* Räknare 2 (kan döljas) */}
+          {showSecond && (
+            <CounterCard
+              initialName={name2}
+              onCommitName={setName2}
+              count={count2}
+              setCount={setCount2}
+              removable={true}
+              onRemove={() => setShowSecond(false)}  /* döljer bara – data sparas */
+            />
+          )}
+
+          {/* Extra räknare */}
+          {extraCounters.map((c) => (
+            <CounterCard
+              key={c.id}
+              initialName={c.name}
+              onCommitName={(v) => updateExtra(c.id, { name: v })}
+              count={c.count}
+              setCount={(v) => updateExtra(c.id, { count: typeof v === "function" ? v(c.count) : v })}
+              removable={true}
+              onRemove={() => removeExtra(c.id)}
+            />
+          ))}
+
+          <button className="plus-btn" onClick={addExtraCounter} aria-label="Lägg till ny räknare">
+            Lägg till ny räknare  ＋
+          </button>
         </main>
       );
     }
