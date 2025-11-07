@@ -30,38 +30,38 @@
     input:focus, button:focus { outline: none; }
     .input-clear { position: absolute; right: .5rem; top: 50%; transform: translateY(-50%); background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af; }
     .input-clear:hover { color: #4b5563; }
-    .icon-btn { background: transparent; border: 0; cursor: pointer; color: #9ca3af; padding: .25rem; }
-    .icon-btn:hover { color: #4b5563; }
+    .icon-btn {
+      background: transparent; border: 0; cursor: pointer; color: #b0b0b0;
+      font-size: 22px; font-weight: 300; padding: .25rem;
+      transition: color 0.15s ease;
+    }
+    .icon-btn:hover { color: #404040; }
     .plus-btn {
       display:flex; align-items:center; justify-content:center;
-      width:100%; padding:14px; border-radius:12px;
-      background:#111827; color:#fff; /* stone-900 */
-      transition:transform .1s ease, filter .15s ease;
+      width:100%; padding:12px; border-radius:12px;
+      background:transparent; color:#6b7280; /* muted gray */
+      font-size:44px; font-weight:200;
+      transition:color .2s ease, transform .1s ease;
     }
-    .plus-btn:hover { filter:brightness(1.05); }
-    .plus-btn:active { transform:scale(.98); }
+    .plus-btn:hover { color:#1f2937; }
+    .plus-btn:active { transform:scale(.97); }
   </style>
 </head>
 <body>
   <div id="root" class="min-h-screen flex flex-col items-center justify-center p-6"></div>
 
-  <!-- viktigt: data-presets för att JSX ska transpileras -->
   <script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useRef } = React;
-    const noSleep = new window.NoSleep(); // iOS-fallback
+    const noSleep = new window.NoSleep();
 
     function Stickraknare() {
-      /* ---- befintliga (orörda) keys ---- */
       const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || "0", 10));
       const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || "0", 10));
       const [name1, setName1]   = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
       const [name2, setName2]   = useState(() => localStorage.getItem("stick-name2") || "Räknare 2");
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
-
-      /* visa/dölj räknare 2 (data raderas inte) */
       const [showSecond, setShowSecond] = useState(() => localStorage.getItem("stick-hide-2") !== "true");
 
-      /* ---- extra räknare (påverkar ej ovan keys) ---- */
       const [extraCounters, setExtraCounters] = useState(() => {
         try {
           const raw = localStorage.getItem("stick-extra");
@@ -76,38 +76,26 @@
         } catch { return []; }
       });
 
-      /* ---- wake lock ---- */
       const [wakeLock, setWakeLock] = useState(null);
-      const [awakeStrategy, setAwakeStrategy] = useState("off"); // "wakeLock" | "noSleep" | "off"
+      const [awakeStrategy, setAwakeStrategy] = useState("off");
 
-      /* persist befintliga */
       useEffect(() => localStorage.setItem("stick-count1", String(count1)), [count1]);
       useEffect(() => localStorage.setItem("stick-count2", String(count2)), [count2]);
       useEffect(() => localStorage.setItem("stick-name1", name1), [name1]);
       useEffect(() => localStorage.setItem("stick-name2", name2), [name2]);
       useEffect(() => localStorage.setItem("stick-keep-awake", String(keepAwake)), [keepAwake]);
-
-      /* persist visningsflagga för 2:an */
       useEffect(() => localStorage.setItem("stick-hide-2", showSecond ? "false" : "true"), [showSecond]);
+      useEffect(() => { localStorage.setItem("stick-extra", JSON.stringify(extraCounters)); }, [extraCounters]);
 
-      /* persist extra */
       useEffect(() => {
-        try { localStorage.setItem("stick-extra", JSON.stringify(extraCounters)); } catch {}
-      }, [extraCounters]);
-
-      /* wake lock on/off */
-      useEffect(() => {
-        if (keepAwake) { enableKeepAwake(); }
-        else { disableKeepAwake(); }
-        return () => { disableKeepAwake(); };
+        if (keepAwake) enableKeepAwake();
+        else disableKeepAwake();
+        return () => disableKeepAwake();
       }, [keepAwake]);
 
-      /* reacquire on visibility */
       useEffect(() => {
         const onVis = async () => {
-          if (document.visibilityState === "visible" && keepAwake) {
-            await enableKeepAwake(true);
-          }
+          if (document.visibilityState === "visible" && keepAwake) await enableKeepAwake(true);
         };
         document.addEventListener("visibilitychange", onVis);
         return () => document.removeEventListener("visibilitychange", onVis);
@@ -120,19 +108,12 @@
             if (wakeLock?.release) { try { await wakeLock.release(); } catch(_){} }
             setWakeLock(lock);
             setAwakeStrategy("wakeLock");
-            lock.addEventListener?.("release", () => { /* visibility handler tar över */ });
+            lock.addEventListener?.("release", () => {});
             return;
           }
-        } catch (err) {
-          if (!silent) console.log("wake lock failed, fallback:", err);
-        }
-        try {
-          noSleep.enable();
-          setAwakeStrategy("noSleep");
-        } catch (err) {
-          if (!silent) console.log("NoSleep enable failed:", err);
-          setAwakeStrategy("off");
-        }
+        } catch (err) { if (!silent) console.log("wake lock fail:", err); }
+        try { noSleep.enable(); setAwakeStrategy("noSleep"); }
+        catch { setAwakeStrategy("off"); }
       }
       async function disableKeepAwake() {
         try { if (wakeLock?.release) await wakeLock.release(); } catch(_) {}
@@ -141,96 +122,48 @@
         setAwakeStrategy("off");
       }
 
-      /* komponent: kort för räknare */
       const CounterCard = ({ initialName, onCommitName, count, setCount, removable=false, onRemove }) => {
         const [localName, setLocalName] = useState(initialName);
         const inputRef = useRef(null);
-
         useEffect(() => { setLocalName(initialName); }, [initialName]);
-
-        const commit = () => {
-          const v = (localName || "").trim();
-          onCommitName(v || initialName);
-        };
-        const onKeyDown = (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-            requestAnimationFrame(() => inputRef.current?.focus());
-          }
-        };
-        const clearName = () => {
-          setLocalName("");
-          requestAnimationFrame(() => inputRef.current?.focus());
-        };
+        const commit = () => onCommitName((localName||"").trim() || initialName);
+        const onKeyDown = e => { if(e.key==="Enter"){ e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); } };
+        const clearName = () => { setLocalName(""); requestAnimationFrame(()=>inputRef.current?.focus()); };
 
         return (
           <div className="relative bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
             {removable && (
-              <button
-                type="button" title="Ta bort räknare" aria-label="Ta bort"
-                className="icon-btn absolute right-3 top-3 text-xl"
-                onClick={onRemove}
-              >🗑️</button>
+              <button type="button" title="Ta bort" className="icon-btn absolute right-3 top-3" onClick={onRemove}>×</button>
             )}
             <div className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                inputMode="text"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="sentences"
-                spellCheck="false"
-                value={localName}
-                onChange={(e) => setLocalName(e.target.value)}
-                onBlur={commit}
-                onKeyDown={onKeyDown}
+              <input ref={inputRef} type="text" value={localName}
+                onChange={e=>setLocalName(e.target.value)} onBlur={commit} onKeyDown={onKeyDown}
                 className="text-xl font-semibold mb-3 w-full text-center bg-transparent border-b border-stone-300 focus:border-stone-500"
-                placeholder="Namn på räknare"
-              />
-              {localName?.length > 0 && (
-                <button type="button" aria-label="Rensa namn" className="input-clear" onClick={clearName}>×</button>
-              )}
+                placeholder="Namn på räknare"/>
+              {localName && <button type="button" aria-label="Rensa namn" className="input-clear" onClick={clearName}>×</button>}
             </div>
-
             <div className="text-6xl font-light mb-6 text-stone-900">{count}</div>
-            <button
-              onClick={() => setCount(count + 1)}
-              className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95"
-            >
+            <button onClick={()=>setCount(count+1)}
+              className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95">
               Lägg till varv
             </button>
             <div className="flex justify-between mt-4 gap-2">
-              <button
-                onClick={() => setCount(Math.max(0, count - 1))}
-                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
-              >
-                Ångra
-              </button>
-              <button
-                onClick={() => setCount(0)}
-                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
-              >
-                Nollställ
-              </button>
+              <button onClick={()=>setCount(Math.max(0,count-1))}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">Ångra</button>
+              <button onClick={()=>setCount(0)}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">Nollställ</button>
             </div>
           </div>
         );
       };
 
-      /* helpers för extra-räknare */
       const addExtraCounter = () => {
-        const nextIndex = 3 + extraCounters.length + (showSecond ? 0 : 1); // namngivning
+        const nextIndex = 3 + extraCounters.length + (showSecond ? 0 : 1);
         const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        setExtraCounters([...extraCounters, { id, name: `Räknare ${nextIndex}`, count: 0 }]);
+        setExtraCounters([...extraCounters, { id, name:`Räknare ${nextIndex}`, count:0 }]);
       };
-      const updateExtra = (id, patch) => {
-        setExtraCounters(ec => ec.map(c => c.id === id ? { ...c, ...patch } : c));
-      };
-      const removeExtra = (id) => {
-        setExtraCounters(ec => ec.filter(c => c.id !== id));
-      };
+      const updateExtra = (id, patch) => setExtraCounters(ec=>ec.map(c=>c.id===id?{...c,...patch}:c));
+      const removeExtra = id => setExtraCounters(ec=>ec.filter(c=>c.id!==id));
 
       return (
         <main className="max-w-md w-full space-y-6">
@@ -240,58 +173,31 @@
           </header>
 
           <div className="flex items-center justify-center gap-2">
-            <input
-              id="keep-awake"
-              type="checkbox"
-              checked={keepAwake}
-              onChange={(e) => setKeepAwake(e.target.checked)}
-              className="w-5 h-5 accent-stone-700 cursor-pointer"
-            />
-            <label htmlFor="keep-awake" className="text-stone-600 text-sm select-none">
-              Håll skärmen vaken
-            </label>
+            <input id="keep-awake" type="checkbox" checked={keepAwake}
+              onChange={e=>setKeepAwake(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+            <label htmlFor="keep-awake" className="text-stone-600 text-sm select-none">Håll skärmen vaken</label>
           </div>
           <p className="text-center text-xs text-stone-500 -mt-3">
-            Status: {awakeStrategy === "wakeLock" ? "Skärmlås aktivt (Wake Lock)" : awakeStrategy === "noSleep" ? "Skärmlås via NoSleep" : "Av"}
+            Status: {awakeStrategy==="wakeLock"?"Skärmlås aktivt (Wake Lock)":awakeStrategy==="noSleep"?"Skärmlås via NoSleep":"Av"}
           </p>
 
-          {/* Räknare 1 (låst) */}
-          <CounterCard
-            initialName={name1}
-            onCommitName={setName1}
-            count={count1}
-            setCount={setCount1}
-            removable={false}
-          />
-
-          {/* Räknare 2 (kan döljas) */}
+          <CounterCard initialName={name1} onCommitName={setName1} count={count1} setCount={setCount1}/>
           {showSecond && (
-            <CounterCard
-              initialName={name2}
-              onCommitName={setName2}
-              count={count2}
-              setCount={setCount2}
-              removable={true}
-              onRemove={() => setShowSecond(false)}  /* döljer bara – data sparas */
-            />
+            <CounterCard initialName={name2} onCommitName={setName2} count={count2} setCount={setCount2}
+              removable onRemove={()=>setShowSecond(false)}/>
           )}
-
-          {/* Extra räknare */}
-          {extraCounters.map((c) => (
-            <CounterCard
-              key={c.id}
-              initialName={c.name}
-              onCommitName={(v) => updateExtra(c.id, { name: v })}
-              count={c.count}
-              setCount={(v) => updateExtra(c.id, { count: typeof v === "function" ? v(c.count) : v })}
-              removable={true}
-              onRemove={() => removeExtra(c.id)}
-            />
+          {extraCounters.map(c=>(
+            <CounterCard key={c.id} initialName={c.name}
+              onCommitName={v=>updateExtra(c.id,{name:v})}
+              count={c.count} setCount={v=>updateExtra(c.id,{count:typeof v==="function"?v(c.count):v})}
+              removable onRemove={()=>removeExtra(c.id)}/>
           ))}
 
-          <button className="plus-btn" onClick={addExtraCounter} aria-label="Lägg till ny räknare">
-            Lägg till ny räknare  ＋
-          </button>
+          <button className="plus-btn" onClick={addExtraCounter} aria-label="Lägg till ny räknare">＋</button>
+
+          <footer className="text-center text-xs text-stone-400 pt-4 pb-2">
+            gjord med ♥ i sverige
+          </footer>
         </main>
       );
     }
