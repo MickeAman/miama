@@ -29,17 +29,37 @@
     input:focus, button:focus { outline: none; }
     .icon-btn { background: transparent; border: 0; cursor: pointer; color: #9ca3af; padding: .25rem; }
     .icon-btn:hover { color: #4b5563; }
-    .plus-btn {
-      display:flex; align-items:center; justify-content:center;
-      width:100%; padding:12px; border-radius:12px;
-      background:transparent; color:#6b7280;
-      font-size:44px; font-weight:200;
-      transition:color .2s ease, transform .1s ease;
-    }
-    .plus-btn:hover { color:#1f2937; }
-    .plus-btn:active { transform:scale(.97); }
     .input-clear { position:absolute; right:.5rem; top:50%; transform:translateY(-50%); background:transparent; border:0; color:#9ca3af; }
     .input-clear:hover { color:#4b5563; }
+
+    /* plus-knapp */
+    .plus-wrap { display:flex; flex-direction:column; align-items:center; gap:.25rem; }
+    .plus-btn {
+      display:flex; align-items:center; justify-content:center;
+      width:56px; height:56px; border-radius:14px;
+      background:#f3f4f6; color:#6b7280; font-size:36px; font-weight:200;
+      transition:color .2s ease, transform .1s ease, background .2s ease;
+      user-select:none; -webkit-user-select:none;
+    }
+    .plus-btn:hover { color:#1f2937; background:#e5e7eb; }
+    .plus-btn:active { transform:scale(.97); }
+
+    /* input glow vid long press */
+    .glow {
+      box-shadow: 0 0 0 3px rgba(45,45,45,0.08) inset, 0 0 0 2px #a3a3a3;
+      border-radius: 8px;
+    }
+
+    /* rad-entré-animation */
+    @keyframes fadeSlideIn {
+      0% { opacity: 0; transform: translateY(6px) scale(0.99); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .enter-anim {
+      animation: fadeSlideIn 260ms ease-out both;
+    }
+
+    /* drag */
     .drag-handle { cursor: grab; user-select: none; color:#9ca3af; }
     .drag-handle:active { cursor: grabbing; }
     .drop-indicator { height: 10px; margin: -6px 0 6px 0; border-radius: 6px; }
@@ -56,32 +76,23 @@
         try { return JSON.parse(localStorage.getItem("todo-items-v1")) || []; }
         catch { return []; }
       });
-      const [draft, setDraft] = useState("");       // ny uppgift
-      const [query, setQuery] = useState("");       // sök
+      const [draft, setDraft] = useState("");
+      const [query, setQuery] = useState("");
       const [filter, setFilter] = useState("all");  // all | active | done
 
       // drag & drop
       const [draggingId, setDraggingId] = useState(null);
       const [overId, setOverId] = useState(null);
-      const [overPosition, setOverPosition] = useState("above"); // "above" | "below"
+      const [overPosition, setOverPosition] = useState("above");
 
-      // pepp-modal
-      const [toastOpen, setToastOpen] = useState(false);
-      const [toastTitle, setToastTitle] = useState("Snyggt!");
-      const [toastBody, setToastBody] = useState("Bra jobbat – en sak mindre.");
-      const MESSAGES = [
-        {t:"Snyggt!", b:"Bra jobbat – en sak mindre."},
-        {t:"Klart!", b:"Ta en klunk och fortsätt."},
-        {t:"Bra tempo!", b:"Du är på rull."},
-        {t:"Fint!", b:"Nu kan du göra nästa sak."}
-      ];
-      const closeToast = () => setToastOpen(false);
-      function celebrate() {
-        const m = MESSAGES[Math.floor(Math.random()*MESSAGES.length)];
-        setToastTitle(m.t); setToastBody(m.b); setToastOpen(true);
-        clearTimeout(celebrate._t);
-        celebrate._t = setTimeout(() => setToastOpen(false), 2500);
-      }
+      // auto-focus + glow + last added
+      const draftRef = useRef(null);
+      const [inputGlow, setInputGlow] = useState(false);
+      const [lastAddedId, setLastAddedId] = useState(null);
+
+      // long-press timer
+      const holdTimerRef = useRef(null);
+      const HOLD_MS = 500;
 
       // persist
       useEffect(() => {
@@ -105,20 +116,23 @@
       // actions
       const addItem = () => {
         const title = draft.trim();
-        if (!title) return;
-        setItems(prev => [
-          ...prev,
-          { id: crypto.randomUUID?.() || String(Date.now()+Math.random()), title, done: false, created_at: Date.now() }
-        ]);
+        if (!title) {
+          // tomt → bara fokusera input
+          focusDraft(true);
+          return;
+        }
+        const id = crypto.randomUUID?.() || String(Date.now()+Math.random());
+        setItems(prev => [...prev, { id, title, done: false, created_at: Date.now() }]);
         setDraft("");
+        setLastAddedId(id);
+        // efter animation, nollställ flagga
+        setTimeout(() => setLastAddedId(null), 400);
+        // auto-focus tillbaka
+        focusDraft();
       };
+
       const toggleItem = (id) => {
-        setItems(prev => prev.map(i => {
-          if (i.id !== id) return i;
-          const next = {...i, done: !i.done};
-          if (!i.done && next.done) celebrate(); // fira när man markerar klar
-          return next;
-        }));
+        setItems(prev => prev.map(i => i.id === id ? {...i, done: !i.done} : i));
       };
       const deleteItem = (id) => setItems(prev => prev.filter(i => i.id !== id));
       const updateTitle = (id, title) => {
@@ -126,7 +140,38 @@
       };
       const clearDone = () => setItems(prev => prev.filter(i => !i.done));
 
-      // dnd helpers
+      // helpers
+      function focusDraft(glow=false) {
+        requestAnimationFrame(() => {
+          draftRef.current?.focus();
+          if (glow) {
+            setInputGlow(true);
+            setTimeout(() => setInputGlow(false), 450);
+          }
+        });
+      }
+      const onDraftKey = (e) => {
+        if (e.key === "Enter") { e.preventDefault(); addItem(); }
+      };
+
+      // long press på plus
+      function onPlusPointerDown() {
+        clearTimeout(holdTimerRef.current);
+        holdTimerRef.current = setTimeout(() => {
+          // long-press → rensa och highlighta input + fokus
+          setDraft("");
+          focusDraft(true);
+          // lätt vibration där det stöds
+          try { navigator.vibrate && navigator.vibrate(20); } catch(_) {}
+        }, HOLD_MS);
+      }
+      function cancelHold() { clearTimeout(holdTimerRef.current); }
+      function onPlusClick() {
+        // vanlig tap → bara fokus (ingen rensning)
+        focusDraft();
+      }
+
+      // dnd logic
       function onDragStart(e, id) {
         setDraggingId(id);
         e.dataTransfer.effectAllowed = "move";
@@ -135,24 +180,19 @@
       function onDragOverRow(e, id) {
         e.preventDefault();
         setOverId(id);
-        // bestäm om vi är över övre eller undre halvan av raden
         const rect = e.currentTarget.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
         setOverPosition(e.clientY < mid ? "above" : "below");
         e.dataTransfer.dropEffect = "move";
       }
-      function onDragLeaveRow() {
-        setOverId(null);
-      }
+      function onDragLeaveRow() { setOverId(null); }
       function onDropRow(e, id) {
         e.preventDefault();
         if (!draggingId) return;
         reorder(draggingId, id, overPosition);
         cleanupDnD();
       }
-      function onDragEnd() {
-        cleanupDnD();
-      }
+      function onDragEnd() { cleanupDnD(); }
       function cleanupDnD() {
         setDraggingId(null);
         setOverId(null);
@@ -167,21 +207,13 @@
           const arr = prev.slice();
           const [moved] = arr.splice(srcIdx, 1);
           let insertIdx = targetIdx;
-          // om vi flyttar ner och ska lägga efter target, justera index
           if (pos === "below" && srcIdx < targetIdx) insertIdx = targetIdx;
-          // om vi flyttar upp och ska lägga före target
           if (pos === "above" && srcIdx > targetIdx) insertIdx = targetIdx;
-          // lägga in före (above) eller efter (below)
           if (pos === "below") insertIdx = Math.min(insertIdx + (srcIdx < targetIdx ? 0 : 1), arr.length);
           arr.splice(insertIdx, 0, moved);
           return arr;
         });
       }
-
-      // enter handlers utan att döda tangentbordet
-      const onDraftKey = (e) => {
-        if (e.key === "Enter") { e.preventDefault(); addItem(); }
-      };
 
       return (
         <main className="max-w-md w-full space-y-6">
@@ -194,12 +226,13 @@
           <div className="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm">
             <div className="relative">
               <input
+                ref={draftRef}
                 type="text"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={onDraftKey}
                 placeholder="vad är nästa?"
-                className="w-full bg-transparent border-b border-stone-300 focus:border-stone-600 transition p-2 text-lg"
+                className={`w-full bg-transparent border-b border-stone-300 focus:border-stone-600 transition p-2 text-lg ${inputGlow ? 'glow' : ''}`}
               />
               {draft && (
                 <button className="input-clear" aria-label="rensa" onClick={()=>setDraft("")}>×</button>
@@ -231,13 +264,14 @@
 
           {/* list */}
           <ul className="space-y-2">
-            {visible.map((item, idx) => (
+            {visible.map(item => (
               <DraggableTodoItem
                 key={item.id}
                 item={item}
                 isDragging={draggingId === item.id}
                 isOver={overId === item.id}
                 overPosition={overId === item.id ? overPosition : null}
+                lastAddedId={lastAddedId}
                 onDragStart={(e)=>onDragStart(e, item.id)}
                 onDragOver={(e)=>onDragOverRow(e, item.id)}
                 onDragLeave={onDragLeaveRow}
@@ -250,35 +284,41 @@
             ))}
           </ul>
 
-          {/* bulk actions */}
-          <div className="flex items-center justify-between">
-            <button className="plus-btn" onClick={()=>{ document.querySelector('input[placeholder="vad är nästa?"]')?.focus(); }} aria-label="Ny uppgift">＋</button>
-            <button className="text-stone-500 text-sm hover:text-stone-800" onClick={clearDone}>rensa klara</button>
+          {/* bulk actions – centrerad grupp */}
+          <div className="pt-4 mt-4 border-t border-stone-200 flex flex-col items-center gap-2">
+            <div
+              className="plus-wrap"
+              onPointerDown={onPlusPointerDown}
+              onPointerUp={cancelHold}
+              onPointerLeave={cancelHold}
+              onPointerCancel={cancelHold}
+            >
+              <button
+                className="plus-btn"
+                onClick={onPlusClick}
+                aria-label="Ny uppgift"
+              >
+                ＋
+              </button>
+            </div>
+
+            <button
+              className="text-stone-500 text-sm hover:text-stone-800 transition"
+              onClick={clearDone}
+            >
+              rensa klara
+            </button>
           </div>
 
           <footer className="text-center text-xs text-stone-400 pt-4 pb-2">
             gjord med ♥ i sverige
           </footer>
-
-          {/* celebration modal */}
-          {toastOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" onClick={closeToast}>
-              {/* backdrop */}
-              <div className="absolute inset-0 bg-black/30"></div>
-              {/* modal */}
-              <div className="relative z-10 mx-6 max-w-sm w-full rounded-2xl bg-white border border-stone-200 p-6 text-center shadow-lg" onClick={(e)=>e.stopPropagation()} aria-live="polite">
-                <div className="text-2xl mb-2">{toastTitle}</div>
-                <p className="text-stone-600">{toastBody}</p>
-                <button className="mt-5 text-sm text-stone-500 hover:text-stone-800" onClick={closeToast} aria-label="Stäng">Stäng</button>
-              </div>
-            </div>
-          )}
         </main>
       );
     }
 
     function DraggableTodoItem({
-      item, isDragging, isOver, overPosition,
+      item, isDragging, isOver, overPosition, lastAddedId,
       onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
       onToggle, onDelete, onCommit
     }) {
@@ -295,10 +335,11 @@
         if (e.key === "Enter") { e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); }
       };
 
+      const enterClass = item.id === lastAddedId ? 'enter-anim' : '';
+
       return (
         <li
-          className={`bg-white border rounded-2xl p-4 shadow-sm transition
-            ${isDragging ? 'opacity-60 border-stone-300' : 'border-stone-200'}`}
+          className={`bg-white border rounded-2xl p-4 shadow-sm transition ${enterClass} ${isDragging ? 'opacity-60 border-stone-300' : 'border-stone-200'}`}
           draggable
           onDragStart={onDragStart}
           onDragOver={onDragOver}
