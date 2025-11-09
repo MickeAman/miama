@@ -10,9 +10,8 @@
     --bg:#0b0d10; --bg2:#0f141b; --panel:#10141b; --ink:#0e141d;
     --text:#e8ecff; --sub:#cfd6ff; --muted:#8d97aa;
     --accent:#6cc0ff; --border:#1b2332;
-    --ulv:#a82239; --by:#648066; --seer:#18a4c9; --hunt:#c49b32;
     --good:#58e1a3; --warn:#f7b955; --bad:#ff6b6b;
-    --r:12px; --rsm:8px; --soft:0 10px 30px rgba(0,0,0,.4);
+    --r:12px; --soft:0 10px 30px rgba(0,0,0,.4);
   }
   *{box-sizing:border-box} html,body{height:100%}
   body{
@@ -26,11 +25,10 @@
   h2{font:700 16px/1.2 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)}
   h3{font:600 14px/1.2 Georgia,serif;letter-spacing:.05em;text-transform:uppercase;color:#b8c2ff}
   p{margin:0 0 10px;color:#c7cee0}
-  header{
-    position:sticky;top:0;z-index:5;backdrop-filter:saturate(115%) blur(6px);
+
+  header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(115%) blur(6px);
     background:linear-gradient(180deg,rgba(10,14,19,.92),rgba(10,14,19,.65) 80%,transparent);
-    border-bottom:1px solid var(--border)
-  }
+    border-bottom:1px solid var(--border)}
   .wrap{max-width:1200px;margin:0 auto;padding:12px 16px}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
   .grow{flex:1 1 auto}
@@ -38,7 +36,8 @@
   .grid{display:grid;gap:14px}
   .two{grid-template-columns:1.1fr .9fr}
   @media (max-width:980px){.two{grid-template-columns:1fr}}
-  .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--soft);padding:14px}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--border);border-radius:12px;box-shadow:var(--soft);padding:14px}
   .spot{box-shadow:0 0 0 1px rgba(108,192,255,.18), 0 12px 38px rgba(12,30,55,.55);border-color:#28354c}
   .divider{height:1px;background:var(--border);margin:10px 0}
   .tags{display:flex;gap:8px;flex-wrap:wrap}
@@ -50,37 +49,33 @@
   .btn{appearance:none;border:1px solid var(--border);background:linear-gradient(180deg,#1a2534,#111924);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;transition:.15s transform,.2s filter,.2s border-color;box-shadow:var(--soft)}
   .btn:active{transform:translateY(1px)} .btn[disabled]{opacity:.5;cursor:not-allowed}
   .btn.primary{border-color:#2a3242;background:linear-gradient(180deg,#1d2532,#141a24)}
-  .btn.accent{border-color:#263d4b;background:linear-gradient(180deg,#173142,#0f202d)}
   .btn.good{border-color:#244238;background:linear-gradient(180deg,#123327,#0c241c)}
   .btn.warn{border-color:#403424;background:linear-gradient(180deg,#2f2915,#201c10)}
   .btn.bad{border-color:#402427;background:linear-gradient(180deg,#2f1518,#201014)}
   .btn.ghost{background:transparent}
-  .list{display:flex;flex-direction:column;gap:8px}
+
+  /* scenlista */
   .li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px;border:1px dashed var(--border);border-radius:10px;background:#0f151d}
-  .li[draggable="true"]{cursor:grab}
   .li.dragging{opacity:.5}
-  .portrait{display:flex;gap:10px;align-items:center}
-  .avatar{width:34px;height:34px;border-radius:8px;background:linear-gradient(180deg,#1a2130,#0d111a);border:1px solid var(--border);position:relative;overflow:hidden}
-  .avatar::after{content:"";position:absolute;inset:0;background:radial-gradient(24px 18px at 65% 35%, rgba(108,192,255,.18), transparent 60%)}
-  .rolechip{padding:3px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#111827}
-  .r-ulv{background:linear-gradient(180deg,#2a0f16,#17090c);border-color:#3e1b23;color:#ffb3bf}
-  .r-by{background:linear-gradient(180deg,#0f1c15,#0a120d);border-color:#1f4031;color:#cfead9}
-  .r-seer{background:linear-gradient(180deg,#0b1a20,#081116);border-color:#145064;color:#bfefff}
-  .r-hunt{background:linear-gradient(180deg,#1b170b,#120f08);border-color:#463b1b;color:#ffe8a8}
-  .dead{opacity:.45;text-decoration:line-through}
-  .moon{display:inline-block;width:18px;height:18px;border-radius:50%;box-shadow:0 0 12px rgba(160,227,255,.35) inset;margin-right:8px;background:radial-gradient(10px 10px at 35% 35%, #e6f5ff 0%, #9dc9ff 45%, #3a5577 80%)}
-  .fade-in{animation:fade .25s ease}@keyframes fade{from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none}}
-  #toast{position:fixed;bottom:16px;right:16px;display:none;background:#0f1723;border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:var(--soft)}
+  .handle{cursor:grab;border:1px solid var(--border);border-radius:6px;background:#0e141d;padding:6px 8px;font:600 12px/1 ui-monospace,Menlo}
+  .ghost-marker{height:40px;border:1px dashed #2a3c57;border-radius:10px;margin:6px 0}
+
+  /* dialog + fallback */
+  dialog{border:1px solid var(--border);border-radius:12px;padding:14px;background:#0e141d;color:#fff;box-shadow:var(--soft);max-width:520px}
+  dialog::backdrop{background:rgba(2,6,12,.7)}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,12,.7);display:none;align-items:center;justify-content:center;z-index:60}
+  .modal-backdrop.show{display:flex}
+  .hint{color:var(--muted);font-size:13px}
+
+  /* overlay (nattguide) */
   #overlay{position:fixed;inset:0;background:rgba(4,7,12,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:50}
   #overlay.show{display:flex}
   .overlay-card{width:min(720px,92vw);background:linear-gradient(180deg,#0f1520,#0a0f16);border:1px solid #28354c;border-radius:14px;padding:16px;box-shadow:0 0 0 1px rgba(108,192,255,.18), 0 12px 38px rgba(12,30,55,.55)}
   .steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .step{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#0e1722;color:var(--muted);font-size:12px}
   .step.active{color:#d7e6ff;border-color:#2a3c57;box-shadow:0 0 0 2px rgba(108,192,255,.15) inset}
-  dialog{border:1px solid var(--border);border-radius:12px;padding:14px;background:#0e141d;color:#fff;box-shadow:var(--soft);max-width:520px}
-  dialog::backdrop{background:rgba(2,6,12,.7)}
-  .hint{color:var(--muted);font-size:13px}
-  .icon-btn{border:1px solid var(--border);background:#0e141d;border-radius:8px;padding:8px;cursor:pointer}
+
+  #toast{position:fixed;bottom:16px;right:16px;display:none;background:#0f1723;border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:var(--soft)}
 </style>
 </head>
 <body>
@@ -96,7 +91,7 @@
       </div>
     </div>
     <div class="row">
-      <button class="btn accent" id="gm_toggle" data-matomo-name="gm-toggle" data-matomo-event="click" data-matomo-category="gm" data-matomo-action="toggle">gm-läge</button>
+      <button class="btn" id="gm_toggle">gm-läge</button>
       <button class="btn" id="night_wizard">nattsekvens</button>
       <button class="btn ghost" id="reset_btn">nollställ</button>
     </div>
@@ -104,7 +99,6 @@
 </header>
 
 <main class="wrap grid two" id="app_root">
-  <!-- vänster: ritual flow -->
   <section class="card spot">
     <h2>ritual flow</h2>
     <p class="hint">börja i gm-panelen: lägg spelare och dela ut roller.</p>
@@ -130,11 +124,11 @@
 
     <div class="divider"></div>
 
-    <section class="card scene-card fade-in">
-      <h3><span class="moon"></span>scen <span id="scene_idx">1</span>: <span id="scene_title"></span></h3>
+    <section class="card scene-card">
+      <h3>scen <span id="scene_idx">1</span>: <span id="scene_title"></span></h3>
       <p id="scene_text" style="margin-top:6px"></p>
       <div class="row" style="margin-top:10px">
-        <button class="btn good" id="scene_next" data-matomo-name="scene-next" data-matomo-event="click" data-matomo-category="scene" data-matomo-action="advance">nästa scen</button>
+        <button class="btn good" id="scene_next">nästa scen</button>
         <button class="btn warn" id="scene_repeat">repetera</button>
         <button class="btn" id="scene_edit_current">editera</button>
       </div>
@@ -163,7 +157,6 @@
     </div>
   </section>
 
-  <!-- höger: gm arsenal -->
   <section class="card" id="gm_panel">
     <h2>gm arsenal</h2>
     <div class="divider"></div>
@@ -171,12 +164,12 @@
     <section class="card">
       <h3>snabbstart</h3>
       <div class="row">
-        <button class="btn good" id="seed_demo" data-matomo-name="seed-demo" data-matomo-event="click" data-matomo-category="gm">ladda demo</button>
+        <button class="btn good" id="seed_demo">ladda demo</button>
         <button class="btn" id="export_btn">export json</button>
         <label class="btn ghost" for="import_file" style="cursor:pointer">import json</label>
         <input id="import_file" type="file" accept="application/json" style="display:none" />
       </div>
-      <p class="hint" style="margin-top:6px">demo skapar 8 spelare, balanserade roller och ställer scen 1.</p>
+      <p class="hint" style="margin-top:6px">demo: 8 spelare, balanserade roller, scen 1.</p>
     </section>
 
     <section class="card">
@@ -184,10 +177,10 @@
       <div class="list" id="players_list"></div>
       <div class="row" style="margin-top:8px">
         <input id="player_name" placeholder="ny spelare (namn)" />
-        <button class="btn primary" id="player_add" data-matomo-name="player-add" data-matomo-event="click" data-matomo-category="players">lägg till</button>
+        <button class="btn primary" id="player_add">lägg till</button>
       </div>
       <div class="row" style="margin-top:8px">
-        <input id="player_bulk" placeholder="snabbadd: namn kommaseparerade (alva, johan, my)" />
+        <input id="player_bulk" placeholder="snabbadd: alva, johan, my" />
         <button class="btn" id="player_bulk_add">lägg flera</button>
       </div>
     </section>
@@ -199,27 +192,12 @@
         <button class="btn good" id="assign_roles">dela ut roller</button>
         <button class="btn warn" id="clear_roles">rensa roller</button>
       </div>
-      <div class="divider"></div>
-      <h3>skapa egen roll</h3>
-      <div class="row">
-        <input id="role_name" placeholder="rollnamn" />
-        <select id="role_team" style="max-width:160px">
-          <option value="by">by</option>
-          <option value="ulv">ulv</option>
-        </select>
-      </div>
-      <textarea id="role_secret" placeholder="hemlig kraft / instruktion"></textarea>
-      <div class="row" style="margin-top:8px">
-        <button class="btn primary" id="role_add">lägg till roll</button>
-        <button class="btn bad" id="role_remove_last">ta bort senaste egna roll</button>
-      </div>
-      <p class="hint">grundrollerna kan inte tas bort.</p>
     </section>
 
     <section class="card">
       <h3>scener</h3>
       <div class="row" style="margin-bottom:8px;justify-content:space-between">
-        <div class="hint">klicka scen för att editera, dra för att ändra ordning</div>
+        <div class="hint">klicka för att editera, dra handtaget för att flytta</div>
         <button class="btn primary" id="scene_new">ny scen</button>
       </div>
       <div class="list" id="scenes_list" aria-live="polite"></div>
@@ -247,29 +225,33 @@
   <p class="hint" style="margin-bottom:8px">välj en levande spelare</p>
   <select id="candidate_select"></select>
   <div class="row" style="margin-top:10px;justify-content:flex-end">
-    <button class="btn ghost" id="candidate_cancel">avbryt</button>
-    <button class="btn primary" id="candidate_ok">lägg till</button>
+    <button class="btn ghost" id="candidate_cancel" type="button">avbryt</button>
+    <button class="btn primary" id="candidate_ok" type="button">lägg till</button>
   </div>
 </dialog>
 
-<!-- scen-editor -->
-<dialog id="scene_modal">
-  <h3 id="scene_modal_title">ny scen</h3>
-  <label class="hint">titel</label>
-  <input id="scene_form_title" placeholder="titel" />
-  <label class="hint" style="margin-top:8px;display:block">text</label>
-  <textarea id="scene_form_text" placeholder="scenens text"></textarea>
-  <div class="row" style="margin-top:10px;justify-content:space-between">
-    <div class="row">
-      <button class="btn" id="scene_duplicate" title="duplicera">duplicera</button>
-      <button class="btn bad" id="scene_delete" title="ta bort">ta bort</button>
-    </div>
-    <div class="row">
-      <button class="btn ghost" id="scene_cancel">avbryt</button>
-      <button class="btn good" id="scene_save">spara</button>
+<!-- scen-editor (dialog + fallback wrapper) -->
+<div id="scene_backdrop" class="modal-backdrop">
+  <div class="card" style="width:min(680px,94vw)">
+    <h3 id="scene_modal_title">ny scen</h3>
+    <label class="hint">titel</label>
+    <input id="scene_form_title" placeholder="titel" />
+    <label class="hint" style="margin-top:8px;display:block">text</label>
+    <textarea id="scene_form_text" placeholder="scenens text"></textarea>
+    <div class="row" style="margin-top:10px;justify-content:space-between">
+      <div class="row">
+        <button class="btn" id="scene_up" type="button" title="flytta upp">upp</button>
+        <button class="btn" id="scene_down" type="button" title="flytta ner">ner</button>
+        <button class="btn" id="scene_duplicate" type="button" title="duplicera">duplicera</button>
+        <button class="btn bad" id="scene_delete" type="button" title="ta bort">ta bort</button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="scene_cancel" type="button">avbryt</button>
+        <button class="btn good" id="scene_save" type="button">spara</button>
+      </div>
     </div>
   </div>
-</dialog>
+</div>
 
 <!-- nattsekvens -->
 <div id="overlay" aria-hidden="true">
@@ -278,9 +260,9 @@
     <div class="steps" id="steps_row"></div>
     <div class="card" id="step_body" style="margin-top:8px;min-height:88px"></div>
     <div class="row" style="margin-top:10px;justify-content:flex-end">
-      <button class="btn ghost" id="overlay_close">stäng</button>
-      <button class="btn primary" id="overlay_prev">tillbaka</button>
-      <button class="btn good" id="overlay_next">nästa</button>
+      <button class="btn ghost" id="overlay_close" type="button">stäng</button>
+      <button class="btn" id="overlay_prev" type="button">tillbaka</button>
+      <button class="btn good" id="overlay_next" type="button">nästa</button>
     </div>
   </div>
 </div>
@@ -288,11 +270,11 @@
 <div id="toast" role="status" aria-live="polite"></div>
 
 <footer class="wrap" style="opacity:.7;font-size:12px;padding:16px">
-  tips: <span class="kbd">n</span> natt, <span class="kbd">d</span> dag, <span class="kbd">space</span> start/stopp timer. export finns i gm-panelen.
+  tips: <span class="kbd">n</span> natt, <span class="kbd">d</span> dag, <span class="kbd">space</span> start/stopp timer.
 </footer>
 
 <script>
-/* ========= core data ========= */
+/* ===== core data ===== */
 const coreRoles = [
   { id:"varulv", name:"Varulv", team:"ulv", secret:"Du jagar om natten. Peka diskret på ett offer när GM ber." },
   { id:"sierska", name:"Sierska", team:"by", secret:"Varje natt kan du undersöka en spelare (ulv eller inte)." },
@@ -313,19 +295,17 @@ const defaultData = {
   roles:[...coreRoles]
 };
 
-/* ========= state ========= */
+/* ===== state ===== */
 const state = {
   pin:"1349",
   phase:"natt",
   timer:0, timerHandle:null,
   sceneIndex:0,
-  players:[],        // {name, roleId?, alive:true}
-  votes:{},          // name -> count
-  notes:"",
+  players:[], votes:{}, notes:"",
   data: JSON.parse(localStorage.getItem("janpire_data") || JSON.stringify(defaultData))
 };
 
-/* ========= dom helpers ========= */
+/* ===== dom ===== */
 const $=s=>document.querySelector(s);
 const el=(t,a={},c=[])=>{const n=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")n.className=v;else if(k==="text")n.textContent=v;else if(k.startsWith("on"))n.addEventListener(k.slice(2),v);else n.setAttribute(k,v)}c.forEach(x=>n.appendChild(typeof x==="string"?document.createTextNode(x):x));return n};
 const toast=msg=>{const t=$("#toast");t.textContent=msg;t.style.display="block";setTimeout(()=>t.style.display="none",1700)};
@@ -333,9 +313,7 @@ const save=()=>{localStorage.setItem("janpire_state",JSON.stringify({phase:state
 const load=()=>{const raw=localStorage.getItem("janpire_state");if(!raw)return;try{Object.assign(state,JSON.parse(raw))}catch(e){console.warn(e)}};
 const fmt=n=>String(n).padStart(2,"0");
 
-/* ========= render ========= */
-function roleClassName(r){ if(r.id==="varulv")return"r-ulv"; if(r.id==="sierska")return"r-seer"; if(r.id==="jägare")return"r-hunt"; return"r-by" }
-
+/* ===== render ===== */
 function renderAll(){
   $("#phase_tag").textContent="fas: "+state.phase;
   $("#scene_tag").textContent="scen: "+(state.sceneIndex+1);
@@ -346,12 +324,13 @@ function renderAll(){
   // players
   const plist=$("#players_list"); plist.innerHTML="";
   state.players.forEach((p,i)=>{
-    const role=state.data.roles.find(r=>r.id===p.roleId); const rc=role?roleClassName(role):"";
-    const rn=role?role.name:"—"; const dead=(p.alive===false)?"dead":"";
+    const role=state.data.roles.find(r=>r.id===p.roleId); const rn=role?role.name:"—"; const dead=(p.alive===false)?"dead":"";
     plist.appendChild(el("div",{class:"li "+dead},[
-      el("div",{class:"portrait"},[el("div",{class:"avatar"}), el("div",{},[el("div",{text:p.name}), el("div",{class:"hint",text:(p.alive===false?"ute":"levande")+" • "+rn})])]),
+      el("div",{class:"row"},[
+        el("div",{class:"handle",title:"drag"},["::"]),
+        el("div",{},[el("div",{text:p.name}), el("div",{class:"hint",text:(p.alive===false?"ute":"levande")+" • "+rn})])
+      ]),
       el("div",{},[
-        el("span",{class:"rolechip "+rc,text:rn}),
         el("button",{class:"btn",text:"hemligt",onclick:()=>revealSecret(p)}),
         el("button",{class:"btn warn",text:(p.alive===false?"markera levande":"markera ute"),onclick:()=>toggleAlive(i)}),
         el("button",{class:"btn ghost",text:"ta bort",onclick:()=>removePlayer(i)})
@@ -361,70 +340,17 @@ function renderAll(){
 
   // roles chips
   const rchips=$("#roles_chips"); rchips.innerHTML="";
-  state.data.roles.forEach(r=>rchips.appendChild(el("span",{class:"tag rolechip "+roleClassName(r),title:r.secret,text:r.name})));
+  state.data.roles.forEach(r=>rchips.appendChild(el("span",{class:"tag",title:r.secret,text:r.name})));
 
-  // scenes list (draggable)
+  // scenes
   renderScenesList();
 
   // votes
   renderVotes();
 
-  // buttons
   $("#assign_roles").disabled = state.players.length===0;
 }
 
-function renderScenesList(){
-  const sl=$("#scenes_list"); sl.innerHTML="";
-  state.data.story.scenes.forEach((s,idx)=>{
-    const row = el("div",{class:"li", draggable:"true", "data-idx":String(idx)},[
-      el("div",{class:"row", style:"gap:8px;align-items:center"},[
-        el("span",{class:"tag", text:String(idx+1)}),
-        el("div",{},[
-          el("div",{text:s.title}),
-          el("div",{class:"hint", text:s.text})
-        ])
-      ]),
-      el("div",{},[
-        el("button",{class:"btn", text:"editera", onclick:()=>openSceneEditor(idx)}),
-        el("button",{class:"btn ghost", text:"gå hit", onclick:()=>{state.sceneIndex=idx; save(); renderAll();}})
-      ])
-    ]);
-    attachDragHandlers(row);
-    sl.appendChild(row);
-  });
-}
-
-/* ========= drag & drop for scenes ========= */
-let dragIdx=null;
-function attachDragHandlers(row){
-  row.addEventListener("dragstart",e=>{
-    dragIdx = Number(row.getAttribute("data-idx"));
-    row.classList.add("dragging");
-    e.dataTransfer.effectAllowed="move";
-  });
-  row.addEventListener("dragend",()=>{
-    row.classList.remove("dragging");
-    dragIdx=null;
-  });
-  row.addEventListener("dragover",e=>{
-    e.preventDefault();
-    e.dataTransfer.dropEffect="move";
-  });
-  row.addEventListener("drop",()=>{
-    const toIdx = Number(row.getAttribute("data-idx"));
-    if(dragIdx===null || toIdx===dragIdx) return;
-    const arr = state.data.story.scenes;
-    const [moved] = arr.splice(dragIdx,1);
-    arr.splice(toIdx,0,moved);
-    // justera current scene index om behövs
-    if(state.sceneIndex===dragIdx) state.sceneIndex = toIdx;
-    else if(dragIdx < state.sceneIndex && toIdx >= state.sceneIndex) state.sceneIndex--;
-    else if(dragIdx > state.sceneIndex && toIdx <= state.sceneIndex) state.sceneIndex++;
-    save(); renderAll(); toast("scenordning uppdaterad");
-  });
-}
-
-/* ========= votes ========= */
 function renderVotes(){
   const box=$("#vote_tokens"); box.innerHTML="";
   const items=Object.entries(state.votes).sort((a,b)=>b[1]-a[1]); const max=items[0]?.[1]??0;
@@ -438,108 +364,190 @@ function renderVotes(){
   });
 }
 
-/* ========= players ========= */
-function addPlayer(){
-  const name=$("#player_name").value.trim();
-  if(!name){ toast("ange namn"); return; }
-  if(state.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ toast("namn redan tillagt"); return; }
-  state.players.push({name,alive:true}); $("#player_name").value="";
-  save(); renderAll(); toast("spelare tillagd");
+/* ===== players ===== */
+function addPlayer(){ const name=$("#player_name").value.trim(); if(!name){toast("ange namn"); return;}
+  if(state.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){toast("namn redan tillagt"); return;}
+  state.players.push({name,alive:true}); $("#player_name").value=""; save(); renderAll(); toast("spelare tillagd");
 }
 function addPlayersBulk(){
-  const raw=$("#player_bulk").value.trim(); if(!raw){ toast("inga namn"); return; }
+  const raw=$("#player_bulk").value.trim(); if(!raw){toast("inga namn"); return;}
   const names=[...new Set(raw.split(",").map(s=>s.trim()).filter(Boolean))];
-  if(names.length===0){ toast("inga giltiga namn"); return; }
   let added=0; names.forEach(n=>{ if(!state.players.some(p=>p.name.toLowerCase()===n.toLowerCase())){ state.players.push({name:n,alive:true}); added++; }});
   $("#player_bulk").value=""; save(); renderAll(); toast(`tillagda: ${added}`);
 }
 function removePlayer(i){ state.players.splice(i,1); save(); renderAll(); }
 function toggleAlive(i){ state.players[i].alive = !(state.players[i].alive===false); save(); renderAll(); }
 
-/* ========= roles ========= */
+/* ===== roles ===== */
 function assignRoles(){
   if(state.players.length===0){ toast("lägg spelare först"); return; }
-  const pool=[];
-  const wolves=Math.max(1,Math.floor(state.players.length/5));
-  for(let i=0;i<wolves;i++) pool.push("varulv");
-  if(state.data.roles.some(r=>r.id==="sierska")) pool.push("sierska");
-  if(state.data.roles.some(r=>r.id==="jägare")) pool.push("jägare");
-  while(pool.length<state.players.length) pool.push("bybo");
-  shuffle(pool);
-  state.players = state.players.map((p,i)=>({...p,roleId: pool[i]}));
+  const pool=[]; const wolves=Math.max(1,Math.floor(state.players.length/5));
+  for(let i=0;i<wolves;i++) pool.push("varulv"); if(state.data.roles.some(r=>r.id==="sierska")) pool.push("sierska");
+  if(state.data.roles.some(r=>r.id==="jägare")) pool.push("jägare"); while(pool.length<state.players.length) pool.push("bybo");
+  shuffle(pool); state.players = state.players.map((p,i)=>({...p,roleId: pool[i]}));
   save(); renderAll(); toast("roller utdelade");
 }
 function clearRoles(){ state.players = state.players.map(p=>({...p,roleId:undefined})); save(); renderAll(); toast("roller rensade"); }
-function addCustomRole(){
-  const name=$("#role_name").value.trim(); const team=$("#role_team").value;
-  const secret=$("#role_secret").value.trim();
-  if(!name){ toast("ange rollnamn"); return; }
-  const id=slugify(name);
-  if(state.data.roles.some(r=>r.id===id)){ toast("rollen finns redan"); return; }
-  state.data.roles.push({id,name,team,secret:secret||"—"});
-  $("#role_name").value=""; $("#role_secret").value="";
-  save(); renderAll(); toast("roll tillagd");
-}
-function removeLastCustomRole(){
-  for(let i=state.data.roles.length-1;i>=0;i--){
-    const id=state.data.roles[i].id;
-    if(!coreRoles.find(cr=>cr.id===id)){ state.data.roles.splice(i,1); save(); renderAll(); toast("senaste egna roll borttagen"); return; }
-  }
-  toast("inga egna roller att ta bort");
+
+/* ===== scenes: list + dnd + editor ===== */
+function renderScenesList(){
+  const sl=$("#scenes_list"); sl.innerHTML="";
+  state.data.story.scenes.forEach((s,idx)=>{
+    const row = el("div",{class:"li", "data-idx":String(idx)},[
+      el("div",{class:"row"},[
+        el("div",{class:"handle",title:"dra för att flytta"},["::"]),
+        el("div",{onclick:()=>openSceneEditor(idx), style:"cursor:pointer"},[
+          el("div",{text:`${idx+1}. ${s.title}`}),
+          el("div",{class:"hint", text:s.text})
+        ])
+      ]),
+      el("div",{},[
+        el("button",{class:"btn", text:"gå hit", onclick:()=>{state.sceneIndex=idx; save(); renderAll();}}),
+        el("button",{class:"btn", text:"upp", onclick:()=>moveScene(idx, -1)}),
+        el("button",{class:"btn", text:"ner", onclick:()=>moveScene(idx, 1)})
+      ])
+    ]);
+    sl.appendChild(row);
+  });
+  enableSceneDnd(sl);
 }
 
-/* ========= scenes: editor modal ========= */
-let sceneEditingIndex = null; // null = new
+function moveScene(from, delta){
+  const to = from + delta;
+  const arr = state.data.story.scenes;
+  if(to<0 || to>=arr.length) return;
+  const [m] = arr.splice(from,1);
+  arr.splice(to,0,m);
+  if(state.sceneIndex===from) state.sceneIndex=to;
+  save(); renderScenesList(); renderHeaderScene();
+}
+
+function renderHeaderScene(){
+  $("#scene_tag").textContent="scen: "+(state.sceneIndex+1);
+  $("#scene_idx").textContent=(state.sceneIndex+1);
+  const sc=state.data.story.scenes[state.sceneIndex]||{title:"—",text:"—"};
+  $("#scene_title").textContent=sc.title; $("#scene_text").textContent=sc.text;
+}
+
+/* desktop drag-and-drop */
+function enableSceneDnd(container){
+  const rows = [...container.children];
+  let dragEl=null, dragIdx=null, ghost=null;
+
+  rows.forEach(row=>{
+    const handle = row.querySelector(".handle");
+    handle.setAttribute("draggable","true");
+    handle.addEventListener("dragstart",(e)=>{
+      dragEl = row;
+      dragIdx = Number(row.getAttribute("data-idx"));
+      e.dataTransfer.effectAllowed="move";
+      e.dataTransfer.setData("text/plain", String(dragIdx)); // behövs för vissa browsers
+      setTimeout(()=>row.classList.add("dragging"),0);
+      // ghost marker
+      ghost = document.createElement("div"); ghost.className="ghost-marker";
+      container.insertBefore(ghost, row.nextSibling);
+    });
+    handle.addEventListener("dragend",()=>{
+      if(dragEl) dragEl.classList.remove("dragging");
+      if(ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      dragEl=null; ghost=null; dragIdx=null;
+      // reindex och rendera om för säkerhets skull
+      renderScenesList(); save();
+    });
+  });
+
+  container.addEventListener("dragover",(e)=>{
+    e.preventDefault();
+    if(!ghost) return;
+    const after = getDragAfterElement(container, e.clientY);
+    if(after == null) container.appendChild(ghost);
+    else container.insertBefore(ghost, after);
+  });
+
+  container.addEventListener("drop",(e)=>{
+    e.preventDefault();
+    if(!ghost) return;
+    const newPos = [...container.children].indexOf(ghost);
+    // ghost index motsvarar nya platsen
+    const arr = state.data.story.scenes;
+    const [moved] = arr.splice(dragIdx,1);
+    const insertAt = Math.min(newPos, arr.length);
+    arr.splice(insertAt,0,moved);
+    if(state.sceneIndex===dragIdx) state.sceneIndex=insertAt;
+    save();
+  });
+
+  function getDragAfterElement(container, y){
+    const els = [...container.querySelectorAll(".li:not(.dragging)")];
+    return els.reduce((closest, child)=>{
+      const box = child.getBoundingClientRect();
+      const offset = y - (box.top + box.height/2);
+      if(offset < 0 && offset > closest.offset) return { offset, element: child };
+      else return closest;
+    }, {offset: Number.NEGATIVE_INFINITY}).element;
+  }
+}
+
+/* editor modal (works on iOS via fallback) */
+let sceneEditingIndex = null;
 function openSceneEditor(idx=null){
-  sceneEditingIndex = idx;
-  const isNew = idx===null || idx===undefined;
-  const dlg=$("#scene_modal");
-  $("#scene_modal_title").textContent = isNew ? "ny scen" : `editera scen ${idx+1}`;
-  if(isNew){
-    $("#scene_form_title").value="";
-    $("#scene_form_text").value="";
-    $("#scene_delete").disabled=true;
-    $("#scene_duplicate").disabled=true;
+  sceneEditingIndex = (idx==null? null : Number(idx));
+  $("#scene_modal_title").textContent = (sceneEditingIndex==null) ? "ny scen" : `editera scen ${sceneEditingIndex+1}`;
+  if(sceneEditingIndex==null){
+    $("#scene_form_title").value = "";
+    $("#scene_form_text").value  = "";
   }else{
-    const s = state.data.story.scenes[idx];
+    const s = state.data.story.scenes[sceneEditingIndex];
     $("#scene_form_title").value = s.title;
     $("#scene_form_text").value  = s.text;
-    $("#scene_delete").disabled=false;
-    $("#scene_duplicate").disabled=false;
   }
-  dlg.showModal();
+  showBackdrop(true);
 }
 function saveSceneFromModal(){
   const title=$("#scene_form_title").value.trim();
   const text =$("#scene_form_text").value.trim();
   if(!title){ toast("titel saknas"); return; }
-  if(sceneEditingIndex===null || sceneEditingIndex===undefined){
-    state.data.story.scenes.push({title, text});
+  if(sceneEditingIndex==null){
+    state.data.story.scenes.push({title,text});
     state.sceneIndex = state.data.story.scenes.length-1;
     toast("scen skapad");
   }else{
-    state.data.story.scenes[sceneEditingIndex] = {title, text};
+    state.data.story.scenes[sceneEditingIndex]={title,text};
     toast("scen sparad");
   }
-  save(); renderAll(); $("#scene_modal").close();
+  save(); renderScenesList(); renderHeaderScene(); showBackdrop(false);
 }
 function deleteSceneFromModal(){
-  if(sceneEditingIndex===null || sceneEditingIndex===undefined) return;
+  if(sceneEditingIndex==null) return;
   if(!confirm("ta bort denna scen?")) return;
   state.data.story.scenes.splice(sceneEditingIndex,1);
   if(state.sceneIndex>=state.data.story.scenes.length) state.sceneIndex = Math.max(0, state.data.story.scenes.length-1);
-  save(); renderAll(); $("#scene_modal").close(); toast("scen borttagen");
+  save(); renderScenesList(); renderHeaderScene(); showBackdrop(false); toast("scen borttagen");
 }
 function duplicateSceneFromModal(){
-  if(sceneEditingIndex===null || sceneEditingIndex===undefined) return;
+  if(sceneEditingIndex==null) return;
   const s = state.data.story.scenes[sceneEditingIndex];
-  const copy = { title: s.title+" (kopia)", text: s.text };
-  state.data.story.scenes.splice(sceneEditingIndex+1, 0, copy);
+  state.data.story.scenes.splice(sceneEditingIndex+1,0,{title:s.title+" (kopia)",text:s.text});
   state.sceneIndex = sceneEditingIndex+1;
-  save(); renderAll(); $("#scene_modal").close(); toast("scen duplicerad");
+  save(); renderScenesList(); renderHeaderScene(); showBackdrop(false); toast("scen duplicerad");
+}
+function moveSceneInModal(delta){
+  if(sceneEditingIndex==null) return;
+  const from=sceneEditingIndex, to=from+delta;
+  const arr=state.data.story.scenes;
+  if(to<0 || to>=arr.length) return;
+  const [m]=arr.splice(from,1); arr.splice(to,0,m);
+  sceneEditingIndex=to; state.sceneIndex=to;
+  save(); renderScenesList(); renderHeaderScene();
 }
 
-/* ========= votes ========= */
+/* modal fallback helpers */
+function showBackdrop(open){
+  const bd = $("#scene_backdrop");
+  bd.classList.toggle("show", !!open);
+}
+
+/* votes */
 function vote(name){ state.votes[name]=(state.votes[name]||0)+1; save(); renderVotes(); }
 function unvote(name){ if(!state.votes[name])return; state.votes[name]=Math.max(0,state.votes[name]-1); if(state.votes[name]===0) delete state.votes[name]; save(); renderVotes(); }
 function removeVote(name){ delete state.votes[name]; save(); renderVotes(); }
@@ -549,33 +557,29 @@ function openCandidatePicker(){
   const live=state.players.filter(p=>p.alive!==false);
   if(live.length===0){ toast("inga levande spelare"); return; }
   live.forEach(p=>sel.appendChild(el("option",{value:p.name,text:p.name})));
-  $("#candidate_modal").showModal();
-}
-$("#candidate_cancel").addEventListener("click",()=>$("#candidate_modal").close());
-$("#candidate_ok").addEventListener("click",()=>{ const n=$("#candidate_select").value; if(n){ state.votes[n]=(state.votes[n]||0); save(); renderVotes(); } $("#candidate_modal").close(); });
-function showVoteResult(){
-  const e=Object.entries(state.votes); if(e.length===0){ toast("inga röster"); return; }
-  const s=e.sort((a,b)=>b[1]-a[1]); const top=s[0][1]; const winners=s.filter(([,c])=>c===top).map(([n])=>n);
-  alert(`flest röster: ${winners.join(", ")} (${top})`);
+  // Safari-fallback: använd <dialog> om stöds, annars alert-variant
+  if(typeof HTMLDialogElement !== "undefined" && typeof $("#candidate_modal").showModal === "function"){
+    $("#candidate_modal").showModal();
+  }else{
+    const name = prompt("välj kandidat:\n"+live.map(p=>p.name).join(", "));
+    if(name){ state.votes[name]=(state.votes[name]||0); save(); renderVotes(); }
+  }
 }
 
-/* ========= phase & timer ========= */
+/* phase & timer */
 function setPhase(p){ state.phase=p; $("#btn_night").classList.toggle("primary",p==="natt"); $("#btn_day").classList.toggle("primary",p==="dag"); save(); renderAll(); }
 function tick(){ state.timer++; const m=Math.floor(state.timer/60),s=state.timer%60; $("#timer_tag").textContent=`timer: ${fmt(m)}:${fmt(s)}` }
 function timerStart(){ if(state.timerHandle) return; state.timerHandle=setInterval(tick,1000) }
 function timerStop(){ clearInterval(state.timerHandle); state.timerHandle=null }
 function timerReset(){ state.timer=0; $("#timer_tag").textContent="timer: 00:00" }
 
-/* ========= gm toggle & settings ========= */
+/* gm toggle */
 let gmOpen=false;
 function openGM(){ gmOpen=true; $("#gm_panel").style.display="block"; $("#gm_badge").style.display="inline-flex" }
 function closeGM(){ gmOpen=false; $("#gm_panel").style.display="none"; $("#gm_badge").style.display="none" }
-function toggleGM(){
-  if(gmOpen){ closeGM(); return; }
-  const pin=prompt("ange gm-pin"); if(pin===state.pin){ openGM(); } else { toast("fel pin") }
-}
+function toggleGM(){ if(gmOpen){ closeGM(); return; } const pin=prompt("ange gm-pin"); if(pin===state.pin){ openGM(); } else { toast("fel pin") } }
 
-/* ========= seed / import / export ========= */
+/* seed / import / export */
 function seedDemo(){
   state.players = ["Alva","Johan","My","Leo","Sara","Mika","Noah","Ines"].map(n=>({name:n,alive:true}));
   const wolves=Math.max(1,Math.floor(state.players.length/5)); const pool=[];
@@ -601,7 +605,7 @@ function importJson(file){
   r.readAsText(file);
 }
 
-/* ========= night wizard ========= */
+/* night wizard */
 const steps=[
   {id:"blind", title:"alla blundar", body:"Alla blundar. Tystnad faller över byn."},
   {id:"wolves", title:"varulvarna vaknar", body:"Varulvarna öppnar ögonen och pekar ut ett offer. Bekräfta när du sett."},
@@ -620,11 +624,11 @@ function renderWizard(){
   $("#overlay_next").textContent = stepIdx===steps.length-1 ? "avsluta" : "nästa";
 }
 
-/* ========= utils ========= */
+/* utils */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j]]} return a }
-function slugify(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") }
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-/* ========= bind ========= */
+/* bind */
 function bind(){
   // phase & timer
   $("#btn_night").addEventListener("click",()=>setPhase("natt"));
@@ -634,21 +638,27 @@ function bind(){
   $("#timer_reset").addEventListener("click",timerReset);
 
   // scenes
-  $("#scene_next").addEventListener("click",nextScene);
-  $("#scene_repeat").addEventListener("click",repeatScene);
+  $("#scene_next").addEventListener("click",()=>{ state.sceneIndex=Math.min(state.sceneIndex+1,state.data.story.scenes.length-1); save(); renderHeaderScene(); });
+  $("#scene_repeat").addEventListener("click",()=>{ renderHeaderScene(); toast("scen repeterad"); });
   $("#scene_edit_current").addEventListener("click",()=>openSceneEditor(state.sceneIndex));
   $("#scene_new").addEventListener("click",()=>openSceneEditor(null));
 
-  // scene modal buttons
+  // scene modal
   $("#scene_save").addEventListener("click",saveSceneFromModal);
   $("#scene_delete").addEventListener("click",deleteSceneFromModal);
   $("#scene_duplicate").addEventListener("click",duplicateSceneFromModal);
-  $("#scene_cancel").addEventListener("click",()=>$("#scene_modal").close());
+  $("#scene_cancel").addEventListener("click",()=>showBackdrop(false));
+  $("#scene_up").addEventListener("click",()=>moveSceneInModal(-1));
+  $("#scene_down").addEventListener("click",()=>moveSceneInModal(1));
 
   // votes
   $("#vote_add_from_players").addEventListener("click",openCandidatePicker);
-  $("#vote_clear").addEventListener("click",clearVotes);
-  $("#vote_result").addEventListener("click",showVoteResult);
+  $("#vote_clear").addEventListener("click",()=>{ state.votes={}; save(); renderVotes(); toast("röster rensade"); });
+  $("#vote_result").addEventListener("click",()=>{
+    const e=Object.entries(state.votes); if(e.length===0){ toast("inga röster"); return; }
+    const s=e.sort((a,b)=>b[1]-a[1]); const top=s[0][1]; const winners=s.filter(([,c])=>c===top).map(([n])=>n);
+    alert(`flest röster: ${winners.join(", ")} (${top})`);
+  });
 
   // notes
   $("#notes").addEventListener("input",e=>{state.notes=e.target.value;save()});
@@ -667,15 +677,13 @@ function bind(){
   // roles
   $("#assign_roles").addEventListener("click",assignRoles);
   $("#clear_roles").addEventListener("click",clearRoles);
-  $("#role_add").addEventListener("click",addCustomRole);
-  $("#role_remove_last").addEventListener("click",removeLastCustomRole);
 
   // seed / import / export
   $("#seed_demo").addEventListener("click",seedDemo);
   $("#export_btn").addEventListener("click",exportJson);
   $("#import_file").addEventListener("change",e=>{ const f=e.target.files?.[0]; if(f) importJson(f) });
 
-  // overlay
+  // night overlay
   $("#night_wizard").addEventListener("click",openWizard);
   $("#overlay_close").addEventListener("click",closeWizard);
   $("#overlay_prev").addEventListener("click",()=>{ if(stepIdx>0){ stepIdx--; renderWizard(); }});
@@ -689,12 +697,19 @@ function bind(){
   });
 }
 
-/* ========= boot ========= */
+/* boot */
 load();
 if(state.sceneIndex>=state.data.story.scenes.length) state.sceneIndex=0;
 renderAll(); bind();
 if(!localStorage.getItem("janpire_booted")){ openGM(); localStorage.setItem("janpire_booted","1"); }
-window.__janpire={state,save,renderAll};
+
+/* helpers */
+function revealSecret(p){
+  const role=state.data.roles.find(r=>r.id===p.roleId);
+  const txt=role?`roll: ${role.name}\nlag: ${role.team}\n\nhemligt:\n${role.secret}`:"ingen roll utdelad än.";
+  alert(`${p.name}\n\n${txt}`);
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j]]} return a }
 </script>
 </body>
 </html>
