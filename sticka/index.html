@@ -28,12 +28,14 @@
       -webkit-tap-highlight-color: transparent;
     }
     input:focus, button:focus { outline: none; }
-    .input-clear { position: absolute; right: .5rem; top: 50%; transform: translateY(-50%); background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af; }
+    .input-clear {
+      position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+      background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af;
+    }
     .input-clear:hover { color: #4b5563; }
     .icon-btn {
       background: transparent; border: 0; cursor: pointer; color: #b0b0b0;
-      font-size: 22px; font-weight: 300; padding: .25rem;
-      transition: color 0.15s ease;
+      font-size: 22px; font-weight: 300; padding: .25rem; transition: color 0.15s ease;
     }
     .icon-btn:hover { color: #404040; }
     .plus-btn {
@@ -55,6 +57,7 @@
     const noSleep = new window.NoSleep();
 
     function Stickraknare() {
+      // befintliga nycklar (orörda)
       const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || "0", 10));
       const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || "0", 10));
       const [name1, setName1]   = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
@@ -62,6 +65,7 @@
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
       const [showSecond, setShowSecond] = useState(() => localStorage.getItem("stick-hide-2") !== "true");
 
+      // extra räknare (påverkar ej ovan keys)
       const [extraCounters, setExtraCounters] = useState(() => {
         try {
           const raw = localStorage.getItem("stick-extra");
@@ -76,9 +80,37 @@
         } catch { return []; }
       });
 
+      // feedback (ljud + vibration) – default: på
+      const [feedbackOn, setFeedbackOn] = useState(() => {
+        const v = localStorage.getItem("stick-feedback");
+        return v === null ? true : v === "true";
+      });
+
+      // wake lock
       const [wakeLock, setWakeLock] = useState(null);
       const [awakeStrategy, setAwakeStrategy] = useState("off");
 
+      // celebration modal + dynamisk text
+      const [toastOpen, setToastOpen] = useState(false);
+      const [toastTitle, setToastTitle] = useState("Bra jobbat!");
+      const [toastBody, setToastBody] = useState("Nu kan du sticka och dricka!");
+
+      const MESSAGES = {
+        reset: [
+          { t: "Bra tempo!", b: "Nollställd – redo för nästa varv." },
+          { t: "Snyggt avslut!", b: "Dags för en ny sektion." },
+          { t: "Fint flöde!", b: "Nu kan du sticka och dricka!" },
+        ],
+        close: [
+          { t: "Bra jobbat!", b: "Räknaren stängd – snyggt arbetat." },
+          { t: "Klart!", b: "Skönt, en sak mindre på listan." },
+          { t: "Snyggt!", b: "Nu kan du sticka och dricka!" },
+        ],
+      };
+
+      const closeToast = () => setToastOpen(false);
+
+      // persist
       useEffect(() => localStorage.setItem("stick-count1", String(count1)), [count1]);
       useEffect(() => localStorage.setItem("stick-count2", String(count2)), [count2]);
       useEffect(() => localStorage.setItem("stick-name1", name1), [name1]);
@@ -86,13 +118,16 @@
       useEffect(() => localStorage.setItem("stick-keep-awake", String(keepAwake)), [keepAwake]);
       useEffect(() => localStorage.setItem("stick-hide-2", showSecond ? "false" : "true"), [showSecond]);
       useEffect(() => { localStorage.setItem("stick-extra", JSON.stringify(extraCounters)); }, [extraCounters]);
+      useEffect(() => localStorage.setItem("stick-feedback", String(feedbackOn)), [feedbackOn]);
 
+      // wake lock on/off
       useEffect(() => {
         if (keepAwake) enableKeepAwake();
         else disableKeepAwake();
         return () => disableKeepAwake();
       }, [keepAwake]);
 
+      // reacquire on visibility
       useEffect(() => {
         const onVis = async () => {
           if (document.visibilityState === "visible" && keepAwake) await enableKeepAwake(true);
@@ -122,13 +157,61 @@
         setAwakeStrategy("off");
       }
 
-      const CounterCard = ({ initialName, onCommitName, count, setCount, removable=false, onRemove }) => {
+      // haptics + chime
+      function buzz(ms = 35) {
+        if (!feedbackOn) return;
+        if (navigator.vibrate) {
+          try { navigator.vibrate(ms); } catch(_) {}
+        }
+      }
+      function chime() {
+        if (!feedbackOn) return;
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = 880; // A5
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          const now = ctx.currentTime;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.2);
+          ctx.resume?.();
+        } catch (_) {}
+      }
+
+      function celebrate(type) {
+        const list = MESSAGES[type] || MESSAGES.close;
+        const pick = list[Math.floor(Math.random() * list.length)];
+        setToastTitle(pick.t);
+        setToastBody(pick.b);
+        setToastOpen(true);
+        // feedback
+        buzz(35);
+        chime();
+        // auto-close after 3s
+        clearTimeout(celebrate._t);
+        celebrate._t = setTimeout(() => setToastOpen(false), 3000);
+      }
+
+      // Counter card
+      const CounterCard = ({ initialName, onCommitName, count, setCount, removable=false, onRemove, onReset }) => {
         const [localName, setLocalName] = useState(initialName);
         const inputRef = useRef(null);
         useEffect(() => { setLocalName(initialName); }, [initialName]);
         const commit = () => onCommitName((localName||"").trim() || initialName);
         const onKeyDown = e => { if(e.key==="Enter"){ e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); } };
         const clearName = () => { setLocalName(""); requestAnimationFrame(()=>inputRef.current?.focus()); };
+
+        const handleReset = () => {
+          setCount(0);
+          onReset && onReset();
+        };
 
         return (
           <div className="relative bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
@@ -150,20 +233,24 @@
             <div className="flex justify-between mt-4 gap-2">
               <button onClick={()=>setCount(Math.max(0,count-1))}
                 className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">Ångra</button>
-              <button onClick={()=>setCount(0)}
+              <button onClick={handleReset}
                 className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">Nollställ</button>
             </div>
           </div>
         );
       };
 
+      // extra helpers
       const addExtraCounter = () => {
         const nextIndex = 3 + extraCounters.length + (showSecond ? 0 : 1);
         const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         setExtraCounters([...extraCounters, { id, name:`Räknare ${nextIndex}`, count:0 }]);
       };
       const updateExtra = (id, patch) => setExtraCounters(ec=>ec.map(c=>c.id===id?{...c,...patch}:c));
-      const removeExtra = id => setExtraCounters(ec=>ec.filter(c=>c.id!==id));
+      const removeExtra = id => {
+        setExtraCounters(ec=>ec.filter(c=>c.id!==id));
+        celebrate("close"); // firar vid stängning
+      };
 
       return (
         <main className="max-w-md w-full space-y-6">
@@ -172,25 +259,58 @@
             <p className="text-stone-500 text-sm">Håll koll på dina varv</p>
           </header>
 
-          <div className="flex items-center justify-center gap-2">
-            <input id="keep-awake" type="checkbox" checked={keepAwake}
-              onChange={e=>setKeepAwake(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
-            <label htmlFor="keep-awake" className="text-stone-600 text-sm select-none">Håll skärmen vaken</label>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <label className="flex items-center gap-2">
+              <input id="keep-awake" type="checkbox" checked={keepAwake}
+                onChange={e=>setKeepAwake(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+              <span className="text-stone-600 text-sm select-none">Håll skärmen vaken</span>
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input id="feedback-on" type="checkbox" checked={feedbackOn}
+                onChange={e=>setFeedbackOn(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+              <span className="text-stone-600 text-sm select-none">Ljud & vibration</span>
+            </label>
           </div>
-          <p className="text-center text-xs text-stone-500 -mt-3">
+
+          <p className="text-center text-xs text-stone-500 -mt-2">
             Status: {awakeStrategy==="wakeLock"?"Skärmlås aktivt (Wake Lock)":awakeStrategy==="noSleep"?"Skärmlås via NoSleep":"Av"}
           </p>
 
-          <CounterCard initialName={name1} onCommitName={setName1} count={count1} setCount={setCount1}/>
+          {/* Räknare 1 (låst) */}
+          <CounterCard
+            initialName={name1}
+            onCommitName={setName1}
+            count={count1}
+            setCount={setCount1}
+            onReset={() => celebrate("reset")}  /* fira vid nollställ */
+          />
+
+          {/* Räknare 2 (kan döljas) */}
           {showSecond && (
-            <CounterCard initialName={name2} onCommitName={setName2} count={count2} setCount={setCount2}
-              removable onRemove={()=>setShowSecond(false)}/>
+            <CounterCard
+              initialName={name2}
+              onCommitName={setName2}
+              count={count2}
+              setCount={setCount2}
+              removable
+              onRemove={() => { setShowSecond(false); celebrate("close"); }}
+              onReset={() => celebrate("reset")}
+            />
           )}
+
+          {/* Extra räknare */}
           {extraCounters.map(c=>(
-            <CounterCard key={c.id} initialName={c.name}
+            <CounterCard
+              key={c.id}
+              initialName={c.name}
               onCommitName={v=>updateExtra(c.id,{name:v})}
-              count={c.count} setCount={v=>updateExtra(c.id,{count:typeof v==="function"?v(c.count):v})}
-              removable onRemove={()=>removeExtra(c.id)}/>
+              count={c.count}
+              setCount={v=>updateExtra(c.id,{count:typeof v==="function"?v(c.count):v})}
+              removable
+              onRemove={() => removeExtra(c.id)}
+              onReset={() => celebrate("reset")}
+            />
           ))}
 
           <button className="plus-btn" onClick={addExtraCounter} aria-label="Lägg till ny räknare">＋</button>
@@ -198,6 +318,32 @@
           <footer className="text-center text-xs text-stone-400 pt-4 pb-2">
             gjord med ♥ i sverige
           </footer>
+
+          {/* celebration modal */}
+          {toastOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              role="dialog" aria-modal="true" onClick={closeToast}
+            >
+              {/* backdrop */}
+              <div className="absolute inset-0 bg-black/30"></div>
+
+              {/* modal */}
+              <div
+                className="relative z-10 mx-6 max-w-sm w-full rounded-2xl bg-white border border-stone-200 p-6 text-center shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+                aria-live="polite"
+              >
+                <div className="text-2xl mb-2">{toastTitle}</div>
+                <p className="text-stone-600">{toastBody}</p>
+                <button
+                  className="mt-5 text-sm text-stone-500 hover:text-stone-800"
+                  onClick={closeToast}
+                  aria-label="Stäng meddelande"
+                >Stäng</button>
+              </div>
+            </div>
+          )}
         </main>
       );
     }
