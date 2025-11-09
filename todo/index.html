@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>att göra</title>
 
-  <!-- pwa / ikoner (valfritt, kan återanvända från stickräknare) -->
+  <!-- pwa / ikoner (frivilligt) -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <meta name="theme-color" content="#f7f7f5">
@@ -13,56 +13,43 @@
   <meta name="apple-mobile-web-app-title" content="att göra">
   <link rel="apple-touch-icon" href="icon-512.png">
 
-  <!-- react + babel + tailwind -->
+  <!-- react + babel + tailwind + nosleep -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 
   <style>
-    body {
-      background: #f7f7f5;
-      color: #1a1a1a;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    input:focus, button:focus { outline: none; }
-    .icon-btn { background: transparent; border: 0; cursor: pointer; color: #9ca3af; padding: .25rem; }
-    .icon-btn:hover { color: #4b5563; }
-    .input-clear { position:absolute; right:.5rem; top:50%; transform:translateY(-50%); background:transparent; border:0; color:#9ca3af; }
-    .input-clear:hover { color:#4b5563; }
-
-    /* plus-knapp */
-    .plus-wrap { display:flex; flex-direction:column; align-items:center; gap:.25rem; }
-    .plus-btn {
-      display:flex; align-items:center; justify-content:center;
-      width:56px; height:56px; border-radius:14px;
-      background:#f3f4f6; color:#6b7280; font-size:36px; font-weight:200;
-      transition:color .2s ease, transform .1s ease, background .2s ease;
-      user-select:none; -webkit-user-select:none;
-    }
-    .plus-btn:hover { color:#1f2937; background:#e5e7eb; }
-    .plus-btn:active { transform:scale(.97); }
-
-    /* input glow vid long press */
-    .glow {
-      box-shadow: 0 0 0 3px rgba(45,45,45,0.08) inset, 0 0 0 2px #a3a3a3;
-      border-radius: 8px;
-    }
-
-    /* rad-entré-animation */
-    @keyframes fadeSlideIn {
-      0% { opacity: 0; transform: translateY(6px) scale(0.99); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .enter-anim {
-      animation: fadeSlideIn 260ms ease-out both;
-    }
-
-    /* drag */
-    .drag-handle { cursor: grab; user-select: none; color:#9ca3af; }
-    .drag-handle:active { cursor: grabbing; }
-    .drop-indicator { height: 10px; margin: -6px 0 6px 0; border-radius: 6px; }
+    body{background:#f7f7f5;color:#1a1a1a;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+    input:focus,button:focus{outline:none}
+    .icon-btn{background:transparent;border:0;cursor:pointer;color:#9ca3af;padding:.25rem}
+    .icon-btn:hover{color:#4b5563}
+    .input-clear{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#9ca3af}
+    .input-clear:hover{color:#4b5563}
+    .plus-wrap{display:flex;flex-direction:column;align-items:center;gap:.25rem}
+    .plus-btn{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:14px;background:#f3f4f6;color:#6b7280;font-size:36px;font-weight:200;transition:color .2s,transform .1s,background .2s;user-select:none;-webkit-user-select:none}
+    .plus-btn:hover{color:#1f2937;background:#e5e7eb}
+    .plus-btn:active{transform:scale(.97)}
+    .glow{box-shadow:0 0 0 3px rgba(45,45,45,.08) inset,0 0 0 2px #a3a3a3;border-radius:8px}
+    @keyframes fadeSlideIn{0%{opacity:0;transform:translateY(6px) scale(.99)}100%{opacity:1;transform:translateY(0) scale(1)}}
+    .enter-anim{animation:fadeSlideIn 260ms ease-out both}
+    .drag-handle{cursor:grab;user-select:none;color:#9ca3af}
+    .drag-handle:active{cursor:grabbing}
+    .drop-indicator{height:10px;margin:-6px 0 6px 0;border-radius:6px}
+    /* kort-behållare för swipe */
+    .swipe-shell{position:relative}
+    .swipe-bg{position:absolute;inset:0;border-radius:16px;background:#fee2e2; /* röd tunn */ color:#991b1b;display:flex;align-items:center;justify-content:flex-end;padding-right:14px}
+    .swipe-fg{position:relative;will-change:transform;touch-action:pan-y}
+    /* popover meny */
+    .menu{position:absolute;top:.25rem;right:.25rem}
+    .menu-panel{position:absolute;top:28px;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.08);min-width:160px;z-index:20}
+    .menu-item{width:100%;text-align:left;background:#fff;border:0;padding:10px 12px;font-size:14px;color:#374151}
+    .menu-item:hover{background:#f3f4f6}
+    /* snackbar */
+    .snackbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:50}
+    .snackbar button{background:transparent;border:0;color:#93c5fd}
+    .snackbar button:hover{color:#bfdbfe}
   </style>
 </head>
 <body>
@@ -70,6 +57,7 @@
 
   <script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useRef, useMemo } = React;
+    const noSleep = new window.NoSleep();
 
     function App() {
       const [items, setItems] = useState(() => {
@@ -78,26 +66,68 @@
       });
       const [draft, setDraft] = useState("");
       const [query, setQuery] = useState("");
-      const [filter, setFilter] = useState("all");  // all | active | done
+      const [filter, setFilter] = useState("all");
 
-      // drag & drop
+      // keep awake
+      const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("todo-keep-awake") === "true");
+      const [wakeLock, setWakeLock] = useState(null);
+      const [awakeStrategy, setAwakeStrategy] = useState("off");
+
+      // dnd
       const [draggingId, setDraggingId] = useState(null);
       const [overId, setOverId] = useState(null);
       const [overPosition, setOverPosition] = useState("above");
 
-      // auto-focus + glow + last added
+      // input/fokus/plus
       const draftRef = useRef(null);
       const [inputGlow, setInputGlow] = useState(false);
       const [lastAddedId, setLastAddedId] = useState(null);
-
-      // long-press timer
       const holdTimerRef = useRef(null);
       const HOLD_MS = 500;
 
+      // undo
+      const [undo, setUndo] = useState(null);
+      const undoTimer = useRef(null);
+
       // persist
+      useEffect(() => { localStorage.setItem("todo-items-v1", JSON.stringify(items)); }, [items]);
+      useEffect(() => { localStorage.setItem("todo-keep-awake", String(keepAwake)); }, [keepAwake]);
+
+      // keep awake handling
       useEffect(() => {
-        localStorage.setItem("todo-items-v1", JSON.stringify(items));
-      }, [items]);
+        if (keepAwake) enableKeepAwake();
+        else disableKeepAwake();
+        return () => disableKeepAwake();
+      }, [keepAwake]);
+
+      useEffect(() => {
+        const onVis = async () => {
+          if (document.visibilityState === "visible" && keepAwake) await enableKeepAwake(true);
+        };
+        document.addEventListener("visibilitychange", onVis);
+        return () => document.removeEventListener("visibilitychange", onVis);
+      }, [keepAwake]);
+
+      async function enableKeepAwake(silent=false) {
+        try {
+          if ("wakeLock" in navigator && navigator.wakeLock?.request) {
+            const lock = await navigator.wakeLock.request("screen");
+            if (wakeLock?.release) { try { await wakeLock.release(); } catch(_){} }
+            setWakeLock(lock);
+            setAwakeStrategy("wakeLock");
+            lock.addEventListener?.("release", () => {});
+            return;
+          }
+        } catch (err) { if (!silent) console.log("wake lock fail:", err); }
+        try { noSleep.enable(); setAwakeStrategy("noSleep"); }
+        catch { setAwakeStrategy("off"); }
+      }
+      async function disableKeepAwake() {
+        try { if (wakeLock?.release) await wakeLock.release(); } catch(_) {}
+        setWakeLock(null);
+        try { noSleep.disable(); } catch(_) {}
+        setAwakeStrategy("off");
+      }
 
       // derived list
       const visible = useMemo(() => {
@@ -116,101 +146,88 @@
       // actions
       const addItem = () => {
         const title = draft.trim();
-        if (!title) {
-          // tomt → bara fokusera input
-          focusDraft(true);
-          return;
-        }
+        if (!title) { focusDraft(true); return; }
         const id = crypto.randomUUID?.() || String(Date.now()+Math.random());
-        setItems(prev => [...prev, { id, title, done: false, created_at: Date.now() }]);
+        setItems(prev => [...prev, { id, title, done:false, created_at: Date.now() }]);
         setDraft("");
         setLastAddedId(id);
-        // efter animation, nollställ flagga
         setTimeout(() => setLastAddedId(null), 400);
-        // auto-focus tillbaka
         focusDraft();
       };
+      const toggleItem = (id) => setItems(prev => prev.map(i => i.id === id ? {...i, done: !i.done} : i));
+      const updateTitle = (id, title) => setItems(prev => prev.map(i => i.id === id ? {...i, title} : i));
 
-      const toggleItem = (id) => {
-        setItems(prev => prev.map(i => i.id === id ? {...i, done: !i.done} : i));
-      };
-      const deleteItem = (id) => setItems(prev => prev.filter(i => i.id !== id));
-      const updateTitle = (id, title) => {
-        setItems(prev => prev.map(i => i.id === id ? {...i, title} : i));
-      };
-      const clearDone = () => setItems(prev => prev.filter(i => !i.done));
-
-      // helpers
-      function focusDraft(glow=false) {
-        requestAnimationFrame(() => {
-          draftRef.current?.focus();
-          if (glow) {
-            setInputGlow(true);
-            setTimeout(() => setInputGlow(false), 450);
-          }
+      const deleteItem = (id) => {
+        setItems(prev => {
+          const idx = prev.findIndex(i => i.id === id);
+          if (idx === -1) return prev;
+          const removed = prev[idx];
+          const next = prev.slice(0, idx).concat(prev.slice(idx+1));
+          showUndo({ item: removed, index: idx });
+          return next;
         });
-      }
-      const onDraftKey = (e) => {
-        if (e.key === "Enter") { e.preventDefault(); addItem(); }
+      };
+      const clearDone = () => {
+        const snapshot = items;
+        const next = items.filter(i => !i.done);
+        if (snapshot.length !== next.length) showUndo({ item:null, index:null, batch:snapshot.filter(i=>i.done) });
+        setItems(next);
       };
 
-      // long press på plus
-      function onPlusPointerDown() {
+      function showUndo(payload){ clearTimeout(undoTimer.current); setUndo(payload); undoTimer.current=setTimeout(()=>setUndo(null),6000); }
+      function performUndo(){
+        clearTimeout(undoTimer.current);
+        if (!undo) return;
+        if (undo.batch){
+          setItems(prev => prev.concat(undo.batch));
+        } else {
+          setItems(prev => {
+            const base = prev.slice();
+            const idx = Math.min(undo.index ?? base.length, base.length);
+            base.splice(idx, 0, undo.item);
+            return base;
+          });
+        }
+        setUndo(null);
+      }
+
+      function focusDraft(glow=false){
+        requestAnimationFrame(()=>{ draftRef.current?.focus(); if(glow){ setInputGlow(true); setTimeout(()=>setInputGlow(false),450);} });
+      }
+      const onDraftKey = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); addItem(); } };
+
+      // plus long-press
+      function onPlusPointerDown(){
         clearTimeout(holdTimerRef.current);
-        holdTimerRef.current = setTimeout(() => {
-          // long-press → rensa och highlighta input + fokus
+        holdTimerRef.current = setTimeout(()=>{
           setDraft("");
           focusDraft(true);
-          // lätt vibration där det stöds
-          try { navigator.vibrate && navigator.vibrate(20); } catch(_) {}
+          try{ navigator.vibrate && navigator.vibrate(20); }catch(_){}
         }, HOLD_MS);
       }
-      function cancelHold() { clearTimeout(holdTimerRef.current); }
-      function onPlusClick() {
-        // vanlig tap → bara fokus (ingen rensning)
-        focusDraft();
-      }
+      function cancelHold(){ clearTimeout(holdTimerRef.current); }
+      function onPlusClick(){ focusDraft(); }
 
-      // dnd logic
-      function onDragStart(e, id) {
-        setDraggingId(id);
-        e.dataTransfer.effectAllowed = "move";
-        try { e.dataTransfer.setData("text/plain", id); } catch {}
-      }
-      function onDragOverRow(e, id) {
-        e.preventDefault();
-        setOverId(id);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const mid = rect.top + rect.height / 2;
-        setOverPosition(e.clientY < mid ? "above" : "below");
-        e.dataTransfer.dropEffect = "move";
-      }
-      function onDragLeaveRow() { setOverId(null); }
-      function onDropRow(e, id) {
-        e.preventDefault();
-        if (!draggingId) return;
-        reorder(draggingId, id, overPosition);
-        cleanupDnD();
-      }
-      function onDragEnd() { cleanupDnD(); }
-      function cleanupDnD() {
-        setDraggingId(null);
-        setOverId(null);
-        setOverPosition("above");
-      }
-      function reorder(srcId, targetId, pos) {
-        if (srcId === targetId) return;
-        setItems(prev => {
-          const srcIdx = prev.findIndex(i => i.id === srcId);
-          const targetIdx = prev.findIndex(i => i.id === targetId);
-          if (srcIdx === -1 || targetIdx === -1) return prev;
-          const arr = prev.slice();
-          const [moved] = arr.splice(srcIdx, 1);
-          let insertIdx = targetIdx;
-          if (pos === "below" && srcIdx < targetIdx) insertIdx = targetIdx;
-          if (pos === "above" && srcIdx > targetIdx) insertIdx = targetIdx;
-          if (pos === "below") insertIdx = Math.min(insertIdx + (srcIdx < targetIdx ? 0 : 1), arr.length);
-          arr.splice(insertIdx, 0, moved);
+      // dnd
+      function onDragStart(e, id){ setDraggingId(id); e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain", id);}catch{} }
+      function onDragOverRow(e, id){ e.preventDefault(); setOverId(id); const r=e.currentTarget.getBoundingClientRect(); const mid=r.top+r.height/2; setOverPosition(e.clientY<mid?"above":"below"); e.dataTransfer.dropEffect="move"; }
+      function onDragLeaveRow(){ setOverId(null); }
+      function onDropRow(e, id){ e.preventDefault(); if(!draggingId) return; reorder(draggingId, id, overPosition); cleanupDnD(); }
+      function onDragEnd(){ cleanupDnD(); }
+      function cleanupDnD(){ setDraggingId(null); setOverId(null); setOverPosition("above"); }
+      function reorder(srcId, targetId, pos){
+        if(srcId===targetId) return;
+        setItems(prev=>{
+          const srcIdx=prev.findIndex(i=>i.id===srcId);
+          const targetIdx=prev.findIndex(i=>i.id===targetId);
+          if(srcIdx===-1||targetIdx===-1) return prev;
+          const arr=prev.slice();
+          const [moved]=arr.splice(srcIdx,1);
+          let insertIdx=targetIdx;
+          if(pos==="below"&&srcIdx<targetIdx) insertIdx=targetIdx;
+          if(pos==="above"&&srcIdx>targetIdx) insertIdx=targetIdx;
+          if(pos==="below") insertIdx=Math.min(insertIdx+(srcIdx<targetIdx?0:1), arr.length);
+          arr.splice(insertIdx,0,moved);
           return arr;
         });
       }
@@ -222,6 +239,18 @@
             <p className="text-stone-500 text-sm">fokusera på nästa sak</p>
           </header>
 
+          {/* keep awake + status */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="w-5 h-5 accent-stone-700 cursor-pointer"
+                     checked={keepAwake} onChange={e=>setKeepAwake(e.target.checked)} />
+              <span className="text-stone-600 text-sm select-none">håll skärmen vaken</span>
+            </label>
+          </div>
+          <p className="text-center text-xs text-stone-500 -mt-2">
+            status: {awakeStrategy==="wakeLock"?"skärmlås aktivt (wake lock)":awakeStrategy==="noSleep"?"skärmlås via nosleep":"av"}
+          </p>
+
           {/* add new */}
           <div className="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm">
             <div className="relative">
@@ -229,26 +258,16 @@
                 ref={draftRef}
                 type="text"
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(e)=>setDraft(e.target.value)}
                 onKeyDown={onDraftKey}
                 placeholder="vad är nästa?"
-                className={`w-full bg-transparent border-b border-stone-300 focus:border-stone-600 transition p-2 text-lg ${inputGlow ? 'glow' : ''}`}
+                className={`w-full bg-transparent border-b border-stone-300 focus:border-stone-600 transition p-2 text-lg ${inputGlow?'glow':''}`}
               />
-              {draft && (
-                <button className="input-clear" aria-label="rensa" onClick={()=>setDraft("")}>×</button>
-              )}
+              {draft && <button className="input-clear" aria-label="rensa" onClick={()=>setDraft("")}>×</button>}
             </div>
             <div className="mt-3 flex items-center gap-2">
-              <button onClick={addItem} className="px-3 py-2 rounded-lg bg-stone-900 text-white text-sm hover:bg-stone-800 active:scale-95 transition">
-                lägg till
-              </button>
-              <input
-                type="search"
-                value={query}
-                onChange={(e)=>setQuery(e.target.value)}
-                placeholder="sök…"
-                className="flex-1 bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-sm"
-              />
+              <button onClick={addItem} className="px-3 py-2 rounded-lg bg-stone-900 text-white text-sm hover:bg-stone-800 active:scale-95 transition">lägg till</button>
+              <input type="search" value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="sök…" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-sm"/>
             </div>
           </div>
 
@@ -265,7 +284,7 @@
           {/* list */}
           <ul className="space-y-2">
             {visible.map(item => (
-              <DraggableTodoItem
+              <SwipeableDraggableItem
                 key={item.id}
                 item={item}
                 isDragging={draggingId === item.id}
@@ -286,109 +305,156 @@
 
           {/* bulk actions – centrerad grupp */}
           <div className="pt-4 mt-4 border-t border-stone-200 flex flex-col items-center gap-2">
-            <div
-              className="plus-wrap"
-              onPointerDown={onPlusPointerDown}
-              onPointerUp={cancelHold}
-              onPointerLeave={cancelHold}
-              onPointerCancel={cancelHold}
-            >
-              <button
-                className="plus-btn"
-                onClick={onPlusClick}
-                aria-label="Ny uppgift"
-              >
-                ＋
-              </button>
+            <div className="plus-wrap" onPointerDown={onPlusPointerDown} onPointerUp={cancelHold} onPointerLeave={cancelHold} onPointerCancel={cancelHold}>
+              <button className="plus-btn" onClick={onPlusClick} aria-label="Ny uppgift">＋</button>
             </div>
-
-            <button
-              className="text-stone-500 text-sm hover:text-stone-800 transition"
-              onClick={clearDone}
-            >
-              rensa klara
-            </button>
+            <button className="text-stone-500 text-sm hover:text-stone-800 transition" onClick={clearDone}>rensa klara</button>
           </div>
 
-          <footer className="text-center text-xs text-stone-400 pt-4 pb-2">
-            gjord med ♥ i sverige
-          </footer>
+          <footer className="text-center text-xs text-stone-400 pt-4 pb-2">gjord med ♥ i sverige</footer>
+
+          {/* undo snackbar */}
+          {undo && (
+            <div className="snackbar" role="status" aria-live="polite">
+              <span>{undo.batch ? `${undo.batch.length} uppgifter borttagna` : `uppgift borttagen`}</span>
+              <button onClick={performUndo} aria-label="Ångra">ångra</button>
+            </div>
+          )}
         </main>
       );
     }
 
-    function DraggableTodoItem({
+    function SwipeableDraggableItem({
       item, isDragging, isOver, overPosition, lastAddedId,
       onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
       onToggle, onDelete, onCommit
     }) {
       const [localTitle, setLocalTitle] = useState(item.title);
+      const [menuOpen, setMenuOpen] = useState(false);
       const inputRef = useRef(null);
+      const menuRef = useRef(null);
+
+      // swipe state
+      const shellRef = useRef(null);
+      const fgRef = useRef(null);
+      const startX = useRef(0);
+      const currentX = useRef(0);
+      const draggingSwipe = useRef(false);
+      const threshold = 80; // px
+      const maxSlide = 140;
 
       useEffect(() => { setLocalTitle(item.title); }, [item.title]);
 
-      const commit = () => {
-        const v = (localTitle || "").trim();
-        onCommit(v || item.title);
-      };
-      const onKeyDown = (e) => {
-        if (e.key === "Enter") { e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); }
-      };
+      // stäng meny vid klick utanför
+      useEffect(() => {
+        const onDoc = (e) => { if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+        document.addEventListener('click', onDoc);
+        return () => document.removeEventListener('click', onDoc);
+      }, [menuOpen]);
 
+      const commit = () => onCommit((localTitle||"").trim() || item.title);
+      const onKeyDown = (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); } };
       const enterClass = item.id === lastAddedId ? 'enter-anim' : '';
+
+      // swipe handlers (pointer events)
+      function onPointerDown(e){
+        // ignorerar musdrag för att inte krocka med HTML5 DnD
+        if (e.pointerType === 'mouse') return;
+        draggingSwipe.current = true;
+        startX.current = e.clientX;
+        currentX.current = 0;
+        fgRef.current.style.transition = 'none';
+        fgRef.current.setPointerCapture?.(e.pointerId);
+      }
+      function onPointerMove(e){
+        if (!draggingSwipe.current) return;
+        const dx = e.clientX - startX.current;
+        // endast vänster-svep
+        const tx = Math.max(-maxSlide, Math.min(0, dx));
+        currentX.current = tx;
+        fgRef.current.style.transform = `translateX(${tx}px)`;
+        // visa röd bg gradvis
+        shellRef.current.querySelector('.swipe-bg').style.opacity = Math.min(1, Math.abs(tx)/threshold);
+      }
+      function onPointerUp(e){
+        if (!draggingSwipe.current) return;
+        draggingSwipe.current = false;
+        fgRef.current.releasePointerCapture?.(e.pointerId);
+        fgRef.current.style.transition = 'transform 180ms ease';
+        if (currentX.current <= -threshold){
+          // full swipe → ta bort
+          fgRef.current.style.transform = `translateX(-${maxSlide}px)`;
+          setTimeout(()=>onDelete(), 140);
+        } else {
+          // backa
+          fgRef.current.style.transform = 'translateX(0)';
+          shellRef.current.querySelector('.swipe-bg').style.opacity = 0;
+        }
+      }
+      function onPointerCancel(e){ onPointerUp(e); }
 
       return (
         <li
-          className={`bg-white border rounded-2xl p-4 shadow-sm transition ${enterClass} ${isDragging ? 'opacity-60 border-stone-300' : 'border-stone-200'}`}
-          draggable
-          onDragStart={onDragStart}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          onDragEnd={onDragEnd}
-          aria-grabbed={isDragging ? "true" : "false"}
-          role="option"
+          className={`swipe-shell ${enterClass}`}
+          ref={shellRef}
+          // HTML5 DnD: endast för mus – touch sköter swipe; låt ändå events bubbla för drag-handle
         >
-          {/* drop-indikator ovanför raden */}
-          {isOver && overPosition === "above" && (
-            <div className="drop-indicator bg-stone-800/20 mb-2"></div>
-          )}
+          <div className="swipe-bg" style={{opacity:0}} aria-hidden="true">ta bort</div>
 
-          <div className="flex items-start gap-3">
-            <span className="drag-handle text-xl select-none" title="Dra för att flytta" aria-hidden="true">≡</span>
-            <input
-              id={`chk-${item.id}`}
-              type="checkbox"
-              checked={item.done}
-              onChange={onToggle}
-              className="mt-1 w-5 h-5 accent-stone-700 cursor-pointer"
-            />
-            <div className="flex-1">
-              <div className="relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={localTitle}
-                  onChange={(e)=>setLocalTitle(e.target.value)}
-                  onBlur={commit}
-                  onKeyDown={onKeyDown}
-                  className={`w-full bg-transparent border-b p-1 pr-6 transition ${item.done ? 'text-stone-400 line-through border-stone-200' : 'border-stone-300 focus:border-stone-600'}`}
-                />
-                {localTitle && (
-                  <button className="input-clear" aria-label="rensa fält" onClick={()=>{ setLocalTitle(""); requestAnimationFrame(()=>inputRef.current?.focus()); }}>×</button>
+          <div
+            ref={fgRef}
+            className={`swipe-fg bg-white border rounded-2xl p-4 shadow-sm transition ${isDragging ? 'opacity-60 border-stone-300' : 'border-stone-200'}`}
+            draggable
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onDragEnd={onDragEnd}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+          >
+            {/* drop-indikator ovanför raden */}
+            {isOver && overPosition === "above" && <div className="drop-indicator bg-stone-800/20 mb-2"></div>}
+
+            <div className="flex items-start gap-3 relative">
+              <span className="drag-handle text-xl select-none" title="Dra för att flytta" aria-hidden="true">≡</span>
+
+              <input id={`chk-${item.id}`} type="checkbox" checked={item.done} onChange={onToggle} className="mt-1 w-5 h-5 accent-stone-700 cursor-pointer"/>
+
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={localTitle}
+                    onChange={(e)=>setLocalTitle(e.target.value)}
+                    onBlur={commit}
+                    onKeyDown={onKeyDown}
+                    className={`w-full bg-transparent border-b p-1 pr-6 transition ${item.done ? 'text-stone-400 line-through border-stone-200' : 'border-stone-300 focus:border-stone-600'}`}
+                  />
+                  {localTitle && <button className="input-clear" aria-label="rensa fält" onClick={()=>{ setLocalTitle(""); requestAnimationFrame(()=>inputRef.current?.focus()); }}>×</button>}
+                </div>
+                <div className="text-xs text-stone-400 mt-1">
+                  {new Date(item.created_at).toLocaleDateString('sv-SE', { year:'numeric', month:'short', day:'numeric' })}
+                </div>
+              </div>
+
+              {/* ⋯ meny (kvar som sekundär väg) */}
+              <div className="menu" ref={menuRef}>
+                <button className="icon-btn text-xl" aria-haspopup="menu" aria-expanded={menuOpen?'true':'false'} onClick={()=>setMenuOpen(v=>!v)} title="Alternativ">⋯</button>
+                {menuOpen && (
+                  <div className="menu-panel" role="menu">
+                    <button className="menu-item" role="menuitem" onClick={()=>{ setMenuOpen(false); onDelete(); }}>ta bort</button>
+                  </div>
                 )}
               </div>
-              <div className="text-xs text-stone-400 mt-1">
-                {new Date(item.created_at).toLocaleDateString('sv-SE', { year:'numeric', month:'short', day:'numeric' })}
-              </div>
             </div>
-            <button className="icon-btn text-xl" title="ta bort" onClick={onDelete} aria-label="Ta bort">×</button>
-          </div>
 
-          {/* drop-indikator under raden */}
-          {isOver && overPosition === "below" && (
-            <div className="drop-indicator bg-stone-800/20 mt-2"></div>
-          )}
+            {/* drop-indikator under raden */}
+            {isOver && overPosition === "below" && <div className="drop-indicator bg-stone-800/20 mt-2"></div>}
+          </div>
         </li>
       );
     }
