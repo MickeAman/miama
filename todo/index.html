@@ -37,16 +37,15 @@
     .drag-handle{cursor:grab;user-select:none;color:#9ca3af}
     .drag-handle:active{cursor:grabbing}
     .drop-indicator{height:10px;margin:-6px 0 6px 0;border-radius:6px}
-    /* kort-behållare för swipe */
+    /* swipe-card */
     .swipe-shell{position:relative}
-    .swipe-bg{position:absolute;inset:0;border-radius:16px;background:#fee2e2; /* röd tunn */ color:#991b1b;display:flex;align-items:center;justify-content:flex-end;padding-right:14px}
+    .swipe-bg{position:absolute;inset:0;border-radius:16px;background:#fee2e2;color:#991b1b;display:flex;align-items:center;justify-content:flex-end;padding-right:14px}
     .swipe-fg{position:relative;will-change:transform;touch-action:pan-y}
-    /* popover meny */
+    /* meny + snackbar */
     .menu{position:absolute;top:.25rem;right:.25rem}
     .menu-panel{position:absolute;top:28px;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.08);min-width:160px;z-index:20}
     .menu-item{width:100%;text-align:left;background:#fff;border:0;padding:10px 12px;font-size:14px;color:#374151}
     .menu-item:hover{background:#f3f4f6}
-    /* snackbar */
     .snackbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:50}
     .snackbar button{background:transparent;border:0;color:#93c5fd}
     .snackbar button:hover{color:#bfdbfe}
@@ -94,16 +93,9 @@
       useEffect(() => { localStorage.setItem("todo-keep-awake", String(keepAwake)); }, [keepAwake]);
 
       // keep awake handling
+      useEffect(() => { if (keepAwake) enableKeepAwake(); else disableKeepAwake(); return () => disableKeepAwake(); }, [keepAwake]);
       useEffect(() => {
-        if (keepAwake) enableKeepAwake();
-        else disableKeepAwake();
-        return () => disableKeepAwake();
-      }, [keepAwake]);
-
-      useEffect(() => {
-        const onVis = async () => {
-          if (document.visibilityState === "visible" && keepAwake) await enableKeepAwake(true);
-        };
+        const onVis = async () => { if (document.visibilityState === "visible" && keepAwake) await enableKeepAwake(true); };
         document.addEventListener("visibilitychange", onVis);
         return () => document.removeEventListener("visibilitychange", onVis);
       }, [keepAwake]);
@@ -113,8 +105,7 @@
           if ("wakeLock" in navigator && navigator.wakeLock?.request) {
             const lock = await navigator.wakeLock.request("screen");
             if (wakeLock?.release) { try { await wakeLock.release(); } catch(_){} }
-            setWakeLock(lock);
-            setAwakeStrategy("wakeLock");
+            setWakeLock(lock); setAwakeStrategy("wakeLock");
             lock.addEventListener?.("release", () => {});
             return;
           }
@@ -129,7 +120,7 @@
         setAwakeStrategy("off");
       }
 
-      // derived list
+      // derived
       const visible = useMemo(() => {
         let v = items;
         if (filter === "active") v = v.filter(i => !i.done);
@@ -140,7 +131,6 @@
         }
         return v;
       }, [items, filter, query]);
-
       const remaining = items.filter(i => !i.done).length;
 
       // actions
@@ -196,7 +186,7 @@
       }
       const onDraftKey = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); addItem(); } };
 
-      // plus long-press
+      // ＋ handlers
       function onPlusPointerDown(){
         clearTimeout(holdTimerRef.current);
         holdTimerRef.current = setTimeout(()=>{
@@ -206,7 +196,16 @@
         }, HOLD_MS);
       }
       function cancelHold(){ clearTimeout(holdTimerRef.current); }
-      function onPlusClick(){ focusDraft(); }
+      function onPlusClick(){
+        // TAP = ADD: skapar nytt kort med text i fältet om den finns, annars "ny uppgift"
+        const title = (draft || "").trim() || "ny uppgift";
+        const id = crypto.randomUUID?.() || String(Date.now()+Math.random());
+        setItems(prev => [...prev, { id, title, done:false, created_at: Date.now() }]);
+        if ((draft || "").trim()) setDraft(""); // nollställ bara om vi använde texten
+        setLastAddedId(id);
+        setTimeout(() => setLastAddedId(null), 400);
+        focusDraft();
+      }
 
       // dnd
       function onDragStart(e, id){ setDraggingId(id); e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain", id);}catch{} }
@@ -239,7 +238,7 @@
             <p className="text-stone-500 text-sm">fokusera på nästa sak</p>
           </header>
 
-          {/* keep awake + status */}
+          {/* keep awake */}
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <label className="flex items-center gap-2">
               <input type="checkbox" className="w-5 h-5 accent-stone-700 cursor-pointer"
@@ -356,10 +355,9 @@
       const onKeyDown = (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); } };
       const enterClass = item.id === lastAddedId ? 'enter-anim' : '';
 
-      // swipe handlers (pointer events)
+      // swipe (touch/pointer)
       function onPointerDown(e){
-        // ignorerar musdrag för att inte krocka med HTML5 DnD
-        if (e.pointerType === 'mouse') return;
+        if (e.pointerType === 'mouse') return; // undvik konflikt med dnd
         draggingSwipe.current = true;
         startX.current = e.clientX;
         currentX.current = 0;
@@ -369,11 +367,9 @@
       function onPointerMove(e){
         if (!draggingSwipe.current) return;
         const dx = e.clientX - startX.current;
-        // endast vänster-svep
-        const tx = Math.max(-maxSlide, Math.min(0, dx));
+        const tx = Math.max(-maxSlide, Math.min(0, dx)); // bara vänster
         currentX.current = tx;
         fgRef.current.style.transform = `translateX(${tx}px)`;
-        // visa röd bg gradvis
         shellRef.current.querySelector('.swipe-bg').style.opacity = Math.min(1, Math.abs(tx)/threshold);
       }
       function onPointerUp(e){
@@ -382,11 +378,9 @@
         fgRef.current.releasePointerCapture?.(e.pointerId);
         fgRef.current.style.transition = 'transform 180ms ease';
         if (currentX.current <= -threshold){
-          // full swipe → ta bort
           fgRef.current.style.transform = `translateX(-${maxSlide}px)`;
           setTimeout(()=>onDelete(), 140);
         } else {
-          // backa
           fgRef.current.style.transform = 'translateX(0)';
           shellRef.current.querySelector('.swipe-bg').style.opacity = 0;
         }
@@ -394,11 +388,7 @@
       function onPointerCancel(e){ onPointerUp(e); }
 
       return (
-        <li
-          className={`swipe-shell ${enterClass}`}
-          ref={shellRef}
-          // HTML5 DnD: endast för mus – touch sköter swipe; låt ändå events bubbla för drag-handle
-        >
+        <li className={`swipe-shell ${enterClass}`} ref={shellRef}>
           <div className="swipe-bg" style={{opacity:0}} aria-hidden="true">ta bort</div>
 
           <div
@@ -441,7 +431,7 @@
                 </div>
               </div>
 
-              {/* ⋯ meny (kvar som sekundär väg) */}
+              {/* ⋯ meny kvar */}
               <div className="menu" ref={menuRef}>
                 <button className="icon-btn text-xl" aria-haspopup="menu" aria-expanded={menuOpen?'true':'false'} onClick={()=>setMenuOpen(v=>!v)} title="Alternativ">⋯</button>
                 {menuOpen && (
