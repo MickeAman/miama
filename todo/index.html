@@ -49,6 +49,11 @@
     .snackbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:50}
     .snackbar button{background:transparent;border:0;color:#93c5fd}
     .snackbar button:hover{color:#bfdbfe}
+    /* tabs */
+    .tabs-scroll{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.25rem}
+    .tab{flex:0 0 auto;max-width:60vw;padding:.4rem .7rem;border-radius:9999px;border:1px solid #e5e7eb;background:#ffffff;color:#374151}
+    .tab.active{background:#111827;color:#ffffff;border-color:#111827}
+    .tab input{background:transparent;border:0;border-bottom:1px solid #cbd5e1}
   </style>
 </head>
 <body>
@@ -58,39 +63,70 @@
     const { useState, useEffect, useRef, useMemo } = React;
     const noSleep = new window.NoSleep();
 
+    // helpers
+    const uid = () => crypto.randomUUID?.() || String(Date.now()+Math.random());
+
     function App() {
-      const [items, setItems] = useState(() => {
-        try { return JSON.parse(localStorage.getItem("todo-items-v1")) || []; }
-        catch { return []; }
+      // tabs + migration from old single-list
+      const [tabs, setTabs] = useState(() => {
+        try {
+          const stored = JSON.parse(localStorage.getItem("todo-tabs-v1"));
+          if (stored && Array.isArray(stored) && stored.length) return stored;
+        } catch {}
+        // migrate legacy items if present
+        let legacy = [];
+        try { legacy = JSON.parse(localStorage.getItem("todo-items-v1")) || []; } catch {}
+        const first = { id: uid(), name: "min lista", items: legacy };
+        return [first];
       });
-      const [draft, setDraft] = useState("");
-      const [query, setQuery] = useState("");
-      const [filter, setFilter] = useState("all");
+      const [activeTabId, setActiveTabId] = useState(() => {
+        const s = localStorage.getItem("todo-active-tab");
+        return s || (Array.isArray(tabs) && tabs[0]?.id) || null;
+      });
 
       // keep awake
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("todo-keep-awake") === "true");
       const [wakeLock, setWakeLock] = useState(null);
       const [awakeStrategy, setAwakeStrategy] = useState("off");
 
+      // draft/search/filter
+      const [draft, setDraft] = useState("");
+      const [query, setQuery] = useState("");
+      const [filter, setFilter] = useState("all");
+
       // dnd
       const [draggingId, setDraggingId] = useState(null);
       const [overId, setOverId] = useState(null);
       const [overPosition, setOverPosition] = useState("above");
 
-      // input/fokus/plus
+      // ui focus etc
       const draftRef = useRef(null);
       const [inputGlow, setInputGlow] = useState(false);
       const [lastAddedId, setLastAddedId] = useState(null);
       const holdTimerRef = useRef(null);
       const HOLD_MS = 500;
 
+      // rename tab
+      const [renamingTabId, setRenamingTabId] = useState(null);
+      const renameRef = useRef(null);
+
       // undo
       const [undo, setUndo] = useState(null);
       const undoTimer = useRef(null);
 
       // persist
-      useEffect(() => { localStorage.setItem("todo-items-v1", JSON.stringify(items)); }, [items]);
+      useEffect(() => {
+        localStorage.setItem("todo-tabs-v1", JSON.stringify(tabs));
+      }, [tabs]);
+      useEffect(() => {
+        if (activeTabId) localStorage.setItem("todo-active-tab", activeTabId);
+      }, [activeTabId]);
       useEffect(() => { localStorage.setItem("todo-keep-awake", String(keepAwake)); }, [keepAwake]);
+
+      // cleanup legacy key if we migrated
+      useEffect(() => {
+        try { localStorage.removeItem("todo-items-v1"); } catch {}
+      }, []);
 
       // keep awake handling
       useEffect(() => { if (keepAwake) enableKeepAwake(); else disableKeepAwake(); return () => disableKeepAwake(); }, [keepAwake]);
@@ -120,8 +156,12 @@
         setAwakeStrategy("off");
       }
 
-      // derived
+      // helpers to get/set active tab
+      const activeTab = useMemo(() => tabs.find(t => t.id === activeTabId) || tabs[0], [tabs, activeTabId]);
+
+      // derived list for active tab
       const visible = useMemo(() => {
+        const items = activeTab?.items || [];
         let v = items;
         if (filter === "active") v = v.filter(i => !i.done);
         if (filter === "done")   v = v.filter(i =>  i.done);
@@ -130,54 +170,66 @@
           v = v.filter(i => i.title.toLowerCase().includes(q));
         }
         return v;
-      }, [items, filter, query]);
-      const remaining = items.filter(i => !i.done).length;
+      }, [activeTab, filter, query]);
 
-      // actions
+      const remaining = (activeTab?.items || []).filter(i => !i.done).length;
+
+      // actions (operate on active tab only)
+      const updateActiveItems = (updater) => {
+        setTabs(prev => prev.map(tab => {
+          if (tab.id !== activeTab.id) return tab;
+          const newItems = updater(tab.items || []);
+          return { ...tab, items: newItems };
+        }));
+      };
+
       const addItem = () => {
         const title = draft.trim();
         if (!title) { focusDraft(true); return; }
-        const id = crypto.randomUUID?.() || String(Date.now()+Math.random());
-        setItems(prev => [...prev, { id, title, done:false, created_at: Date.now() }]);
+        const id = uid();
+        updateActiveItems(items => [...items, { id, title, done:false, created_at: Date.now() }]);
         setDraft("");
         setLastAddedId(id);
         setTimeout(() => setLastAddedId(null), 400);
         focusDraft();
       };
-      const toggleItem = (id) => setItems(prev => prev.map(i => i.id === id ? {...i, done: !i.done} : i));
-      const updateTitle = (id, title) => setItems(prev => prev.map(i => i.id === id ? {...i, title} : i));
+
+      const toggleItem = (id) => updateActiveItems(items => items.map(i => i.id === id ? {...i, done: !i.done} : i));
+      const updateTitle = (id, title) => updateActiveItems(items => items.map(i => i.id === id ? {...i, title} : i));
 
       const deleteItem = (id) => {
-        setItems(prev => {
-          const idx = prev.findIndex(i => i.id === id);
-          if (idx === -1) return prev;
-          const removed = prev[idx];
-          const next = prev.slice(0, idx).concat(prev.slice(idx+1));
-          showUndo({ item: removed, index: idx });
+        updateActiveItems(items => {
+          const idx = items.findIndex(i => i.id === id);
+          if (idx === -1) return items;
+          const removed = items[idx];
+          const next = items.slice(0, idx).concat(items.slice(idx+1));
+          showUndo({ item: removed, index: idx, tabId: activeTab.id });
           return next;
         });
       };
+
       const clearDone = () => {
-        const snapshot = items;
-        const next = items.filter(i => !i.done);
-        if (snapshot.length !== next.length) showUndo({ item:null, index:null, batch:snapshot.filter(i=>i.done) });
-        setItems(next);
+        const snapshot = activeTab?.items || [];
+        const next = snapshot.filter(i => !i.done);
+        if (snapshot.length !== next.length) showUndo({ item:null, index:null, batch:snapshot.filter(i=>i.done), tabId: activeTab.id });
+        updateActiveItems(() => next);
       };
 
       function showUndo(payload){ clearTimeout(undoTimer.current); setUndo(payload); undoTimer.current=setTimeout(()=>setUndo(null),6000); }
       function performUndo(){
         clearTimeout(undoTimer.current);
         if (!undo) return;
-        if (undo.batch){
-          setItems(prev => prev.concat(undo.batch));
-        } else {
-          setItems(prev => {
-            const base = prev.slice();
+        setTabs(prev => prev.map(tab => {
+          if (tab.id !== undo.tabId) return tab;
+          if (undo.batch) {
+            return { ...tab, items: tab.items.concat(undo.batch) };
+          } else {
+            const base = tab.items.slice();
             const idx = Math.min(undo.index ?? base.length, base.length);
             base.splice(idx, 0, undo.item);
-            return base;
-          });
-        }
+            return { ...tab, items: base };
+          }
+        }));
         setUndo(null);
       }
 
@@ -186,7 +238,7 @@
       }
       const onDraftKey = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); addItem(); } };
 
-      // ＋ handlers
+      // ＋ handlers (tap = add new card; long-press = clear input)
       function onPlusPointerDown(){
         clearTimeout(holdTimerRef.current);
         holdTimerRef.current = setTimeout(()=>{
@@ -197,17 +249,16 @@
       }
       function cancelHold(){ clearTimeout(holdTimerRef.current); }
       function onPlusClick(){
-        // TAP = ADD: skapar nytt kort med text i fältet om den finns, annars "ny uppgift"
         const title = (draft || "").trim() || "ny uppgift";
-        const id = crypto.randomUUID?.() || String(Date.now()+Math.random());
-        setItems(prev => [...prev, { id, title, done:false, created_at: Date.now() }]);
-        if ((draft || "").trim()) setDraft(""); // nollställ bara om vi använde texten
+        const id = uid();
+        updateActiveItems(items => [...items, { id, title, done:false, created_at: Date.now() }]);
+        if ((draft || "").trim()) setDraft("");
         setLastAddedId(id);
         setTimeout(() => setLastAddedId(null), 400);
         focusDraft();
       }
 
-      // dnd
+      // dnd (on active list)
       function onDragStart(e, id){ setDraggingId(id); e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain", id);}catch{} }
       function onDragOverRow(e, id){ e.preventDefault(); setOverId(id); const r=e.currentTarget.getBoundingClientRect(); const mid=r.top+r.height/2; setOverPosition(e.clientY<mid?"above":"below"); e.dataTransfer.dropEffect="move"; }
       function onDragLeaveRow(){ setOverId(null); }
@@ -215,12 +266,11 @@
       function onDragEnd(){ cleanupDnD(); }
       function cleanupDnD(){ setDraggingId(null); setOverId(null); setOverPosition("above"); }
       function reorder(srcId, targetId, pos){
-        if(srcId===targetId) return;
-        setItems(prev=>{
-          const srcIdx=prev.findIndex(i=>i.id===srcId);
-          const targetIdx=prev.findIndex(i=>i.id===targetId);
-          if(srcIdx===-1||targetIdx===-1) return prev;
-          const arr=prev.slice();
+        updateActiveItems(items => {
+          const srcIdx=items.findIndex(i=>i.id===srcId);
+          const targetIdx=items.findIndex(i=>i.id===targetId);
+          if(srcIdx===-1||targetIdx===-1) return items;
+          const arr=items.slice();
           const [moved]=arr.splice(srcIdx,1);
           let insertIdx=targetIdx;
           if(pos==="below"&&srcIdx<targetIdx) insertIdx=targetIdx;
@@ -231,12 +281,66 @@
         });
       }
 
+      // tabs actions
+      const addTab = () => {
+        const t = { id: uid(), name: "ny lista", items: [] };
+        setTabs(prev => [...prev, t]);
+        setActiveTabId(t.id);
+        setRenamingTabId(t.id);
+        setTimeout(()=>renameRef.current?.focus(), 0);
+      };
+      const renameTab = (id, name) => {
+        setTabs(prev => prev.map(t => t.id===id ? {...t, name: (name||"").trim() || t.name} : t));
+      };
+      const deleteTab = (id) => {
+        if (tabs.length <= 1) return; // minst en tab
+        setTabs(prev => prev.filter(t => t.id !== id));
+        if (activeTabId === id) {
+          const next = tabs.find(t => t.id !== id);
+          setActiveTabId(next?.id || null);
+        }
+      };
+
       return (
         <main className="max-w-md w-full space-y-6">
           <header className="text-center">
             <h1 className="text-3xl font-semibold mb-2">att göra</h1>
-            <p className="text-stone-500 text-sm">fokusera på nästa sak</p>
+            <p className="text-stone-500 text-sm">flera listor, samma lugn</p>
           </header>
+
+          {/* tabs bar */}
+          <div className="bg-white border border-stone-200 rounded-2xl p-3 shadow-sm">
+            <div className="tabs-scroll">
+              {tabs.map(tab => {
+                const active = tab.id === activeTab.id;
+                return (
+                  <div key={tab.id} className={`tab ${active?'active':''}`} onClick={()=>setActiveTabId(tab.id)}>
+                    {renamingTabId===tab.id ? (
+                      <input
+                        ref={renameRef}
+                        defaultValue={tab.name}
+                        onBlur={(e)=>{ renameTab(tab.id, e.target.value); setRenamingTabId(null); }}
+                        onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); e.currentTarget.blur(); } }}
+                        className="text-sm px-1"
+                        aria-label="byt namn på lista"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="truncate">{tab.name}</span>
+                        {active && (
+                          <button title="byt namn" className="icon-btn text-sm" onClick={(e)=>{ e.stopPropagation(); setRenamingTabId(tab.id); setTimeout(()=>renameRef.current?.focus(),0); }}>✎</button>
+                        )}
+                        {tabs.length>1 && active && (
+                          <button title="ta bort lista" className="icon-btn text-sm" onClick={(e)=>{ e.stopPropagation(); deleteTab(tab.id); }}>×</button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <button className="tab" title="ny lista" onClick={addTab}>＋ ny</button>
+            </div>
+          </div>
 
           {/* keep awake */}
           <div className="flex items-center justify-center gap-3 flex-wrap">
@@ -259,7 +363,7 @@
                 value={draft}
                 onChange={(e)=>setDraft(e.target.value)}
                 onKeyDown={onDraftKey}
-                placeholder="vad är nästa?"
+                placeholder={`vad är nästa? (${activeTab?.name||'lista'})`}
                 className={`w-full bg-transparent border-b border-stone-300 focus:border-stone-600 transition p-2 text-lg ${inputGlow?'glow':''}`}
               />
               {draft && <button className="input-clear" aria-label="rensa" onClick={()=>setDraft("")}>×</button>}
@@ -328,6 +432,7 @@
       onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
       onToggle, onDelete, onCommit
     }) {
+      const { useState, useEffect, useRef } = React;
       const [localTitle, setLocalTitle] = useState(item.title);
       const [menuOpen, setMenuOpen] = useState(false);
       const inputRef = useRef(null);
