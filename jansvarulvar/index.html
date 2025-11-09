@@ -57,6 +57,8 @@
   .btn.ghost{background:transparent}
   .list{display:flex;flex-direction:column;gap:8px}
   .li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px;border:1px dashed var(--border);border-radius:10px;background:#0f151d}
+  .li[draggable="true"]{cursor:grab}
+  .li.dragging{opacity:.5}
   .portrait{display:flex;gap:10px;align-items:center}
   .avatar{width:34px;height:34px;border-radius:8px;background:linear-gradient(180deg,#1a2130,#0d111a);border:1px solid var(--border);position:relative;overflow:hidden}
   .avatar::after{content:"";position:absolute;inset:0;background:radial-gradient(24px 18px at 65% 35%, rgba(108,192,255,.18), transparent 60%)}
@@ -75,9 +77,10 @@
   .steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .step{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#0e1722;color:var(--muted);font-size:12px}
   .step.active{color:#d7e6ff;border-color:#2a3c57;box-shadow:0 0 0 2px rgba(108,192,255,.15) inset}
-  dialog{border:1px solid var(--border);border-radius:12px;padding:14px;background:#0e141d;color:var(--text);box-shadow:var(--soft);max-width:460px}
+  dialog{border:1px solid var(--border);border-radius:12px;padding:14px;background:#0e141d;color:#fff;box-shadow:var(--soft);max-width:520px}
   dialog::backdrop{background:rgba(2,6,12,.7)}
   .hint{color:var(--muted);font-size:13px}
+  .icon-btn{border:1px solid var(--border);background:#0e141d;border-radius:8px;padding:8px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -102,9 +105,9 @@
 
 <main class="wrap grid two" id="app_root">
   <!-- vänster: ritual flow -->
-  <section class="card spot" id="left_flow">
+  <section class="card spot">
     <h2>ritual flow</h2>
-    <p class="hint">börja i gm-panelen till höger: lägg spelare → dela ut roller.</p>
+    <p class="hint">börja i gm-panelen: lägg spelare och dela ut roller.</p>
     <div class="divider"></div>
 
     <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
@@ -133,6 +136,7 @@
       <div class="row" style="margin-top:10px">
         <button class="btn good" id="scene_next" data-matomo-name="scene-next" data-matomo-event="click" data-matomo-category="scene" data-matomo-action="advance">nästa scen</button>
         <button class="btn warn" id="scene_repeat">repetera</button>
+        <button class="btn" id="scene_edit_current">editera</button>
       </div>
     </section>
 
@@ -172,7 +176,7 @@
         <label class="btn ghost" for="import_file" style="cursor:pointer">import json</label>
         <input id="import_file" type="file" accept="application/json" style="display:none" />
       </div>
-      <p class="hint" style="margin-top:6px">demo skapar 8 spelare + balanserade roller + ställer scen 1.</p>
+      <p class="hint" style="margin-top:6px">demo skapar 8 spelare, balanserade roller och ställer scen 1.</p>
     </section>
 
     <section class="card">
@@ -183,7 +187,7 @@
         <button class="btn primary" id="player_add" data-matomo-name="player-add" data-matomo-event="click" data-matomo-category="players">lägg till</button>
       </div>
       <div class="row" style="margin-top:8px">
-        <input id="player_bulk" placeholder="snabbadd: namn kommaseparerade (t.ex. alva, johan, my)" />
+        <input id="player_bulk" placeholder="snabbadd: namn kommaseparerade (alva, johan, my)" />
         <button class="btn" id="player_bulk_add">lägg flera</button>
       </div>
     </section>
@@ -198,27 +202,27 @@
       <div class="divider"></div>
       <h3>skapa egen roll</h3>
       <div class="row">
-        <input id="role_name" placeholder="rollnamn (t.ex. Häxa)" />
+        <input id="role_name" placeholder="rollnamn" />
         <select id="role_team" style="max-width:160px">
           <option value="by">by</option>
           <option value="ulv">ulv</option>
         </select>
       </div>
-      <textarea id="role_secret" placeholder="hemlig kraft / instruktion (visas bara för gm)"></textarea>
+      <textarea id="role_secret" placeholder="hemlig kraft / instruktion"></textarea>
       <div class="row" style="margin-top:8px">
         <button class="btn primary" id="role_add">lägg till roll</button>
         <button class="btn bad" id="role_remove_last">ta bort senaste egna roll</button>
       </div>
-      <p class="hint">grundrollerna (varulv, sierska, jägare, bybo) kan inte tas bort, men du kan lägga till egna.</p>
+      <p class="hint">grundrollerna kan inte tas bort.</p>
     </section>
 
     <section class="card">
       <h3>scener</h3>
-      <div class="list" id="scenes_list"></div>
-      <div class="row" style="margin-top:8px">
-        <input id="scene_custom" placeholder="snabb scen — rubrik :: text" />
-        <button class="btn" id="scene_add_quick">lägg till</button>
+      <div class="row" style="margin-bottom:8px;justify-content:space-between">
+        <div class="hint">klicka scen för att editera, dra för att ändra ordning</div>
+        <button class="btn primary" id="scene_new">ny scen</button>
       </div>
+      <div class="list" id="scenes_list" aria-live="polite"></div>
     </section>
 
     <section class="card">
@@ -248,6 +252,25 @@
   </div>
 </dialog>
 
+<!-- scen-editor -->
+<dialog id="scene_modal">
+  <h3 id="scene_modal_title">ny scen</h3>
+  <label class="hint">titel</label>
+  <input id="scene_form_title" placeholder="titel" />
+  <label class="hint" style="margin-top:8px;display:block">text</label>
+  <textarea id="scene_form_text" placeholder="scenens text"></textarea>
+  <div class="row" style="margin-top:10px;justify-content:space-between">
+    <div class="row">
+      <button class="btn" id="scene_duplicate" title="duplicera">duplicera</button>
+      <button class="btn bad" id="scene_delete" title="ta bort">ta bort</button>
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="scene_cancel">avbryt</button>
+      <button class="btn good" id="scene_save">spara</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- nattsekvens -->
 <div id="overlay" aria-hidden="true">
   <div class="overlay-card">
@@ -269,7 +292,7 @@
 </footer>
 
 <script>
-/* ========= default data ========= */
+/* ========= core data ========= */
 const coreRoles = [
   { id:"varulv", name:"Varulv", team:"ulv", secret:"Du jagar om natten. Peka diskret på ett offer när GM ber." },
   { id:"sierska", name:"Sierska", team:"by", secret:"Varje natt kan du undersöka en spelare (ulv eller inte)." },
@@ -340,22 +363,68 @@ function renderAll(){
   const rchips=$("#roles_chips"); rchips.innerHTML="";
   state.data.roles.forEach(r=>rchips.appendChild(el("span",{class:"tag rolechip "+roleClassName(r),title:r.secret,text:r.name})));
 
-  // scenes list
-  const sl=$("#scenes_list"); sl.innerHTML="";
-  state.data.story.scenes.forEach((s,idx)=>{
-    sl.appendChild(el("div",{class:"li"},[
-      el("div",{},[el("div",{text:`${idx+1}. ${s.title}`}), el("div",{class:"hint",text:s.text})]),
-      el("div",{},[el("button",{class:"btn",text:"gå hit",onclick:()=>{state.sceneIndex=idx;save();renderAll();}})])
-    ]))
-  });
+  // scenes list (draggable)
+  renderScenesList();
 
   // votes
   renderVotes();
 
-  // enable/disable buttons based on state
+  // buttons
   $("#assign_roles").disabled = state.players.length===0;
 }
 
+function renderScenesList(){
+  const sl=$("#scenes_list"); sl.innerHTML="";
+  state.data.story.scenes.forEach((s,idx)=>{
+    const row = el("div",{class:"li", draggable:"true", "data-idx":String(idx)},[
+      el("div",{class:"row", style:"gap:8px;align-items:center"},[
+        el("span",{class:"tag", text:String(idx+1)}),
+        el("div",{},[
+          el("div",{text:s.title}),
+          el("div",{class:"hint", text:s.text})
+        ])
+      ]),
+      el("div",{},[
+        el("button",{class:"btn", text:"editera", onclick:()=>openSceneEditor(idx)}),
+        el("button",{class:"btn ghost", text:"gå hit", onclick:()=>{state.sceneIndex=idx; save(); renderAll();}})
+      ])
+    ]);
+    attachDragHandlers(row);
+    sl.appendChild(row);
+  });
+}
+
+/* ========= drag & drop for scenes ========= */
+let dragIdx=null;
+function attachDragHandlers(row){
+  row.addEventListener("dragstart",e=>{
+    dragIdx = Number(row.getAttribute("data-idx"));
+    row.classList.add("dragging");
+    e.dataTransfer.effectAllowed="move";
+  });
+  row.addEventListener("dragend",()=>{
+    row.classList.remove("dragging");
+    dragIdx=null;
+  });
+  row.addEventListener("dragover",e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect="move";
+  });
+  row.addEventListener("drop",()=>{
+    const toIdx = Number(row.getAttribute("data-idx"));
+    if(dragIdx===null || toIdx===dragIdx) return;
+    const arr = state.data.story.scenes;
+    const [moved] = arr.splice(dragIdx,1);
+    arr.splice(toIdx,0,moved);
+    // justera current scene index om behövs
+    if(state.sceneIndex===dragIdx) state.sceneIndex = toIdx;
+    else if(dragIdx < state.sceneIndex && toIdx >= state.sceneIndex) state.sceneIndex--;
+    else if(dragIdx > state.sceneIndex && toIdx <= state.sceneIndex) state.sceneIndex++;
+    save(); renderAll(); toast("scenordning uppdaterad");
+  });
+}
+
+/* ========= votes ========= */
 function renderVotes(){
   const box=$("#vote_tokens"); box.innerHTML="";
   const items=Object.entries(state.votes).sort((a,b)=>b[1]-a[1]); const max=items[0]?.[1]??0;
@@ -369,14 +438,7 @@ function renderVotes(){
   });
 }
 
-function revealSecret(p){
-  const role=state.data.roles.find(r=>r.id===p.roleId);
-  const txt=role?`roll: ${role.name}\nlag: ${role.team}\n\nhemligt:\n${role.secret}`:"ingen roll utdelad än.";
-  alert(`${p.name}\n\n${txt}`);
-}
-
-/* ========= actions ========= */
-// players
+/* ========= players ========= */
 function addPlayer(){
   const name=$("#player_name").value.trim();
   if(!name){ toast("ange namn"); return; }
@@ -394,24 +456,20 @@ function addPlayersBulk(){
 function removePlayer(i){ state.players.splice(i,1); save(); renderAll(); }
 function toggleAlive(i){ state.players[i].alive = !(state.players[i].alive===false); save(); renderAll(); }
 
-// roles
+/* ========= roles ========= */
 function assignRoles(){
   if(state.players.length===0){ toast("lägg spelare först"); return; }
-  const haveVarulv=state.data.roles.some(r=>r.id==="varulv");
-  const haveSeer  =state.data.roles.some(r=>r.id==="sierska");
-  const haveHunt  =state.data.roles.some(r=>r.id==="jägare");
   const pool=[];
   const wolves=Math.max(1,Math.floor(state.players.length/5));
-  if(haveVarulv) for(let i=0;i<wolves;i++) pool.push("varulv");
-  if(haveSeer) pool.push("sierska");
-  if(haveHunt) pool.push("jägare");
+  for(let i=0;i<wolves;i++) pool.push("varulv");
+  if(state.data.roles.some(r=>r.id==="sierska")) pool.push("sierska");
+  if(state.data.roles.some(r=>r.id==="jägare")) pool.push("jägare");
   while(pool.length<state.players.length) pool.push("bybo");
   shuffle(pool);
   state.players = state.players.map((p,i)=>({...p,roleId: pool[i]}));
   save(); renderAll(); toast("roller utdelade");
 }
 function clearRoles(){ state.players = state.players.map(p=>({...p,roleId:undefined})); save(); renderAll(); toast("roller rensade"); }
-
 function addCustomRole(){
   const name=$("#role_name").value.trim(); const team=$("#role_team").value;
   const secret=$("#role_secret").value.trim();
@@ -430,17 +488,58 @@ function removeLastCustomRole(){
   toast("inga egna roller att ta bort");
 }
 
-// scenes
-function nextScene(){ state.sceneIndex=Math.min(state.sceneIndex+1,state.data.story.scenes.length-1); save(); renderAll(); }
-function repeatScene(){ renderAll(); toast("scen repeterad"); }
-function addCustomScene(){
-  const raw=$("#scene_custom").value.trim(); if(!raw){ toast("ange rubrik :: text"); return; }
-  const [title,...rest]=raw.split("::"); const text=(rest.join("::")||"—").trim();
-  state.data.story.scenes.push({title:title.trim(),text}); $("#scene_custom").value="";
-  save(); renderAll(); toast("scen tillagd");
+/* ========= scenes: editor modal ========= */
+let sceneEditingIndex = null; // null = new
+function openSceneEditor(idx=null){
+  sceneEditingIndex = idx;
+  const isNew = idx===null || idx===undefined;
+  const dlg=$("#scene_modal");
+  $("#scene_modal_title").textContent = isNew ? "ny scen" : `editera scen ${idx+1}`;
+  if(isNew){
+    $("#scene_form_title").value="";
+    $("#scene_form_text").value="";
+    $("#scene_delete").disabled=true;
+    $("#scene_duplicate").disabled=true;
+  }else{
+    const s = state.data.story.scenes[idx];
+    $("#scene_form_title").value = s.title;
+    $("#scene_form_text").value  = s.text;
+    $("#scene_delete").disabled=false;
+    $("#scene_duplicate").disabled=false;
+  }
+  dlg.showModal();
+}
+function saveSceneFromModal(){
+  const title=$("#scene_form_title").value.trim();
+  const text =$("#scene_form_text").value.trim();
+  if(!title){ toast("titel saknas"); return; }
+  if(sceneEditingIndex===null || sceneEditingIndex===undefined){
+    state.data.story.scenes.push({title, text});
+    state.sceneIndex = state.data.story.scenes.length-1;
+    toast("scen skapad");
+  }else{
+    state.data.story.scenes[sceneEditingIndex] = {title, text};
+    toast("scen sparad");
+  }
+  save(); renderAll(); $("#scene_modal").close();
+}
+function deleteSceneFromModal(){
+  if(sceneEditingIndex===null || sceneEditingIndex===undefined) return;
+  if(!confirm("ta bort denna scen?")) return;
+  state.data.story.scenes.splice(sceneEditingIndex,1);
+  if(state.sceneIndex>=state.data.story.scenes.length) state.sceneIndex = Math.max(0, state.data.story.scenes.length-1);
+  save(); renderAll(); $("#scene_modal").close(); toast("scen borttagen");
+}
+function duplicateSceneFromModal(){
+  if(sceneEditingIndex===null || sceneEditingIndex===undefined) return;
+  const s = state.data.story.scenes[sceneEditingIndex];
+  const copy = { title: s.title+" (kopia)", text: s.text };
+  state.data.story.scenes.splice(sceneEditingIndex+1, 0, copy);
+  state.sceneIndex = sceneEditingIndex+1;
+  save(); renderAll(); $("#scene_modal").close(); toast("scen duplicerad");
 }
 
-// votes
+/* ========= votes ========= */
 function vote(name){ state.votes[name]=(state.votes[name]||0)+1; save(); renderVotes(); }
 function unvote(name){ if(!state.votes[name])return; state.votes[name]=Math.max(0,state.votes[name]-1); if(state.votes[name]===0) delete state.votes[name]; save(); renderVotes(); }
 function removeVote(name){ delete state.votes[name]; save(); renderVotes(); }
@@ -467,7 +566,7 @@ function timerStart(){ if(state.timerHandle) return; state.timerHandle=setInterv
 function timerStop(){ clearInterval(state.timerHandle); state.timerHandle=null }
 function timerReset(){ state.timer=0; $("#timer_tag").textContent="timer: 00:00" }
 
-/* ========= gm toggle & safety ========= */
+/* ========= gm toggle & settings ========= */
 let gmOpen=false;
 function openGM(){ gmOpen=true; $("#gm_panel").style.display="block"; $("#gm_badge").style.display="inline-flex" }
 function closeGM(){ gmOpen=false; $("#gm_panel").style.display="none"; $("#gm_badge").style.display="none" }
@@ -479,7 +578,6 @@ function toggleGM(){
 /* ========= seed / import / export ========= */
 function seedDemo(){
   state.players = ["Alva","Johan","My","Leo","Sara","Mika","Noah","Ines"].map(n=>({name:n,alive:true}));
-  // balansera roller
   const wolves=Math.max(1,Math.floor(state.players.length/5)); const pool=[];
   for(let i=0;i<wolves;i++) pool.push("varulv"); pool.push("sierska"); pool.push("jägare");
   while(pool.length<state.players.length) pool.push("bybo");
@@ -507,7 +605,7 @@ function importJson(file){
 const steps=[
   {id:"blind", title:"alla blundar", body:"Alla blundar. Tystnad faller över byn."},
   {id:"wolves", title:"varulvarna vaknar", body:"Varulvarna öppnar ögonen och pekar ut ett offer. Bekräfta när du sett."},
-  {id:"seer", title:"sierskan vaknar", body:"Sierskan pekar på en spelare. Viskande: “ulv” eller “inte ulv”."},
+  {id:"seer", title:"sierskan vaknar", body:"Sierskan pekar på en spelare. Viskande: ulv eller inte ulv."},
   {id:"others", title:"andra effekter", body:"Andra roller (om du lagt till dem) aktiveras."},
   {id:"dawn", title:"gryning", body:"Avslöja nattens konsekvenser. Byt fas till dag."}
 ];
@@ -523,7 +621,7 @@ function renderWizard(){
 }
 
 /* ========= utils ========= */
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j]]} return a }
 function slugify(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") }
 
 /* ========= bind ========= */
@@ -538,7 +636,14 @@ function bind(){
   // scenes
   $("#scene_next").addEventListener("click",nextScene);
   $("#scene_repeat").addEventListener("click",repeatScene);
-  $("#scene_add_quick").addEventListener("click",addCustomScene);
+  $("#scene_edit_current").addEventListener("click",()=>openSceneEditor(state.sceneIndex));
+  $("#scene_new").addEventListener("click",()=>openSceneEditor(null));
+
+  // scene modal buttons
+  $("#scene_save").addEventListener("click",saveSceneFromModal);
+  $("#scene_delete").addEventListener("click",deleteSceneFromModal);
+  $("#scene_duplicate").addEventListener("click",duplicateSceneFromModal);
+  $("#scene_cancel").addEventListener("click",()=>$("#scene_modal").close());
 
   // votes
   $("#vote_add_from_players").addEventListener("click",openCandidatePicker);
@@ -588,7 +693,6 @@ function bind(){
 load();
 if(state.sceneIndex>=state.data.story.scenes.length) state.sceneIndex=0;
 renderAll(); bind();
-// öppna gm-läge direkt första gången för att undvika “kan ej lägga till”
 if(!localStorage.getItem("janpire_booted")){ openGM(); localStorage.setItem("janpire_booted","1"); }
 window.__janpire={state,save,renderAll};
 </script>
