@@ -3,69 +3,501 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>varulvsspel – spelledarapp</title>
+  <title>varulv: spelledarapp</title>
+  <meta name="theme-color" content="#0b0d10" />
   <style>
     :root{
-      --bg:#0f1115; --bg2:#151821; --panel:#1b2030; --text:#e6e7eb; --muted:#9aa3b2;
-      --accent:#7aa2ff; --accent-2:#18c29c; --danger:#ff6b6b; --warn:#f0ad4e; --ok:#52d273; 
-      --border:#273047; --shadow:0 6px 20px rgba(0,0,0,.35);
-      --radius:12px; --radius-sm:8px; --gap:12px; --pad:14px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --bg:#0b0d10; --panel:#12151a; --muted:#7a8599; --text:#e6ebff;
+      --accent:#6cc0ff; --good:#58e1a3; --warn:#f7b955; --bad:#ff6b6b;
+      --border:#1e2430; --chip:#1a1f29; --chip2:#0f131a; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --focus:0 0 0 3px rgba(108,192,255,.35);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;background:radial-gradient(1200px 800px at 70% -10%, #1a2233 0%, #0f1115 55%) fixed;
-      color:var(--text); font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      margin:0; background:radial-gradient(1200px 800px at 20% -10%,#111722 0%,#0b0d10 55%,#0b0d10 100%);
+      color:var(--text); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+      letter-spacing:.2px;
     }
+    a{color:var(--accent); text-decoration:none}
     header{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:12px 16px; border-bottom:1px solid var(--border); backdrop-filter:saturate(120%) blur(8px);
-      position:sticky; top:0; background:rgba(10,12,16,.75); z-index:10;
+      position:sticky; top:0; z-index:5; backdrop-filter:saturate(120%) blur(6px);
+      background:linear-gradient(180deg, rgba(8,10,13,.9), rgba(8,10,13,.65) 85%, transparent);
+      border-bottom:1px solid var(--border);
     }
-    header h1{font-size:16px; margin:0; font-weight:600; letter-spacing:.2px}
-    .badge{padding:4px 8px; border-radius:999px; background:var(--panel); border:1px solid var(--border); color:var(--muted)}
-    .container{display:grid; grid-template-columns:320px 1fr; gap:var(--gap); padding:var(--gap)}
-    @media (max-width: 980px){ .container{grid-template-columns:1fr} }
-
-    /* sidebar */
-    aside{background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
-    .section{padding:var(--pad); border-bottom:1px dashed var(--border)}
-    .section:last-child{border-bottom:0}
-    .section h2{margin:0 0 8px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px}
-
-    .scene_list{display:flex; flex-direction:column; gap:8px; max-height:260px; overflow:auto; padding-right:4px}
-    .scene{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px}
-    .scene button{margin-left:auto}
-
-    /* main */
-    main{display:grid; gap:var(--gap); align-content:start}
-    .card{background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)}
-    .card .head{display:flex; align-items:center; justify-content:space-between; padding:var(--pad); border-bottom:1px dashed var(--border)}
-    .card .body{padding:var(--pad)}
-    .row{display:flex; gap:var(--gap); flex-wrap:wrap}
-    .row > *{flex:1 1 260px}
-
-    /* players */
-    .table{width:100%; border-collapse:collapse; font-size:14px}
-    .table th,.table td{border-bottom:1px solid var(--border); padding:10px 8px; text-align:left}
-    .pill{padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); background:var(--panel)}
-    .role-varulv{background:linear-gradient(90deg,#2b2f45,#4a2a6a)}
-    .role-bybo{background:linear-gradient(90deg,#2b2f45,#1f4d3b)}
-    .role-jagare{background:linear-gradient(90deg,#2b2f45,#473f1c)}
-    .alive{color:var(--ok)} .down{color:var(--warn)} .dead{color:var(--danger)}
-
-    /* controls */
-    input, select, textarea{
-      background:#0f1320; color:var(--text); border:1px solid var(--border);
-      border-radius:8px; padding:10px; width:100%;
+    .wrap{max-width:1100px; margin:0 auto; padding:12px 16px}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    .grow{flex:1 1 auto}
+    .btn{
+      appearance:none; border:1px solid var(--border); background:linear-gradient(180deg,var(--chip),var(--chip2));
+      color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow);
+      transition:.15s transform ease,.2s border-color;
     }
-    textarea{min-height:120px; resize:vertical}
-    button{
-      appearance:none; border:1px solid var(--border); background:linear-gradient(180deg,#293149,#1b2237);
-      color:var(--text); padding:10px 12px; border-radius:10px; cursor:pointer;
+    .btn:active{transform:translateY(1px)}
+    .btn[disabled]{opacity:.5; cursor:not-allowed}
+    .btn.primary{border-color:#2a3242; background:linear-gradient(180deg,#1d2532,#151a24)}
+    .btn.accent{border-color:#243746; background:linear-gradient(180deg,#163040,#0f1f2b)}
+    .btn.good{border-color:#244238; background:linear-gradient(180deg,#123327,#0c241c)}
+    .btn.bad{border-color:#402427; background:linear-gradient(180deg,#2f1518,#201014)}
+    .btn.warn{border-color:#403424; background:linear-gradient(180deg,#2f2915,#201c10)}
+    .tag{display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; background:var(--chip); color:var(--muted); font-size:12px}
+    .grid{display:grid; gap:12px}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media (max-width:900px){ .two,.three{grid-template-columns:1fr} header .row{gap:8px} }
+    section.card{
+      background:linear-gradient(180deg,var(--panel),#0e1117);
+      border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:var(--shadow)
     }
-    button:hover{filter:brightness(1.06)}
-    .btn-accent{border-color:#355bfd; background:linear-gradient(180deg,#3f66ff,#2240b5)}
-    .btn-ok{border-color:#1d6f58; background:linear-gradient(180deg,#22c1a7,#147a67)}
-    .btn-warn{border-color:#7a5b19; background:linear-gradient(180deg,#f0ad
+    h1,h2,h3{margin:0 0 8px}
+    h1{font-size:20px} h2{font-size:16px; color:#cfd8ff} h3{font-size:14px; color:#b0bbd9}
+    p{margin:0 0 10px; color:#c5cbe0}
+    input,select,textarea{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+      background:#0e141d; color:var(--text); outline:none; box-shadow:inset 0 0 0 1px transparent;
+    }
+    input:focus,select:focus,textarea:focus{box-shadow:var(--focus)}
+    .split{display:flex; gap:12px; align-items:center}
+    .split > *{flex:1}
+    .pillgroup{display:flex; flex-wrap:wrap; gap:8px}
+    .list{display:flex; flex-direction:column; gap:8px}
+    .li{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding:10px; border:1px dashed var(--border); border-radius:10px; background:#0e131a;
+    }
+    .muted{color:var(--muted)}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-size:12px; padding:2px 6px; border-radius:6px; background:#0e141d; border:1px solid var(--border); color:#cbd3ee}
+    .divider{height:1px; background:var(--border); margin:10px 0}
+    footer{opacity:.7; font-size:12px; padding:20px 16px; text-align:center}
+    /* spotlight for current scene */
+    .spot{border:1px solid #2a3c57; box-shadow:0 0 0 1px rgba(108,192,255,.15), 0 10px 30px rgba(20,40,70,.35)}
+    /* toast */
+    #toast{position:fixed; bottom:16px; right:16px; background:#111826; border:1px solid var(--border); padding:10px 12px; border-radius:10px; box-shadow:var(--shadow); display:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row">
+      <div class="grow">
+        <strong>varulv</strong> <span class="muted">— spelledarapp</span>
+      </div>
+      <div class="pillgroup">
+        <span class="tag" id="phase_tag">fas: natt</span>
+        <span class="tag" id="scene_tag">scen: 1</span>
+        <span class="tag" id="timer_tag">timer: 00:00</span>
+      </div>
+      <button class="btn accent" id="gm_toggle" data-matomo-name="gm-toggle" data-matomo-event="click" data-matomo-category="gm" data-matomo-action="toggle">gm-läge</button>
+      <button class="btn" id="reset_btn" title="nollställ spel">nollställ</button>
+    </div>
+  </header>
+
+  <main class="wrap grid two" id="app_root">
+    <!-- vänster: spelardisplay -->
+    <section class="card" id="player_panel">
+      <h2>spel</h2>
+      <div class="divider"></div>
+
+      <div class="grid two" id="phase_controls">
+        <div>
+          <h3>fas</h3>
+          <div class="pillgroup">
+            <button class="btn primary" id="btn_night">natt</button>
+            <button class="btn" id="btn_day">dag</button>
+          </div>
+        </div>
+        <div>
+          <h3>timer</h3>
+          <div class="split">
+            <button class="btn" id="timer_start">start</button>
+            <button class="btn" id="timer_stop">stopp</button>
+            <button class="btn" id="timer_reset">återställ</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="current_scene" class="card spot">
+        <h3>scen <span id="scene_idx">1</span>: <span id="scene_title"></span></h3>
+        <p id="scene_text" style="margin-top:6px"></p>
+        <div class="pillgroup" style="margin-top:10px">
+          <button class="btn good" id="scene_next" data-matomo-name="scene-next" data-matomo-event="click" data-matomo-category="scene" data-matomo-action="advance">nästa scen</button>
+          <button class="btn warn" id="scene_repeat">repetera</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid two">
+        <section class="card">
+          <h3>röstning</h3>
+          <div class="list" id="vote_list"></div>
+          <div class="split" style="margin-top:8px">
+            <input id="vote_target" placeholder="namn (t.ex. Alva)" />
+            <button class="btn primary" id="vote_add">lägg röst</button>
+          </div>
+          <div class="pillgroup" style="margin-top:8px">
+            <button class="btn warn" id="vote_clear">rensa</button>
+            <button class="btn good" id="vote_result">visa resultat</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>anteckningar</h3>
+          <textarea id="notes" rows="8" placeholder="snabba anteckningar..."></textarea>
+          <div class="row" style="margin-top:8px">
+            <div class="grow muted">autosparas lokalt</div>
+            <button class="btn" id="notes_clear">töm</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- höger: gm-panel -->
+    <section class="card" id="gm_panel" style="display:none">
+      <h2>gm-panel</h2>
+      <div class="divider"></div>
+
+      <section class="card">
+        <h3>spelare</h3>
+        <div class="list" id="players_list"></div>
+        <div class="split" style="margin-top:8px">
+          <input id="player_name" placeholder="ny spelare (namn)" />
+          <button class="btn primary" id="player_add" data-matomo-name="player-add" data-matomo-event="click" data-matomo-category="players" data-matomo-action="add">lägg till</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>roller</h3>
+        <div class="pillgroup" id="roles_chips"></div>
+        <div class="split" style="margin-top:8px">
+          <button class="btn good" id="assign_roles">dela ut roller</button>
+          <button class="btn warn" id="clear_roles">rensa roller</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>scener</h3>
+        <div class="list" id="scenes_list"></div>
+        <div class="split" style="margin-top:8px">
+          <input id="scene_custom" placeholder="snabb scen – rubrik :: text" />
+          <button class="btn" id="scene_add_quick">lägg till</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>inställningar</h3>
+        <div class="grid two">
+          <div>
+            <label class="muted">gm-pin</label>
+            <input id="pin_input" value="1349"/>
+          </div>
+          <div>
+            <label class="muted">återställ allt</label>
+            <button class="btn bad" id="hard_reset">rensa localStorage</button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <footer>
+    byggd för rummet: inga konton, ingen backend. ändra story och roller i koden ↑
+  </footer>
+
+  <script>
+  // ======= speldata (redigera för din kampanj) =======
+  const defaultData = {
+    story: {
+      title: "Skuggor över Vargtjärn",
+      synopsis: "En isolerad by. En förbannelse. Fullmånen närmar sig.",
+      scenes: [
+        { title:"ankomst", text:"Ni anländer till Vargtjärn. Dimman ligger lågt. En ylande ton långt bort." },
+        { title:"värdshuset", text:"Värdshusvärden pekar diskret mot anslagstavlan: försvinnanden senaste veckorna." },
+        { title:"spåren", text:"I skogsbrynet: djupa klösmärken, men… även märken av järnbojor." },
+        { title:"gammelstugan", text:"En gammal dagbok avslöjar ett namn och datum för nästa förvandling." },
+        { title:"uppgörelse", text:"När mörkret faller dras alla mot tjärnen. Någon ljuger. Någon skyddar vargen." }
+      ]
+    },
+    roles: [
+      { id:"varulv", name:"Varulv", secret:"Du jagar om natten. Peka diskret på ett mål när GM ber.", team:"ulv" },
+      { id:"sierska", name:"Sierska", secret:"Varje natt kan du undersöka en spelare (sant/inte sant för ulv).", team:"by" },
+      { id:"jägare", name:"Jägare", secret:"Om du faller, får du ta med dig någon i fallet.", team:"by" },
+      { id:"bybo", name:"Bybo", secret:"Ingen kraft. Din styrka är din röst och dina frågor.", team:"by" }
+    ]
+  };
+
+  // ======= tillstånd =======
+  const state = {
+    pin:"1349",
+    phase:"natt", // eller "dag"
+    timer:0, timerHandle:null,
+    sceneIndex:0,
+    players:[], // {name, roleId?, alive:true}
+    votes:{}, // name -> count
+    notes:"",
+    data: JSON.parse(localStorage.getItem("varulv_data") || JSON.stringify(defaultData))
+  };
+
+  // ======= dom helpers =======
+  const $ = sel => document.querySelector(sel);
+  const el = (tag, attrs={}, children=[])=>{
+    const n = document.createElement(tag);
+    for(const [k,v] of Object.entries(attrs)){
+      if(k==="class") n.className=v;
+      else if(k==="text") n.textContent=v;
+      else if(k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k,v);
+    }
+    children.forEach(c => n.appendChild(typeof c==="string"? document.createTextNode(c): c));
+    return n;
+  };
+  const toast = (msg)=>{ const t=$("#toast"); t.textContent=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",1800); }
+  const save = ()=>{
+    localStorage.setItem("varulv_state", JSON.stringify({
+      phase:state.phase, timer:state.timer, sceneIndex:state.sceneIndex,
+      players:state.players, votes:state.votes, notes:state.notes
+    }));
+    localStorage.setItem("varulv_data", JSON.stringify(state.data));
+  };
+  const load = ()=>{
+    const raw = localStorage.getItem("varulv_state");
+    if(raw){
+      try{
+        const s = JSON.parse(raw);
+        Object.assign(state, s);
+      }catch(e){ console.warn(e) }
+    }
+  };
+
+  // ======= init =======
+  function renderAll(){
+    // top tags
+    $("#phase_tag").textContent = "fas: " + state.phase;
+    $("#scene_tag").textContent = "scen: " + (state.sceneIndex+1);
+    $("#scene_idx").textContent = (state.sceneIndex+1);
+    const scene = state.data.story.scenes[state.sceneIndex] || {title:"-",text:"—"};
+    $("#scene_title").textContent = scene.title;
+    $("#scene_text").textContent  = scene.text;
+
+    // players
+    const plist = $("#players_list");
+    plist.innerHTML = "";
+    state.players.forEach((p,i)=>{
+      const role = state.data.roles.find(r=>r.id===p.roleId);
+      const roleText = role ? role.name : "—";
+      plist.appendChild(el("div",{class:"li"},[
+        el("div",{},[
+          el("div",{text:p.name}),
+          el("div",{class:"muted", text:(p.alive!==false?"levande":"ute") + " • " + roleText})
+        ]),
+        el("div",{},[
+          el("button",{class:"btn", text:"hemligt", onclick:()=>alertSecret(p)}),
+          el("button",{class:"btn warn", text:(p.alive!==false?"markera ute":"markera levande"), onclick:()=>toggleAlive(i)})
+        ])
+      ]));
+    });
+
+    // roles chips
+    const rchips = $("#roles_chips");
+    rchips.innerHTML="";
+    state.data.roles.forEach(r=>{
+      rchips.appendChild(el("span",{class:"tag", title:r.secret, text:r.name}));
+    });
+
+    // scenes list
+    const slist = $("#scenes_list");
+    slist.innerHTML="";
+    state.data.story.scenes.forEach((s,idx)=>{
+      slist.appendChild(
+        el("div",{class:"li"},[
+          el("div",{},[ el("div",{text:`${idx+1}. ${s.title}`}), el("div",{class:"muted", text:s.text}) ]),
+          el("div",{},[
+            el("button",{class:"btn", text:"gå hit", onclick:()=>{state.sceneIndex=idx; save(); renderAll();}})
+          ])
+        ])
+      );
+    });
+
+    // vote list
+    const vlist = $("#vote_list"); vlist.innerHTML="";
+    const sorted = Object.entries(state.votes).sort((a,b)=>b[1]-a[1]);
+    sorted.forEach(([name,count])=>{
+      vlist.appendChild(el("div",{class:"li"},[
+        el("div",{text:`${name}`}),
+        el("div",{},[
+          el("span",{class:"tag", text:`röster: ${count}`}),
+          el("button",{class:"btn", text:"+", onclick:()=>vote(name)}),
+          el("button",{class:"btn warn", text:"−", onclick:()=>unvote(name)}),
+          el("button",{class:"btn", text:"ta bort", onclick:()=>removeVote(name)})
+        ])
+      ]));
+    });
+
+    // notes
+    $("#notes").value = state.notes;
+  }
+
+  function alertSecret(p){
+    const role = state.data.roles.find(r=>r.id===p.roleId);
+    const secret = role ? `roll: ${role.name}\n\nhemligt:\n${role.secret}\n\nlag: ${role.team}` : "ingen roll utdelad än.";
+    alert(`${p.name}\n\n${secret}`);
+  }
+
+  // ======= actions =======
+  function addPlayer(){
+    const name = $("#player_name").value.trim();
+    if(!name) return;
+    state.players.push({name, alive:true});
+    $("#player_name").value="";
+    save(); renderAll(); toast("spelare tillagd");
+  }
+  function toggleAlive(i){
+    state.players[i].alive = !(state.players[i].alive!==false ? false : true);
+    save(); renderAll();
+  }
+  function assignRoles(){
+    if(state.players.length===0){ toast("lägg till spelare först"); return; }
+    // enkel blandning: varulv >=1, sierska 1, jägar 1, resten bybor (anpassa vid behov)
+    const roles = [...state.data.roles];
+    const must = ["varulv","sierska","jägare"].filter(id=>roles.find(r=>r.id===id));
+    const pool = [];
+    // lägg minst en varulv (om fler spelare, öka)
+    const wolves = Math.max(1, Math.floor(state.players.length/5));
+    for(let i=0;i<wolves;i++) pool.push("varulv");
+    must.filter(id=>id!=="varulv").forEach(id=>pool.push(id));
+    while(pool.length<state.players.length){
+      pool.push("bybo");
+    }
+    shuffle(pool);
+    state.players = state.players.map((p,i)=>({...p, roleId: pool[i]}));
+    save(); renderAll(); toast("roller utdelade");
+  }
+  function clearRoles(){
+    state.players = state.players.map(p=>({ ...p, roleId: undefined }));
+    save(); renderAll(); toast("roller rensade");
+  }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
+
+  function vote(name){
+    state.votes[name] = (state.votes[name]||0)+1; save(); renderAll();
+  }
+  function unvote(name){
+    if(!state.votes[name]) return;
+    state.votes[name] = Math.max(0, state.votes[name]-1);
+    if(state.votes[name]===0) delete state.votes[name];
+    save(); renderAll();
+  }
+  function removeVote(name){ delete state.votes[name]; save(); renderAll(); }
+  function addVoteTarget(){
+    const t = $("#vote_target").value.trim();
+    if(!t) return;
+    state.votes[t] = (state.votes[t]||0);
+    $("#vote_target").value="";
+    save(); renderAll();
+  }
+  function clearVotes(){ state.votes={}; save(); renderAll(); toast("röster rensade"); }
+  function showVoteResult(){
+    const entries = Object.entries(state.votes);
+    if(entries.length===0){ toast("inga röster än"); return; }
+    const sorted = entries.sort((a,b)=>b[1]-a[1]);
+    const top = sorted.filter(([_,c])=>c===sorted[0][1]).map(([n])=>n);
+    alert(`flest röster: ${top.join(", ")} (${sorted[0][1]})`);
+  }
+
+  function nextScene(){
+    state.sceneIndex = Math.min(state.sceneIndex+1, state.data.story.scenes.length-1);
+    save(); renderAll();
+  }
+  function repeatScene(){ renderAll(); toast("scen repeterad"); }
+  function addCustomScene(){
+    const raw = $("#scene_custom").value.trim();
+    if(!raw) return;
+    const [title, ...rest] = raw.split("::");
+    const text = rest.join("::").trim() || "—";
+    state.data.story.scenes.push({title:title.trim(), text});
+    $("#scene_custom").value="";
+    save(); renderAll();
+  }
+
+  function setPhase(p){
+    state.phase = p;
+    $("#btn_night").classList.toggle("primary", p==="natt");
+    $("#btn_day").classList.toggle("primary", p==="dag");
+    save(); renderAll();
+  }
+
+  // timer
+  function fmt(n){ return String(n).padStart(2,"0") }
+  function tick(){
+    state.timer++;
+    const m = Math.floor(state.timer/60), s = state.timer%60;
+    $("#timer_tag").textContent = `timer: ${fmt(m)}:${fmt(s)}`;
+  }
+  function timerStart(){ if(state.timerHandle) return; state.timerHandle = setInterval(tick,1000); }
+  function timerStop(){ clearInterval(state.timerHandle); state.timerHandle=null; }
+  function timerReset(){ state.timer=0; $("#timer_tag").textContent="timer: 00:00"; }
+
+  // gm toggle with pin
+  let gmOpen=false;
+  function toggleGM(){
+    if(gmOpen){ gmOpen=false; $("#gm_panel").style.display="none"; return; }
+    const pin = prompt("ange gm-pin");
+    if(pin===state.pin){ gmOpen=true; $("#gm_panel").style.display="block"; }
+    else toast("fel pin");
+  }
+
+  // hard reset
+  function hardReset(){
+    if(confirm("rensa allt och börja om?")){
+      localStorage.removeItem("varulv_state");
+      localStorage.removeItem("varulv_data");
+      location.reload();
+    }
+  }
+
+  // notes autosave
+  $("#notes")?.addEventListener("input", e=>{ state.notes=e.target.value; save(); });
+
+  // ======= wire up =======
+  function bind(){
+    $("#player_add").addEventListener("click", addPlayer);
+    $("#assign_roles").addEventListener("click", assignRoles);
+    $("#clear_roles").addEventListener("click", clearRoles);
+    $("#scene_next").addEventListener("click", nextScene);
+    $("#scene_repeat").addEventListener("click", repeatScene);
+    $("#scene_add_quick").addEventListener("click", addCustomScene);
+    $("#btn_night").addEventListener("click", ()=>setPhase("natt"));
+    $("#btn_day").addEventListener("click", ()=>setPhase("dag"));
+    $("#vote_add").addEventListener("click", addVoteTarget);
+    $("#vote_clear").addEventListener("click", clearVotes);
+    $("#vote_result").addEventListener("click", showVoteResult);
+    $("#timer_start").addEventListener("click", timerStart);
+    $("#timer_stop").addEventListener("click", timerStop);
+    $("#timer_reset").addEventListener("click", timerReset);
+    $("#gm_toggle").addEventListener("click", toggleGM);
+    $("#hard_reset").addEventListener("click", hardReset);
+    $("#reset_btn").addEventListener("click", ()=>{ if(confirm("nollställ spel (behåller story/roller)?")){ localStorage.removeItem("varulv_state"); location.reload(); } });
+    $("#pin_input").addEventListener("change", e=>{ state.pin = e.target.value.trim(); toast("pin uppdaterad"); });
+  }
+
+  // ======= boot =======
+  load();
+  // init story to scene 0 safe
+  if(state.sceneIndex>=state.data.story.scenes.length) state.sceneIndex=0;
+  renderAll(); bind();
+  // expose some helpers for konsolen
+  window.__varulv = {state, save, renderAll};
+
+  // matomo hooks (optional): lägg ditt matomo script här om du vill.
+  // ex:
+  // var _paq = window._paq = window._paq || [];
+  // _paq.push(['trackPageView']); _paq.push(['enableLinkTracking']);
+  // (function(){ var u="https://your-matomo.example/"; _paq.push(['setTrackerUrl', u+'matomo.php']); _paq.push(['setSiteId', '1']);
+  // var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s); })();
+
+  </script>
+</body>
+</html>
