@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <title>stillgood bokföring – shopify + spreadconnect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #111;
+    }
+    header {
+      background: #111;
+      color: #fff;
+      padding: 16px 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    main {
+      max-width: 1000px;
+      margin: 20px auto 40px;
+      padding: 0 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px 14px;
+      align-items: end;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: #444;
+    }
+    input, select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    input[type="number"] {
+      text-align: right;
+    }
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    button {
+      border-radius: 4px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #111;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #eee;
+      color: #111;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border-bottom: 1px solid #eee;
+      padding: 6px 4px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+    th {
+      font-weight: 600;
+      background: #fafafa;
+    }
+    .totals {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+    }
+    .totals div span.label {
+      color: #555;
+      margin-right: 4px;
+    }
+    .tagline {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .danger {
+      color: #a40000;
+      font-size: 12px;
+    }
+    .totals-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    @media (max-width: 700px) {
+      th:nth-child(4),
+      th:nth-child(5),
+      th:nth-child(6),
+      th:nth-child(7),
+      th:nth-child(8),
+      td:nth-child(4),
+      td:nth-child(5),
+      td:nth-child(6),
+      td:nth-child(7),
+      td:nth-child(8) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>stillgood bokföring</h1>
+    <p>snabb överblick för shopify + spreadconnect dropship</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>lägg till order</h2>
+      <p class="tagline">
+        modell: intäkt från shopify (inkl moms) + kostnad från spreadconnect + frakt → resultat.
+      </p>
+      <form id="entry-form">
+        <div>
+          <label for="date">datum</label>
+          <input type="date" id="date" required />
+        </div>
+        <div>
+          <label for="order_id">order-id</label>
+          <input type="text" id="order_id" placeholder="#1001" />
+        </div>
+        <div>
+          <label for="product_name">produkt</label>
+          <input type="text" id="product_name" placeholder="stillgood tee – black" />
+        </div>
+        <div>
+          <label for="quantity">antal</label>
+          <input type="number" id="quantity" min="1" step="1" value="1" required />
+        </div>
+        <div>
+          <label for="price_inc_vat">pris/st inkl moms (sek)</label>
+          <input type="number" id="price_inc_vat" step="0.01" value="399" required />
+        </div>
+        <div>
+          <label for="vat_rate">moms % (standard 25)</label>
+          <input type="number" id="vat_rate" step="0.01" value="25" required />
+        </div>
+        <div>
+          <label for="spread_cost">kostnad/st till spreadconnect (sek)</label>
+          <input type="number" id="spread_cost" step="0.01" value="180" required />
+        </div>
+        <div>
+          <label for="shipping_revenue">fraktintäkt (sek)</label>
+          <input type="number" id="shipping_revenue" step="0.01" value="49" />
+        </div>
+        <div>
+          <label for="shipping_cost">fraktkostnad (sek)</label>
+          <input type="number" id="shipping_cost" step="0.01" value="49" />
+        </div>
+        <div>
+          <label for="other_costs">övriga kostnader (sek)</label>
+          <input type="number" id="other_costs" step="0.01" value="0" />
+        </div>
+        <div>
+          <label for="channel">kanal</label>
+          <select id="channel">
+            <option value="shopify">shopify</option>
+            <option value="manual">manuell</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="clear-all">rensa allt</button>
+          <button type="submit" class="btn-primary">lägg till rad</button>
+        </div>
+      </form>
+      <p class="danger">
+        obs: detta är ett enkelt översiktsverktyg, inte ett komplett bokföringssystem.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>order & resultat</h2>
+      <div style="overflow-x:auto;">
+        <table id="entries-table">
+          <thead>
+            <tr>
+              <th>datum</th>
+              <th>order</th>
+              <th>produkt</th>
+              <th>antal</th>
+              <th>intäkt exkl moms</th>
+              <th>moms</th>
+              <th>kostnad</th>
+              <th>vinst</th>
+              <th>marginal %</th>
+              <th>kanal</th>
+              <th>ta bort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- rader fylls via js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>summering</h2>
+      <div class="totals" id="totals"></div>
+      <div class="totals-actions">
+        <button class="btn-primary" id="export-csv">exportera csv (för google sheets)</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "stillgood_bookkeeping_v1";
+
+    function safeNumber(value) {
+      const n = parseFloat(value);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function loadEntries() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error("could not load entries", e);
+        return [];
+      }
+    }
+
+    function saveEntries(entries) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    let entries = loadEntries();
+
+    function computeDerived(e) {
+      const qty = safeNumber(e.quantity);
+      const priceIncVat = safeNumber(e.price_inc_vat);
+      const vatRate = safeNumber(e.vat_rate);
+      const spreadCost = safeNumber(e.spread_cost);
+      const shippingRevenue = safeNumber(e.shipping_revenue);
+      const shippingCost = safeNumber(e.shipping_cost);
+      const otherCosts = safeNumber(e.other_costs);
+
+      const revenueIncVat = qty * priceIncVat;
+      const revenueExVat = vatRate > 0
+        ? revenueIncVat / (1 + vatRate / 100)
+        : revenueIncVat;
+      const vatAmount = revenueIncVat - revenueExVat;
+
+      const productCost = qty * spreadCost;
+      const totalCost = productCost + shippingCost + otherCosts;
+
+      const profit = revenueIncVat + shippingRevenue - totalCost;
+      const margin = revenueExVat > 0 ? (profit / revenueExVat) * 100 : 0;
+
+      return {
+        revenue_inc_vat: revenueIncVat,
+        revenue_ex_vat: revenueExVat,
+        vat_amount: vatAmount,
+        total_cost: totalCost,
+        profit,
+        margin
+      };
+    }
+
+    function render() {
+      const tbody = document.querySelector("#entries-table tbody");
+      const totalsEl = document.getElementById("totals");
+      tbody.innerHTML = "";
+
+      let sumRevenueExVat = 0;
+      let sumVat = 0;
+      let sumCost = 0;
+      let sumProfit = 0;
+
+      entries.forEach((e, index) => {
+        const d = computeDerived(e);
+        sumRevenueExVat += d.revenue_ex_vat;
+        sumVat += d.vat_amount;
+        sumCost += d.total_cost;
+        sumProfit += d.profit;
+
+        const tr = document.createElement("tr");
+
+        function td(text, alignRight = true) {
+          const cell = document.createElement("td");
+          cell.textContent = text;
+          if (!alignRight) cell.style.textAlign = "left";
+          return cell;
+        }
+
+        tr.appendChild(td(e.date || "", false));
+        tr.appendChild(td(e.order_id || "", false));
+        tr.appendChild(td(e.product_name || "", false));
+        tr.appendChild(td(e.quantity ?? "", true));
+        tr.appendChild(td(d.revenue_ex_vat.toFixed(2)));
+        tr.appendChild(td(d.vat_amount.toFixed(2)));
+        tr.appendChild(td(d.total_cost.toFixed(2)));
+        tr.appendChild(td(d.profit.toFixed(2)));
+        tr.appendChild(td(d.margin.toFixed(1)));
+        tr.appendChild(td(e.channel || "", false));
+
+        const removeTd = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.textContent = "x";
+        btn.className = "btn-secondary";
+        btn.style.padding = "2px 6px";
+        btn.addEventListener("click", () => {
+          entries.splice(index, 1);
+          saveEntries(entries);
+          render();
+        });
+        removeTd.appendChild(btn);
+        tr.appendChild(removeTd);
+
+        tbody.appendChild(tr);
+      });
+
+      totalsEl.innerHTML = "";
+
+      function addTotal(label, value) {
+        const div = document.createElement("div");
+        div.innerHTML = `<span class="label">${label}:</span><span>${value}</span>`;
+        totalsEl.appendChild(div);
+      }
+
+      addTotal("intäkt exkl moms", sumRevenueExVat.toFixed(2) + " SEK");
+      addTotal("moms", sumVat.toFixed(2) + " SEK");
+      addTotal("kostnader", sumCost.toFixed(2) + " SEK");
+      addTotal("vinst", sumProfit.toFixed(2) + " SEK");
+      const overallMargin = sumRevenueExVat > 0
+        ? (sumProfit / sumRevenueExVat) * 100
+        : 0;
+      addTotal("marginal", overallMargin.toFixed(1) + " %");
+      addTotal("antal order", entries.length);
+    }
+
+    function initForm() {
+      const form = document.getElementById("entry-form");
+      const clearBtn = document.getElementById("clear-all");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const entry = {
+          date: document.getElementById("date").value,
+          order_id: document.getElementById("order_id").value.trim(),
+          product_name: document.getElementById("product_name").value.trim(),
+          quantity: safeNumber(document.getElementById("quantity").value),
+          price_inc_vat: safeNumber(document.getElementById("price_inc_vat").value),
+          vat_rate: safeNumber(document.getElementById("vat_rate").value),
+          spread_cost: safeNumber(document.getElementById("spread_cost").value),
+          shipping_revenue: safeNumber(document.getElementById("shipping_revenue").value),
+          shipping_cost: safeNumber(document.getElementById("shipping_cost").value),
+          other_costs: safeNumber(document.getElementById("other_costs").value),
+          channel: document.getElementById("channel").value
+        };
+
+        if (!entry.date) {
+          alert("ange datum");
+          return;
+        }
+
+        entries.push(entry);
+        saveEntries(entries);
+        render();
+
+        // behåll de flesta fält men nollställ order-id, produkt, övriga kostnader
+        document.getElementById("order_id").value = "";
+        document.getElementById("product_name").value = "";
+        document.getElementById("other_costs").value = "0";
+      });
+
+      clearBtn.addEventListener("click", () => {
+        if (confirm("rensa alla rader?")) {
+          entries = [];
+          saveEntries(entries);
+          render();
+        }
+      });
+    }
+
+    function escapeCsvValue(value) {
+      const str = String(value ?? "");
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    function exportCsv() {
+      if (!entries.length) {
+        alert("ingen data att exportera");
+        return;
+      }
+
+      const headers = [
+        "date",
+        "order_id",
+        "product_name",
+        "quantity",
+        "price_inc_vat",
+        "vat_rate",
+        "spread_cost",
+        "shipping_revenue",
+        "shipping_cost",
+        "other_costs",
+        "revenue_ex_vat",
+        "vat_amount",
+        "total_cost",
+        "profit",
+        "margin_percent",
+        "channel"
+      ];
+
+      const lines = [];
+      lines.push(headers.join(","));
+
+      entries.forEach((e) => {
+        const d = computeDerived(e);
+        const row = [
+          e.date || "",
+          e.order_id || "",
+          e.product_name || "",
+          e.quantity,
+          e.price_inc_vat,
+          e.vat_rate,
+          e.spread_cost,
+          e.shipping_revenue,
+          e.shipping_cost,
+          e.other_costs,
+          d.revenue_ex_vat.toFixed(2),
+          d.vat_amount.toFixed(2),
+          d.total_cost.toFixed(2),
+          d.profit.toFixed(2),
+          d.margin.toFixed(1),
+          e.channel || ""
+        ].map(escapeCsvValue);
+        lines.push(row.join(","));
+      });
+
+      const csvContent = lines.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const today = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `stillgood_bokforing_${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function initExport() {
+      const exportBtn = document.getElementById("export-csv");
+      exportBtn.addEventListener("click", exportCsv);
+    }
+
+    // init
+    initForm();
+    initExport();
+    render();
+  </script>
+</body>
+</html>
