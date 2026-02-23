@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stickräknare</title>
+
+  <!-- appikon + manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Stickräknare">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <!-- react + babel + tailwind + nosleep fallback -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
+
+  <style>
+    body {
+      background: #f7f7f5;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input:focus, button:focus { outline: none; }
+    .input-clear {
+      position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+      background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af;
+    }
+    .input-clear:hover { color: #4b5563; }
+    .icon-btn {
+      background: transparent; border: 0; cursor: pointer; color: #b0b0b0;
+      font-size: 22px; font-weight: 300; padding: .25rem; transition: color 0.15s ease;
+    }
+    .icon-btn:hover { color: #404040; }
+    .plus-btn {
+      display:flex; align-items:center; justify-content:center;
+      width:100%; padding:12px; border-radius:12px;
+      background:transparent; color:#6b7280; /* muted gray */
+      font-size:44px; font-weight:200;
+      transition:color .2s ease, transform .1s ease;
+    }
+    .plus-btn:hover { color:#1f2937; }
+    .plus-btn:active { transform:scale(.97); }
+  </style>
+</head>
+<body>
+  <div id="root" class="min-h-screen flex flex-col items-center justify-center p-6"></div>
+
+  <script type="text/babel" data-presets="react,env">
+    const { useState, useEffect, useRef } = React;
+    const noSleep = new window.NoSleep();
+
+    function Stickraknare() {
+      // befintliga nycklar (orörda)
+      const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || "0", 10));
+      const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || "0", 10));
+      const [name1, setName1]   = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
+      const [name2, setName2]   = useState(() => localStorage.getItem("stick-name2") || "Räknare 2");
+      const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
+      const [showSecond, setShowSecond] = useState(() => localStorage.getItem("stick-hide-2") !== "true");
+
+      // language (sv/da)
+      const [lang, setLang] = useState(() => localStorage.getItem("stick-lang") || "sv");
+
+      // extra räknare (påverkar ej ovan keys)
+      const [extraCounters, setExtraCounters] = useState(() => {
+        try {
+          const raw = localStorage.getItem("stick-extra");
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed)
+            ? parsed.map((it, idx) => ({
+                id: it.id || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+                name: typeof it.name === "string" ? it.name : `Räknare ${idx + 3}`,
+                count: Number.isFinite(it.count) ? it.count : 0
+              }))
+            : [];
+        } catch { return []; }
+      });
+
+      // feedback (ljud + vibration) – default: på
+      const [feedbackOn, setFeedbackOn] = useState(() => {
+        const v = localStorage.getItem("stick-feedback");
+        return v === null ? true : v === "true";
+      });
+
+      // wake lock
+      const [wakeLock, setWakeLock] = useState(null);
+      const [awakeStrategy, setAwakeStrategy] = useState("off");
+
+      // celebration modal + dynamisk text
+      const [toastOpen, setToastOpen] = useState(false);
+      const [toastTitle, setToastTitle] = useState("Bra jobbat!");
+      const [toastBody, setToastBody] = useState("Nu kan du sticka och dricka!");
+
+      // donation (swish)
+      const SWISH_NUMBER_SE = "0704095845";
+      const [donateOpen, setDonateOpen] = useState(false);
+      const [donateAmount, setDonateAmount] = useState("");
+      const [donateMessage, setDonateMessage] = useState("stickräknare");
+      const [copied, setCopied] = useState(false);
+
+      const I18N = {
+        sv: {
+          app_title: "Stickräknare",
+          subtitle: "Håll koll på dina varv",
+          keep_awake: "Håll skärmen vaken",
+          feedback: "Ljud & vibration",
+          status: "Status",
+          wake_on: "Skärmlås aktivt (Wake Lock)",
+          wake_nosleep: "Skärmlås via NoSleep",
+          wake_off: "Av",
+          add_round: "Lägg till varv",
+          undo: "Ångra",
+          reset: "Nollställ",
+          remove: "Ta bort",
+          add_counter: "Lägg till ny räknare",
+          footer: "gjord med ♥ i sverige",
+          donate_cta: "stöd appen",
+          donate_title: "swisha en donation",
+          donate_body: "swish-nummer",
+          amount_optional: "belopp (valfritt)",
+          message_optional: "meddelande (valfritt)",
+          copy_number: "kopiera nummer",
+          copied: "kopierat",
+          close: "stäng",
+          share: "dela",
+          clear_name: "Rensa namn",
+          close_message: "Stäng meddelande",
+          name_placeholder: "Namn på räknare",
+          status_label: "Status:",
+        },
+        da: {
+          app_title: "Pindetæller",
+          subtitle: "Hold styr på dine omgange",
+          keep_awake: "Hold skærmen vågen",
+          feedback: "Lyd & vibration",
+          status: "Status",
+          wake_on: "Skærmlås aktiv (Wake Lock)",
+          wake_nosleep: "Skærmlås via NoSleep",
+          wake_off: "Fra",
+          add_round: "Tilføj omgang",
+          undo: "Fortryd",
+          reset: "Nulstil",
+          remove: "Fjern",
+          add_counter: "Tilføj ny tæller",
+          footer: "lavet med ♥ i sverige",
+          donate_cta: "støt appen",
+          donate_title: "swish en donation",
+          donate_body: "swish-nummer",
+          amount_optional: "beløb (valgfrit)",
+          message_optional: "besked (valgfrit)",
+          copy_number: "kopiér nummer",
+          copied: "kopieret",
+          close: "luk",
+          share: "del",
+          clear_name: "Ryd navn",
+          close_message: "Luk besked",
+          name_placeholder: "Navn på tæller",
+          status_label: "Status:",
+        }
+      };
+
+      const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.sv[k] || k;
+
+      const MESSAGES = {
+        reset: [
+          { t: "Bra tempo!", b: "Nollställd – redo för nästa varv." },
+          { t: "Snyggt avslut!", b: "Dags för en ny sektion." },
+          { t: "Fint flöde!", b: "Nu kan du sticka och dricka!" },
+        ],
+        close: [
+          { t: "Bra jobbat!", b: "Räknaren stängd – snyggt arbetat." },
+          { t: "Klart!", b: "Skönt, en sak mindre på listan." },
+          { t: "Snyggt!", b: "Nu kan du sticka och dricka!" },
+        ],
+      };
+
+      const closeToast = () => setToastOpen(false);
+
+      // persist
+      useEffect(() => localStorage.setItem("stick-count1", String(count1)), [count1]);
+      useEffect(() => localStorage.setItem("stick-count2", String(count2)), [count2]);
+      useEffect(() => localStorage.setItem("stick-name1", name1), [name1]);
+      useEffect(() => localStorage.setItem("stick-name2", name2), [name2]);
+      useEffect(() => localStorage.setItem("stick-keep-awake", String(keepAwake)), [keepAwake]);
+      useEffect(() => localStorage.setItem("stick-hide-2", showSecond ? "false" : "true"), [showSecond]);
+      useEffect(() => { localStorage.setItem("stick-extra", JSON.stringify(extraCounters)); }, [extraCounters]);
+      useEffect(() => localStorage.setItem("stick-feedback", String(feedbackOn)), [feedbackOn]);
+      useEffect(() => localStorage.setItem("stick-lang", lang), [lang]);
+
+      // wake lock on/off
+      useEffect(() => {
+        if (keepAwake) enableKeepAwake();
+        else disableKeepAwake();
+        return () => disableKeepAwake();
+      }, [keepAwake]);
+
+      // reacquire on visibility
+      useEffect(() => {
+        const onVis = async () => {
+          if (document.visibilityState === "visible" && keepAwake) await enableKeepAwake(true);
+        };
+        document.addEventListener("visibilitychange", onVis);
+        return () => document.removeEventListener("visibilitychange", onVis);
+      }, [keepAwake]);
+
+      async function enableKeepAwake(silent = false) {
+        try {
+          if ("wakeLock" in navigator && navigator.wakeLock?.request) {
+            const lock = await navigator.wakeLock.request("screen");
+            if (wakeLock?.release) { try { await wakeLock.release(); } catch(_){} }
+            setWakeLock(lock);
+            setAwakeStrategy("wakeLock");
+            lock.addEventListener?.("release", () => {
+              setWakeLock(null);
+              setAwakeStrategy("off");
+            });
+            return;
+          }
+        } catch (err) { if (!silent) console.log("wake lock fail:", err); }
+        try { noSleep.enable(); setAwakeStrategy("noSleep"); }
+        catch { setAwakeStrategy("off"); }
+      }
+      async function disableKeepAwake() {
+        try { if (wakeLock?.release) await wakeLock.release(); } catch(_) {}
+        setWakeLock(null);
+        try { noSleep.disable(); } catch(_) {}
+        setAwakeStrategy("off");
+      }
+
+      // haptics + chime
+      function buzz(ms = 35) {
+        if (!feedbackOn) return;
+        if (navigator.vibrate) {
+          try { navigator.vibrate(ms); } catch(_) {}
+        }
+      }
+      function chime() {
+        if (!feedbackOn) return;
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = 880; // A5
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          const now = ctx.currentTime;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.2);
+          ctx.resume?.();
+        } catch (_) {}
+      }
+
+      function celebrate(type) {
+        const list = MESSAGES[type] || MESSAGES.close;
+        const pick = list[Math.floor(Math.random() * list.length)];
+        setToastTitle(pick.t);
+        setToastBody(pick.b);
+        setToastOpen(true);
+        buzz(35);
+        chime();
+        clearTimeout(celebrate._t);
+        celebrate._t = setTimeout(() => setToastOpen(false), 3000);
+      }
+
+      // donation helpers
+      const copySwish = async () => {
+        try {
+          await navigator.clipboard.writeText(SWISH_NUMBER_SE);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1200);
+        } catch (_) {}
+      };
+
+      const shareSwish = async () => {
+        try {
+          if (!navigator.share) return;
+          const lines = [
+            `${t("donate_title")}`,
+            `${t("donate_body")}: ${SWISH_NUMBER_SE}`,
+            donateAmount ? `${t("amount_optional")}: ${donateAmount}` : "",
+            donateMessage ? `${t("message_optional")}: ${donateMessage}` : "",
+          ].filter(Boolean);
+          await navigator.share({ text: lines.join("\n") });
+        } catch (_) {}
+      };
+
+      // Counter card
+      const CounterCard = ({ initialName, onCommitName, count, setCount, removable=false, onRemove, onReset }) => {
+        const [localName, setLocalName] = useState(initialName);
+        const inputRef = useRef(null);
+        useEffect(() => { setLocalName(initialName); }, [initialName]);
+        const commit = () => onCommitName((localName||"").trim() || initialName);
+        const onKeyDown = e => { if(e.key==="Enter"){ e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); } };
+        const clearName = () => { setLocalName(""); requestAnimationFrame(()=>inputRef.current?.focus()); };
+
+        const handleReset = () => {
+          setCount(0);
+          onReset && onReset();
+        };
+
+        return (
+          <div className="relative bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
+            {removable && (
+              <button type="button" title={t("remove")} className="icon-btn absolute right-3 top-3" onClick={onRemove}>×</button>
+            )}
+            <div className="relative">
+              <input ref={inputRef} type="text" value={localName}
+                onChange={e=>setLocalName(e.target.value)} onBlur={commit} onKeyDown={onKeyDown}
+                className="text-xl font-semibold mb-3 w-full text-center bg-transparent border-b border-stone-300 focus:border-stone-500"
+                placeholder={t("name_placeholder")}/>
+              {localName && <button type="button" aria-label={t("clear_name")} className="input-clear" onClick={clearName}>×</button>}
+            </div>
+            <div className="text-6xl font-light mb-6 text-stone-900">{count}</div>
+            <button onClick={()=>setCount(count+1)}
+              className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95">
+              {t("add_round")}
+            </button>
+            <div className="flex justify-between mt-4 gap-2">
+              <button onClick={()=>setCount(Math.max(0,count-1))}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">{t("undo")}</button>
+              <button onClick={handleReset}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">{t("reset")}</button>
+            </div>
+          </div>
+        );
+      };
+
+      // extra helpers
+      const addExtraCounter = () => {
+        const nextIndex = 3 + extraCounters.length + (showSecond ? 0 : 1);
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        setExtraCounters([...extraCounters, { id, name:`Räknare ${nextIndex}`, count:0 }]);
+      };
+      const updateExtra = (id, patch) => setExtraCounters(ec=>ec.map(c=>c.id===id?{...c,...patch}:c));
+      const removeExtra = id => {
+        setExtraCounters(ec=>ec.filter(c=>c.id!==id));
+        celebrate("close");
+      };
+
+      return (
+        <main className="max-w-md w-full space-y-6">
+          <header className="text-center">
+            <h1 className="text-3xl font-semibold mb-2">{t("app_title")}</h1>
+            <p className="text-stone-500 text-sm">{t("subtitle")}</p>
+
+            <div className="flex justify-center gap-2 mt-3">
+              <button
+                type="button"
+                onClick={() => setLang("sv")}
+                className={`px-3 py-1 rounded-full text-xs border ${lang==="sv" ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-700 border-stone-300"}`}
+              >
+                svenska
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang("da")}
+                className={`px-3 py-1 rounded-full text-xs border ${lang==="da" ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-700 border-stone-300"}`}
+              >
+                dansk
+              </button>
+            </div>
+          </header>
+
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <label className="flex items-center gap-2">
+              <input id="keep-awake" type="checkbox" checked={keepAwake}
+                onChange={e=>setKeepAwake(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+              <span className="text-stone-600 text-sm select-none">{t("keep_awake")}</span>
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input id="feedback-on" type="checkbox" checked={feedbackOn}
+                onChange={e=>setFeedbackOn(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+              <span className="text-stone-600 text-sm select-none">{t("feedback")}</span>
+            </label>
+          </div>
+
+          <p className="text-center text-xs text-stone-500 -mt-2">
+            {t("status_label")} {awakeStrategy==="wakeLock"?t("wake_on"):awakeStrategy==="noSleep"?t("wake_nosleep"):t("wake_off")}
+          </p>
+
+          {/* Räknare 1 (låst) */}
+          <CounterCard
+            initialName={name1}
+            onCommitName={setName1}
+            count={count1}
+            setCount={setCount1}
+            onReset={() => celebrate("reset")}
+          />
+
+          {/* Räknare 2 (kan döljas) */}
+          {showSecond && (
+            <CounterCard
+              initialName={name2}
+              onCommitName={setName2}
+              count={count2}
+              setCount={setCount2}
+              removable
+              onRemove={() => { setShowSecond(false); celebrate("close"); }}
+              onReset={() => celebrate("reset")}
+            />
+          )}
+
+          {/* Extra räknare */}
+          {extraCounters.map(c=>(
+            <CounterCard
+              key={c.id}
+              initialName={c.name}
+              onCommitName={v=>updateExtra(c.id,{name:v})}
+              count={c.count}
+              setCount={v=>updateExtra(c.id,{count:typeof v==="function"?v(c.count):v})}
+              removable
+              onRemove={() => removeExtra(c.id)}
+              onReset={() => celebrate("reset")}
+            />
+          ))}
+
+          <button className="plus-btn" onClick={addExtraCounter} aria-label={t("add_counter")}>＋</button>
+
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => setDonateOpen(true)}
+              className="text-xs text-stone-500 hover:text-stone-800 underline"
+            >
+              {t("donate_cta")}
+            </button>
+          </div>
+
+          <footer className="text-center text-xs text-stone-400 pt-2 pb-2">
+            {t("footer")}
+          </footer>
+
+          {/* celebration modal */}
+          {toastOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              role="dialog" aria-modal="true" onClick={closeToast}
+            >
+              <div className="absolute inset-0 bg-black/30"></div>
+              <div
+                className="relative z-10 mx-6 max-w-sm w-full rounded-2xl bg-white border border-stone-200 p-6 text-center shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+                aria-live="polite"
+              >
+                <div className="text-2xl mb-2">{toastTitle}</div>
+                <p className="text-stone-600">{toastBody}</p>
+                <button
+                  className="mt-5 text-sm text-stone-500 hover:text-stone-800"
+                  onClick={closeToast}
+                  aria-label={t("close_message")}
+                >{t("close")}</button>
+              </div>
+            </div>
+          )}
+
+          {/* donation modal */}
+          {donateOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              role="dialog"
+              aria-modal="true"
+              onClick={() => setDonateOpen(false)}
+            >
+              <div className="absolute inset-0 bg-black/30"></div>
+
+              <div
+                className="relative z-10 mx-6 max-w-sm w-full rounded-2xl bg-white border border-stone-200 p-6 text-center shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="text-2xl mb-2">{t("donate_title")}</div>
+
+                <div className="text-stone-600 text-sm mb-3">{t("donate_body")}</div>
+                <div className="font-mono text-lg text-stone-900 mb-4">{SWISH_NUMBER_SE}</div>
+
+                <div className="space-y-2 text-left">
+                  <label className="block">
+                    <div className="text-xs text-stone-500 mb-1">{t("amount_optional")}</div>
+                    <input
+                      value={donateAmount}
+                      onChange={(e) => setDonateAmount(e.target.value)}
+                      inputMode="decimal"
+                      placeholder="50"
+                      className="w-full rounded-lg border border-stone-300 px-3 py-2"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <div className="text-xs text-stone-500 mb-1">{t("message_optional")}</div>
+                    <input
+                      value={donateMessage}
+                      onChange={(e) => setDonateMessage(e.target.value)}
+                      placeholder="tack!"
+                      className="w-full rounded-lg border border-stone-300 px-3 py-2"
+                    />
+                  </label>
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={copySwish}
+                    className="flex-1 bg-stone-900 text-white py-3 rounded-lg text-sm hover:bg-stone-800 active:scale-95 transition"
+                  >
+                    {copied ? t("copied") : t("copy_number")}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={shareSwish}
+                    disabled={!navigator.share}
+                    className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition disabled:opacity-50"
+                  >
+                    {t("share")}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setDonateOpen(false)}
+                  className="mt-4 text-sm text-stone-500 hover:text-stone-800"
+                >
+                  {t("close")}
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      );
+    }
+
+    // React 18 root
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<Stickraknare />);
+  </script>
+</body>
+</html>
