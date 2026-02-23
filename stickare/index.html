@@ -28,16 +28,48 @@
       -webkit-tap-highlight-color: transparent;
     }
     input:focus, button:focus { outline: none; }
+
+    /* name row fix: clear vs remove */
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .input-wrap { position: relative; }
     .input-clear {
-      position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
-      background: transparent; border: 0; padding: .25rem; line-height: 1; cursor: pointer; color: #9ca3af;
+      position: absolute;
+      right: .5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: 0;
+      padding: .25rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #9ca3af;
+      z-index: 2;
     }
     .input-clear:hover { color: #4b5563; }
-    .icon-btn {
-      background: transparent; border: 0; cursor: pointer; color: #b0b0b0;
-      font-size: 22px; font-weight: 300; padding: .25rem; transition: color 0.15s ease;
+    .name-input { padding-right: 2rem; }
+
+    .remove-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      min-width: 40px;
+      padding: 0 10px;
+      border-radius: 10px;
+      border: 1px solid #e7e5e4; /* stone-200 */
+      color: #78716c; /* stone-500 */
+      background: #fff;
+      cursor: pointer;
+      transition: transform .1s ease, background .15s ease, color .15s ease;
     }
-    .icon-btn:hover { color: #404040; }
+    .remove-btn:hover { background: #fafaf9; color: #44403c; }
+    .remove-btn:active { transform: scale(.98); }
+
     .plus-btn {
       display:flex; align-items:center; justify-content:center;
       width:100%; padding:12px; border-radius:12px;
@@ -47,8 +79,60 @@
     }
     .plus-btn:hover { color:#1f2937; }
     .plus-btn:active { transform:scale(.97); }
+
+    /* donation card */
+    .donation-card {
+      background: #ffffff;
+      border: 1px solid #e7e5e4;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .donation-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:#57534e;
+      background:#fafaf9;
+      border:1px solid #e7e5e4;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+    .donation-primary {
+      width:100%;
+      background:#111827; /* stone/near-black */
+      color:#fff;
+      border:0;
+      padding:14px 14px;
+      border-radius:12px;
+      font-size:16px;
+      font-weight:600;
+      transition: transform .1s ease, background .15s ease;
+    }
+    .donation-primary:hover { background:#0f172a; }
+    .donation-primary:active { transform: scale(.99); }
+
+    .donation-secondary {
+      width:100%;
+      background:#fff;
+      border:1px solid #d6d3d1;
+      color:#44403c;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:14px;
+      font-weight:600;
+      transition: transform .1s ease, background .15s ease;
+    }
+    .donation-secondary:hover { background:#fafaf9; }
+    .donation-secondary:active { transform: scale(.99); }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
   </style>
 </head>
+
 <body>
   <div id="root" class="min-h-screen flex flex-col items-center justify-center p-6"></div>
 
@@ -111,7 +195,7 @@
           subtitle: "Håll koll på dina varv",
           keep_awake: "Håll skärmen vaken",
           feedback: "Ljud & vibration",
-          status: "Status",
+          status_label: "Status:",
           wake_on: "Skärmlås aktivt (Wake Lock)",
           wake_nosleep: "Skärmlås via NoSleep",
           wake_off: "Av",
@@ -121,26 +205,28 @@
           remove: "Ta bort",
           add_counter: "Lägg till ny räknare",
           footer: "gjord med ♥ i sverige",
-          donate_cta: "stöd appen",
-          donate_title: "swisha en donation",
-          donate_body: "swish-nummer",
-          amount_optional: "belopp (valfritt)",
-          message_optional: "meddelande (valfritt)",
-          copy_number: "kopiera nummer",
-          copied: "kopierat",
-          close: "stäng",
-          share: "dela",
           clear_name: "Rensa namn",
           close_message: "Stäng meddelande",
           name_placeholder: "Namn på räknare",
-          status_label: "Status:",
+
+          donate_badge: "stöd appen",
+          donate_title: "swisha en donation",
+          donate_desc: "om du gillar appen, swisha en liten slant så håller jag den uppdaterad.",
+          donate_number_label: "swish-nummer",
+          donate_open: "öppna donation",
+          donate_copy: "kopiera nummer",
+          donate_copied: "kopierat",
+          donate_share: "dela",
+          amount_optional: "belopp (valfritt)",
+          message_optional: "meddelande (valfritt)",
+          close: "stäng",
         },
         da: {
           app_title: "Pindetæller",
           subtitle: "Hold styr på dine omgange",
           keep_awake: "Hold skærmen vågen",
           feedback: "Lyd & vibration",
-          status: "Status",
+          status_label: "Status:",
           wake_on: "Skærmlås aktiv (Wake Lock)",
           wake_nosleep: "Skærmlås via NoSleep",
           wake_off: "Fra",
@@ -150,19 +236,21 @@
           remove: "Fjern",
           add_counter: "Tilføj ny tæller",
           footer: "lavet med ♥ i sverige",
-          donate_cta: "støt appen",
-          donate_title: "swish en donation",
-          donate_body: "swish-nummer",
-          amount_optional: "beløb (valgfrit)",
-          message_optional: "besked (valgfrit)",
-          copy_number: "kopiér nummer",
-          copied: "kopieret",
-          close: "luk",
-          share: "del",
           clear_name: "Ryd navn",
           close_message: "Luk besked",
           name_placeholder: "Navn på tæller",
-          status_label: "Status:",
+
+          donate_badge: "støt appen",
+          donate_title: "swish en donation",
+          donate_desc: "hvis du kan lide appen, så swish et lille beløb — så holder jeg den opdateret.",
+          donate_number_label: "swish-nummer",
+          donate_open: "åbn donation",
+          donate_copy: "kopiér nummer",
+          donate_copied: "kopieret",
+          donate_share: "del",
+          amount_optional: "beløb (valgfrit)",
+          message_optional: "besked (valgfrit)",
+          close: "luk",
         }
       };
 
@@ -288,7 +376,7 @@
           if (!navigator.share) return;
           const lines = [
             `${t("donate_title")}`,
-            `${t("donate_body")}: ${SWISH_NUMBER_SE}`,
+            `${t("donate_number_label")}: ${SWISH_NUMBER_SE}`,
             donateAmount ? `${t("amount_optional")}: ${donateAmount}` : "",
             donateMessage ? `${t("message_optional")}: ${donateMessage}` : "",
           ].filter(Boolean);
@@ -300,10 +388,21 @@
       const CounterCard = ({ initialName, onCommitName, count, setCount, removable=false, onRemove, onReset }) => {
         const [localName, setLocalName] = useState(initialName);
         const inputRef = useRef(null);
+
         useEffect(() => { setLocalName(initialName); }, [initialName]);
+
         const commit = () => onCommitName((localName||"").trim() || initialName);
-        const onKeyDown = e => { if(e.key==="Enter"){ e.preventDefault(); commit(); requestAnimationFrame(()=>inputRef.current?.focus()); } };
-        const clearName = () => { setLocalName(""); requestAnimationFrame(()=>inputRef.current?.focus()); };
+        const onKeyDown = e => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+            requestAnimationFrame(()=>inputRef.current?.focus());
+          }
+        };
+        const clearName = () => {
+          setLocalName("");
+          requestAnimationFrame(()=>inputRef.current?.focus());
+        };
 
         const handleReset = () => {
           setCount(0);
@@ -312,26 +411,66 @@
 
         return (
           <div className="relative bg-white rounded-2xl shadow-sm p-6 border border-stone-200">
-            {removable && (
-              <button type="button" title={t("remove")} className="icon-btn absolute right-3 top-3" onClick={onRemove}>×</button>
-            )}
-            <div className="relative">
-              <input ref={inputRef} type="text" value={localName}
-                onChange={e=>setLocalName(e.target.value)} onBlur={commit} onKeyDown={onKeyDown}
-                className="text-xl font-semibold mb-3 w-full text-center bg-transparent border-b border-stone-300 focus:border-stone-500"
-                placeholder={t("name_placeholder")}/>
-              {localName && <button type="button" aria-label={t("clear_name")} className="input-clear" onClick={clearName}>×</button>}
+            <div className="name-row mb-3">
+              <div className="input-wrap">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={localName}
+                  onChange={e=>setLocalName(e.target.value)}
+                  onBlur={commit}
+                  onKeyDown={onKeyDown}
+                  className="name-input text-xl font-semibold w-full text-center bg-transparent border-b border-stone-300 focus:border-stone-500"
+                  placeholder={t("name_placeholder")}
+                />
+                {!!localName && (
+                  <button
+                    type="button"
+                    aria-label={t("clear_name")}
+                    className="input-clear"
+                    onClick={clearName}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {removable && (
+                <button
+                  type="button"
+                  className="remove-btn"
+                  onClick={onRemove}
+                  aria-label={t("remove")}
+                  title={t("remove")}
+                >
+                  🗑
+                </button>
+              )}
             </div>
+
             <div className="text-6xl font-light mb-6 text-stone-900">{count}</div>
-            <button onClick={()=>setCount(count+1)}
-              className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95">
+
+            <button
+              onClick={()=>setCount(count+1)}
+              className="w-full bg-stone-900 text-white py-4 rounded-lg text-lg tracking-wide transition-all hover:bg-stone-800 active:scale-95"
+            >
               {t("add_round")}
             </button>
+
             <div className="flex justify-between mt-4 gap-2">
-              <button onClick={()=>setCount(Math.max(0,count-1))}
-                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">{t("undo")}</button>
-              <button onClick={handleReset}
-                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition">{t("reset")}</button>
+              <button
+                onClick={()=>setCount(Math.max(0,count-1))}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
+              >
+                {t("undo")}
+              </button>
+
+              <button
+                onClick={handleReset}
+                className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition"
+              >
+                {t("reset")}
+              </button>
             </div>
           </div>
         );
@@ -375,14 +514,24 @@
 
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <label className="flex items-center gap-2">
-              <input id="keep-awake" type="checkbox" checked={keepAwake}
-                onChange={e=>setKeepAwake(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+              <input
+                id="keep-awake"
+                type="checkbox"
+                checked={keepAwake}
+                onChange={e=>setKeepAwake(e.target.checked)}
+                className="w-5 h-5 accent-stone-700 cursor-pointer"
+              />
               <span className="text-stone-600 text-sm select-none">{t("keep_awake")}</span>
             </label>
 
             <label className="flex items-center gap-2">
-              <input id="feedback-on" type="checkbox" checked={feedbackOn}
-                onChange={e=>setFeedbackOn(e.target.checked)} className="w-5 h-5 accent-stone-700 cursor-pointer"/>
+              <input
+                id="feedback-on"
+                type="checkbox"
+                checked={feedbackOn}
+                onChange={e=>setFeedbackOn(e.target.checked)}
+                className="w-5 h-5 accent-stone-700 cursor-pointer"
+              />
               <span className="text-stone-600 text-sm select-none">{t("feedback")}</span>
             </label>
           </div>
@@ -429,15 +578,42 @@
 
           <button className="plus-btn" onClick={addExtraCounter} aria-label={t("add_counter")}>＋</button>
 
-          <div className="flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={() => setDonateOpen(true)}
-              className="text-xs text-stone-500 hover:text-stone-800 underline"
-            >
-              {t("donate_cta")}
-            </button>
-          </div>
+          {/* donation - more prominent */}
+          <section className="donation-card">
+            <div className="flex items-center justify-between gap-3">
+              <span className="donation-badge">💛 {t("donate_badge")}</span>
+              <span className="text-xs text-stone-500 mono">{SWISH_NUMBER_SE}</span>
+            </div>
+
+            <div className="mt-3">
+              <div className="text-lg font-semibold text-stone-900">{t("donate_title")}</div>
+              <p className="text-sm text-stone-600 mt-1">
+                {t("donate_desc")}
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-2">
+              <button type="button" className="donation-primary" onClick={() => setDonateOpen(true)}>
+                {t("donate_open")}
+              </button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" className="donation-secondary" onClick={copySwish}>
+                  {copied ? t("donate_copied") : t("donate_copy")}
+                </button>
+
+                <button
+                  type="button"
+                  className="donation-secondary"
+                  onClick={shareSwish}
+                  disabled={!navigator.share}
+                  style={!navigator.share ? {opacity: 0.6} : undefined}
+                >
+                  {t("donate_share")}
+                </button>
+              </div>
+            </div>
+          </section>
 
           <footer className="text-center text-xs text-stone-400 pt-2 pb-2">
             {t("footer")}
@@ -447,9 +623,12 @@
           {toastOpen && (
             <div
               className="fixed inset-0 z-50 flex items-center justify-center"
-              role="dialog" aria-modal="true" onClick={closeToast}
+              role="dialog"
+              aria-modal="true"
+              onClick={closeToast}
             >
               <div className="absolute inset-0 bg-black/30"></div>
+
               <div
                 className="relative z-10 mx-6 max-w-sm w-full rounded-2xl bg-white border border-stone-200 p-6 text-center shadow-lg"
                 onClick={(e) => e.stopPropagation()}
@@ -461,7 +640,9 @@
                   className="mt-5 text-sm text-stone-500 hover:text-stone-800"
                   onClick={closeToast}
                   aria-label={t("close_message")}
-                >{t("close")}</button>
+                >
+                  {t("close")}
+                </button>
               </div>
             </div>
           )}
@@ -482,8 +663,8 @@
               >
                 <div className="text-2xl mb-2">{t("donate_title")}</div>
 
-                <div className="text-stone-600 text-sm mb-3">{t("donate_body")}</div>
-                <div className="font-mono text-lg text-stone-900 mb-4">{SWISH_NUMBER_SE}</div>
+                <div className="text-stone-600 text-sm mb-3">{t("donate_number_label")}</div>
+                <div className="mono text-lg text-stone-900 mb-4">{SWISH_NUMBER_SE}</div>
 
                 <div className="space-y-2 text-left">
                   <label className="block">
@@ -514,7 +695,7 @@
                     onClick={copySwish}
                     className="flex-1 bg-stone-900 text-white py-3 rounded-lg text-sm hover:bg-stone-800 active:scale-95 transition"
                   >
-                    {copied ? t("copied") : t("copy_number")}
+                    {copied ? t("donate_copied") : t("donate_copy")}
                   </button>
 
                   <button
@@ -523,7 +704,7 @@
                     disabled={!navigator.share}
                     className="flex-1 bg-white border border-stone-300 text-stone-700 py-3 rounded-lg text-sm hover:bg-stone-100 active:scale-95 transition disabled:opacity-50"
                   >
-                    {t("share")}
+                    {t("donate_share")}
                   </button>
                 </div>
 
