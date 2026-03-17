@@ -141,16 +141,25 @@
     const noSleep = new window.NoSleep();
 
     function Stickraknare() {
+      // language first, used by defaults below
+      const [lang, setLang] = useState(() => localStorage.getItem("stick-lang") || "sv");
+
+      const get_default_name = (index, current_lang) => {
+        const labels = {
+          sv: "Räknare",
+          da: "Tæller",
+          en: "Counter",
+        };
+        return `${labels[current_lang] || labels.sv} ${index}`;
+      };
+
       // befintliga nycklar (orörda)
       const [count1, setCount1] = useState(() => parseInt(localStorage.getItem("stick-count1") || "0", 10));
       const [count2, setCount2] = useState(() => parseInt(localStorage.getItem("stick-count2") || "0", 10));
-      const [name1, setName1]   = useState(() => localStorage.getItem("stick-name1") || "Räknare 1");
-      const [name2, setName2]   = useState(() => localStorage.getItem("stick-name2") || "Räknare 2");
+      const [name1, setName1]   = useState(() => localStorage.getItem("stick-name1") || get_default_name(1, lang));
+      const [name2, setName2]   = useState(() => localStorage.getItem("stick-name2") || get_default_name(2, lang));
       const [keepAwake, setKeepAwake] = useState(() => localStorage.getItem("stick-keep-awake") === "true");
       const [showSecond, setShowSecond] = useState(() => localStorage.getItem("stick-hide-2") !== "true");
-
-      // language (sv/da)
-      const [lang, setLang] = useState(() => localStorage.getItem("stick-lang") || "sv");
 
       // extra räknare (påverkar ej ovan keys)
       const [extraCounters, setExtraCounters] = useState(() => {
@@ -160,7 +169,7 @@
           return Array.isArray(parsed)
             ? parsed.map((it, idx) => ({
                 id: it.id || `${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
-                name: typeof it.name === "string" ? it.name : `Räknare ${idx + 3}`,
+                name: typeof it.name === "string" ? it.name : get_default_name(idx + 3, lang),
                 count: Number.isFinite(it.count) ? it.count : 0
               }))
             : [];
@@ -208,6 +217,9 @@
           clear_name: "Rensa namn",
           close_message: "Stäng meddelande",
           name_placeholder: "Namn på räknare",
+          lang_sv: "svenska",
+          lang_da: "dansk",
+          lang_en: "english",
 
           donate_badge: "Stöd appen",
           donate_title: "Swisha en donation",
@@ -239,6 +251,9 @@
           clear_name: "Ryd navn",
           close_message: "Luk besked",
           name_placeholder: "Navn på tæller",
+          lang_sv: "svenska",
+          lang_da: "dansk",
+          lang_en: "english",
 
           donate_badge: "støt appen",
           donate_title: "swish en donation",
@@ -251,22 +266,82 @@
           amount_optional: "beløb (valgfrit)",
           message_optional: "besked (valgfrit)",
           close: "luk",
+        },
+        en: {
+          app_title: "Row Counter",
+          subtitle: "Keep track of your rounds",
+          keep_awake: "Keep screen awake",
+          feedback: "Sound & vibration",
+          status_label: "Status:",
+          wake_on: "Screen lock active (Wake Lock)",
+          wake_nosleep: "Screen lock via NoSleep",
+          wake_off: "Off",
+          add_round: "Add round",
+          undo: "Undo",
+          reset: "Reset",
+          remove: "Remove",
+          add_counter: "Add new counter",
+          footer: "made with ♥ in sweden",
+          clear_name: "Clear name",
+          close_message: "Close message",
+          name_placeholder: "Counter name",
+          lang_sv: "svenska",
+          lang_da: "dansk",
+          lang_en: "english",
+
+          donate_badge: "Support the app",
+          donate_title: "Send a Swish donation",
+          donate_desc: "If you like the app, send a small donation and I’ll keep it updated.",
+          donate_number_label: "Swish number",
+          donate_open: "Open donation",
+          donate_copy: "Copy number",
+          donate_copied: "Copied",
+          donate_share: "Share",
+          amount_optional: "Amount (optional)",
+          message_optional: "Message (optional)",
+          close: "close",
         }
       };
 
       const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.sv[k] || k;
 
       const MESSAGES = {
-        reset: [
-          { t: "Bra tempo!", b: "Nollställd – redo för nästa varv." },
-          { t: "Snyggt avslut!", b: "Dags för en ny sektion." },
-          { t: "Fint flöde!", b: "Nu kan du sticka och dricka!" },
-        ],
-        close: [
-          { t: "Bra jobbat!", b: "Räknaren stängd – snyggt arbetat." },
-          { t: "Klart!", b: "Skönt, en sak mindre på listan." },
-          { t: "Snyggt!", b: "Nu kan du sticka och dricka!" },
-        ],
+        sv: {
+          reset: [
+            { t: "Bra tempo!", b: "Nollställd – redo för nästa varv." },
+            { t: "Snyggt avslut!", b: "Dags för en ny sektion." },
+            { t: "Fint flöde!", b: "Nu kan du sticka och dricka!" },
+          ],
+          close: [
+            { t: "Bra jobbat!", b: "Räknaren stängd – snyggt arbetat." },
+            { t: "Klart!", b: "Skönt, en sak mindre på listan." },
+            { t: "Snyggt!", b: "Nu kan du sticka och dricka!" },
+          ],
+        },
+        da: {
+          reset: [
+            { t: "Godt tempo!", b: "Nulstillet – klar til næste omgang." },
+            { t: "Flot afslutning!", b: "Tid til en ny sektion." },
+            { t: "Godt flow!", b: "Nu kan du strikke og drikke!" },
+          ],
+          close: [
+            { t: "Godt klaret!", b: "Tælleren er lukket – flot arbejde." },
+            { t: "Klart!", b: "Rart, én ting mindre på listen." },
+            { t: "Flot!", b: "Nu kan du strikke og drikke!" },
+          ],
+        },
+        en: {
+          reset: [
+            { t: "Good pace!", b: "Reset — ready for the next round." },
+            { t: "Nice finish!", b: "Time for a new section." },
+            { t: "Good flow!", b: "Ready for the next stretch." },
+          ],
+          close: [
+            { t: "Well done!", b: "Counter closed — nice work." },
+            { t: "Done!", b: "One less thing on the list." },
+            { t: "Nice!", b: "Ready to keep going." },
+          ],
+        }
       };
 
       const closeToast = () => setToastOpen(false);
@@ -281,6 +356,14 @@
       useEffect(() => { localStorage.setItem("stick-extra", JSON.stringify(extraCounters)); }, [extraCounters]);
       useEffect(() => localStorage.setItem("stick-feedback", String(feedbackOn)), [feedbackOn]);
       useEffect(() => localStorage.setItem("stick-lang", lang), [lang]);
+
+      // update document metadata on language change
+      useEffect(() => {
+        document.documentElement.lang = lang;
+        document.title = t("app_title");
+        const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appleTitle) appleTitle.setAttribute("content", t("app_title"));
+      }, [lang]);
 
       // wake lock on/off
       useEffect(() => {
@@ -351,7 +434,8 @@
       }
 
       function celebrate(type) {
-        const list = MESSAGES[type] || MESSAGES.close;
+        const byLang = MESSAGES[lang] || MESSAGES.sv;
+        const list = byLang[type] || byLang.close;
         const pick = list[Math.floor(Math.random() * list.length)];
         setToastTitle(pick.t);
         setToastBody(pick.b);
@@ -480,7 +564,7 @@
       const addExtraCounter = () => {
         const nextIndex = 3 + extraCounters.length + (showSecond ? 0 : 1);
         const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        setExtraCounters([...extraCounters, { id, name:`Räknare ${nextIndex}`, count:0 }]);
+        setExtraCounters([...extraCounters, { id, name:get_default_name(nextIndex, lang), count:0 }]);
       };
       const updateExtra = (id, patch) => setExtraCounters(ec=>ec.map(c=>c.id===id?{...c,...patch}:c));
       const removeExtra = id => {
@@ -500,14 +584,21 @@
                 onClick={() => setLang("sv")}
                 className={`px-3 py-1 rounded-full text-xs border ${lang==="sv" ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-700 border-stone-300"}`}
               >
-                svenska
+                {t("lang_sv")}
               </button>
               <button
                 type="button"
                 onClick={() => setLang("da")}
                 className={`px-3 py-1 rounded-full text-xs border ${lang==="da" ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-700 border-stone-300"}`}
               >
-                dansk
+                {t("lang_da")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang("en")}
+                className={`px-3 py-1 rounded-full text-xs border ${lang==="en" ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-700 border-stone-300"}`}
+              >
+                {t("lang_en")}
               </button>
             </div>
           </header>
@@ -683,7 +774,7 @@
                     <input
                       value={donateMessage}
                       onChange={(e) => setDonateMessage(e.target.value)}
-                      placeholder="tack!"
+                      placeholder="thanks!"
                       className="w-full rounded-lg border border-stone-300 px-3 py-2"
                     />
                   </label>
