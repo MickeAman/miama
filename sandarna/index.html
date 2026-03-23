@@ -6,19 +6,18 @@
 <title>Sandarna P14 – Träningsplanering</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--black:#0d0d0d;--deep:#141414;--card:#1c1c1c;--border:#2a2a2a;--red:#d42b2b;--red-dark:#a01f1f;--red-glow:rgba(212,43,43,0.15);--white:#f0f0f0;--muted:#888;--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html{-webkit-text-size-adjust:100%;}
+  :root{--black:#0d0d0d;--deep:#141414;--card:#1c1c1c;--card2:#222;--border:#2a2a2a;--red:#d42b2b;--red-dark:#a01f1f;--red-glow:rgba(212,43,43,0.15);--white:#f0f0f0;--muted:#888;--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0;}html{-webkit-text-size-adjust:100%;}
   body{background:var(--black);color:var(--white);font-family:var(--fb);min-height:100dvh;}
 
-  /* ── AUTH SCREEN ── */
+  /* AUTH */
   #auth-screen{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
   .auth-box{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:32px 24px;width:100%;max-width:380px;}
   .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
   .auth-crest{width:44px;height:44px;background:var(--red);clip-path:polygon(50% 0%,100% 20%,100% 80%,50% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:13px;color:#fff;flex-shrink:0;}
   .auth-logo h1{font-family:var(--fd);font-weight:900;font-size:24px;letter-spacing:2px;text-transform:uppercase;line-height:1;}
   .auth-logo h1 span{color:var(--red);}
-  .auth-tabs{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+  .auth-tabs{display:flex;margin-bottom:24px;border:1px solid var(--border);border-radius:3px;overflow:hidden;}
   .auth-tab{flex:1;background:none;border:none;color:var(--muted);font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px;cursor:pointer;transition:all .2s;}
   .auth-tab.active{background:var(--red);color:#fff;}
   .auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
@@ -26,10 +25,10 @@
   .auth-field input{background:var(--deep);border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:var(--fb);font-size:16px;padding:11px 12px;outline:none;width:100%;-webkit-appearance:none;transition:border-color .2s;}
   .auth-field input:focus{border-color:var(--red);}
   .auth-error{font-size:13px;color:#e06060;margin-bottom:12px;min-height:18px;}
-  .auth-submit{width:100%;background:var(--red);color:#fff;border:none;border-radius:3px;font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px;cursor:pointer;transition:background .2s;margin-top:4px;}
+  .auth-submit{width:100%;background:var(--red);color:#fff;border:none;border-radius:3px;font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px;cursor:pointer;transition:background .2s;}
   .auth-submit:active{background:var(--red-dark);}
 
-  /* ── HEADER ── */
+  /* HEADER */
   header{background:var(--deep);border-bottom:3px solid var(--red);padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;}
   .crest{width:36px;height:36px;background:var(--red);flex-shrink:0;clip-path:polygon(50% 0%,100% 20%,100% 80%,50% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:11px;color:#fff;}
   header h1{font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;line-height:1;}
@@ -40,19 +39,17 @@
   .btn-signout:active{border-color:var(--red);color:var(--white);}
   .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s;flex-shrink:0;}
   .sync-dot.syncing{background:#e8a000;animation:pulse 1s infinite;}
-  .sync-dot.ok{background:#5ac85a;}
-  .sync-dot.err{background:var(--red);}
+  .sync-dot.ok{background:#5ac85a;}.sync-dot.err{background:var(--red);}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-  /* ── TABS ── */
+  /* TABS */
   .tabs{display:flex;background:var(--deep);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
   .tabs::-webkit-scrollbar{display:none;}
   .tab-btn{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:12px 14px;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;}
   .tab-btn.active{color:var(--red);border-bottom-color:var(--red);}
 
   main{padding:14px;max-width:1100px;margin:0 auto;}
-  .tab-panel{display:none;}
-  .tab-panel.active{display:block;}
+  .tab-panel{display:none;}.tab-panel.active{display:block;}
 
   .section-title{font-family:var(--fd);font-size:22px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
   .section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,var(--red),transparent);}
@@ -77,13 +74,11 @@
   @media(max-width:480px){.form-actions{flex-direction:column-reverse;}.form-actions .btn{width:100%;text-align:center;}}
 
   .btn{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:12px 18px;border:none;border-radius:3px;cursor:pointer;transition:all .2s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-  .btn-primary{background:var(--red);color:#fff;}
-  .btn-primary:active{background:var(--red-dark);}
-  .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
-  .btn-ghost:active{border-color:var(--red);color:var(--white);}
+  .btn-primary{background:var(--red);color:#fff;}.btn-primary:active{background:var(--red-dark);}
+  .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}.btn-ghost:active{border-color:var(--red);color:var(--white);}
   .btn-sm{font-size:11px;padding:8px 12px;letter-spacing:1.2px;}
-  .btn-danger{background:none;border:1px solid #5a1a1a;color:#c06060;}
-  .btn-danger:active{background:#5a1a1a;color:#fff;}
+  .btn-danger{background:none;border:1px solid #5a1a1a;color:#c06060;}.btn-danger:active{background:#5a1a1a;color:#fff;}
+  .btn-warning{background:none;border:1px solid #4a3a00;color:#c8a000;}.btn-warning:active{background:#3a2a00;color:#e8c000;}
 
   .search-input{background:var(--card);border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:var(--fb);font-size:16px;padding:10px 12px;outline:none;width:100%;margin-bottom:10px;-webkit-appearance:none;}
   .search-input:focus{border-color:var(--red);}
@@ -94,12 +89,9 @@
   .filter-pill.active{border-color:var(--red);color:var(--white);background:var(--red-glow);}
 
   .drill-type-badge{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-bottom:8px;}
-  .b-Uppvärmning{background:#2a2a00;color:#c8b800;}
-  .b-Teknik{background:#001a2a;color:#4ab0e8;}
-  .b-Taktik{background:#0a2a00;color:#5ac85a;}
-  .b-Fysik{background:#1a0a2a;color:#a05ae8;}
-  .b-Avslutning{background:#2a0000;color:#e85a5a;}
-  .b-Match{background:#1a1a00;color:#e8a000;}
+  .b-Uppvärmning{background:#2a2a00;color:#c8b800;}.b-Teknik{background:#001a2a;color:#4ab0e8;}
+  .b-Taktik{background:#0a2a00;color:#5ac85a;}.b-Fysik{background:#1a0a2a;color:#a05ae8;}
+  .b-Avslutning{background:#2a0000;color:#e85a5a;}.b-Match{background:#1a1a00;color:#e8a000;}
 
   .drills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
   @media(max-width:600px){.drills-grid{grid-template-columns:1fr;}}
@@ -111,6 +103,17 @@
   .dtag{font-size:11px;background:var(--red-glow);border:1px solid rgba(212,43,43,0.3);color:#e06060;display:inline-block;padding:2px 8px;border-radius:2px;font-family:var(--fd);letter-spacing:1px;text-transform:uppercase;}
   .added-by{font-size:11px;color:#555;margin-top:8px;}
   .drill-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+  /* EDIT MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:flex-end;justify-content:center;padding:0;}
+  @media(min-width:600px){.modal-overlay{align-items:center;padding:20px;}}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:6px 6px 0 0;width:100%;max-width:540px;max-height:90dvh;overflow-y:auto;padding:20px;}
+  @media(min-width:600px){.modal{border-radius:6px;}}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .modal-title{font-family:var(--fd);font-size:20px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
+  .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;line-height:1;-webkit-tap-highlight-color:transparent;}
+  .modal-close:active{color:var(--white);}
+  .modal-overlay.hidden{display:none;}
 
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media(max-width:660px){.two-col{grid-template-columns:1fr;}}
@@ -155,7 +158,7 @@
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-box">
     <div class="auth-logo">
@@ -192,13 +195,59 @@
   <p>Laddar...</p>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="modal-overlay hidden" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Redigera övning</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="field" style="grid-column:1/-1">
+        <label>Namn *</label>
+        <input id="e-name" type="text">
+      </div>
+      <div class="field">
+        <label>Typ *</label>
+        <select id="e-type">
+          <option value="">Välj typ...</option>
+          <option>Uppvärmning</option><option>Teknik</option><option>Taktik</option>
+          <option>Fysik</option><option>Match</option><option>Avslutning</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tid (min) *</label>
+        <input id="e-dur" type="number" min="1" max="120">
+      </div>
+      <div class="field">
+        <label>Spelare</label>
+        <input id="e-players" type="text">
+      </div>
+      <div class="field">
+        <label>Material</label>
+        <input id="e-equip" type="text">
+      </div>
+    </div>
+    <div class="field mt12">
+      <label>Tema / fokusområde</label>
+      <div class="theme-pills" id="edit-theme-pills"></div>
+    </div>
+    <div class="field mt12">
+      <label>Beskrivning</label>
+      <textarea id="e-desc"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Avbryt</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Spara ändringar →</button>
+    </div>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app" style="display:none;">
   <header>
     <div class="crest">SBK</div>
-    <div>
-      <h1>Sandarna <span>P14</span></h1>
-    </div>
+    <div><h1>Sandarna <span>P14</span></h1></div>
     <div class="header-right">
       <span class="user-email" id="user-email-display"></span>
       <button class="btn-signout" onclick="handleSignOut()">Logga ut</button>
@@ -323,14 +372,8 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged, updateProfile
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, deleteDoc, doc,
-  onSnapshot, serverTimestamp, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBi2mrYngEjJDzxmZQaxFdrjT17_-sV0Vw",
@@ -338,19 +381,17 @@ const firebaseConfig = {
   projectId: "sandarna-traningsapp",
   storageBucket: "sandarna-traningsapp.firebasestorage.app",
   messagingSenderId: "829288235305",
-  appId: "1:829288235305:web:ecf9831c1876ae6b81f738",
-  measurementId: "G-75VH4VMMZH"
+  appId: "1:829288235305:web:ecf9831c1876ae6b81f738"
 };
 
-const fbApp  = initializeApp(firebaseConfig);
-const auth   = getAuth(fbApp);
-const db     = getFirestore(fbApp);
+const fbApp = initializeApp(firebaseConfig);
+const auth  = getAuth(fbApp);
+const db    = getFirestore(fbApp);
 
-// ── STATE ──────────────────────────────────────────────
 const THEMES = ['Presspel','Omställning','Passningsspel','Inneslutning','Avslut','Uppspel','Dödbollar','Spelbarhet','Kontra','Rörelse utan boll'];
 let drills = [], sessions = [], sessionDrills = [];
-let activeFilter = 'alla', newTheme = '', sessionTheme = '';
-let currentUser = null;
+let activeFilter = 'alla', newTheme = '', sessionTheme = '', editTheme = '';
+let currentUser = null, editingId = null;
 let unsubDrills = null, unsubSessions = null;
 
 // ── UTILS ──────────────────────────────────────────────
@@ -366,10 +407,10 @@ function showLoading(v) { document.getElementById('loading').style.display = v ?
 let authMode = 'login';
 window.showAuthTab = function(mode) {
   authMode = mode;
-  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-  document.getElementById('tab-register').classList.toggle('active', mode === 'register');
-  document.getElementById('auth-name-field').style.display = mode === 'register' ? 'flex' : 'none';
-  document.getElementById('auth-submit').textContent = mode === 'login' ? 'Logga in' : 'Skapa konto';
+  document.getElementById('tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('tab-register').classList.toggle('active', mode==='register');
+  document.getElementById('auth-name-field').style.display = mode==='register' ? 'flex' : 'none';
+  document.getElementById('auth-submit').textContent = mode==='login' ? 'Logga in' : 'Skapa konto';
   document.getElementById('auth-error').textContent = '';
 };
 
@@ -379,14 +420,12 @@ window.handleAuth = async function() {
   const name     = document.getElementById('auth-name').value.trim();
   const errEl    = document.getElementById('auth-error');
   errEl.textContent = '';
-
-  if (!email || !password) { errEl.textContent = 'Fyll i e-post och lösenord.'; return; }
-  if (authMode === 'register' && !name) { errEl.textContent = 'Fyll i ditt namn.'; return; }
-  if (authMode === 'register' && password.length < 6) { errEl.textContent = 'Lösenordet måste vara minst 6 tecken.'; return; }
-
+  if (!email||!password) { errEl.textContent='Fyll i e-post och lösenord.'; return; }
+  if (authMode==='register'&&!name) { errEl.textContent='Fyll i ditt namn.'; return; }
+  if (authMode==='register'&&password.length<6) { errEl.textContent='Lösenordet måste vara minst 6 tecken.'; return; }
   showLoading(true);
   try {
-    if (authMode === 'register') {
+    if (authMode==='register') {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
     } else {
@@ -394,15 +433,8 @@ window.handleAuth = async function() {
     }
   } catch(e) {
     showLoading(false);
-    const msgs = {
-      'auth/email-already-in-use': 'E-postadressen används redan.',
-      'auth/invalid-email': 'Ogiltig e-postadress.',
-      'auth/wrong-password': 'Fel lösenord.',
-      'auth/user-not-found': 'Inget konto med den e-postadressen.',
-      'auth/invalid-credential': 'Fel e-post eller lösenord.',
-      'auth/too-many-requests': 'För många försök. Försök igen senare.',
-    };
-    errEl.textContent = msgs[e.code] || 'Något gick fel, försök igen.';
+    const msgs = {'auth/email-already-in-use':'E-postadressen används redan.','auth/invalid-email':'Ogiltig e-postadress.','auth/wrong-password':'Fel lösenord.','auth/user-not-found':'Inget konto med den e-postadressen.','auth/invalid-credential':'Fel e-post eller lösenord.','auth/too-many-requests':'För många försök. Försök igen senare.'};
+    errEl.textContent = msgs[e.code]||'Något gick fel, försök igen.';
   }
 };
 
@@ -412,37 +444,29 @@ window.handleSignOut = async function() {
   await signOut(auth);
 };
 
-// ── AUTH STATE ─────────────────────────────────────────
 onAuthStateChanged(auth, user => {
   showLoading(false);
   if (user) {
     currentUser = user;
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    document.getElementById('user-email-display').textContent = user.displayName || user.email;
+    document.getElementById('user-email-display').textContent = user.displayName||user.email;
     startListeners();
   } else {
     currentUser = null;
     document.getElementById('auth-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
-    drills = []; sessions = []; sessionDrills = [];
+    drills=[]; sessions=[]; sessionDrills=[];
   }
 });
 
-// ── FIRESTORE LISTENERS ────────────────────────────────
 function startListeners() {
-  const drillsRef   = collection(db, 'drills');
-  const sessionsRef = collection(db, 'sessions');
-
-  unsubDrills = onSnapshot(query(drillsRef, orderBy('createdAt', 'desc')), snap => {
-    drills = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    setSyncStatus('ok');
-    renderDrills();
-    renderPicker();
+  unsubDrills = onSnapshot(query(collection(db,'drills'), orderBy('createdAt','desc')), snap => {
+    drills = snap.docs.map(d => ({id:d.id,...d.data()}));
+    setSyncStatus('ok'); renderDrills(); renderPicker();
   }, () => setSyncStatus('err'));
-
-  unsubSessions = onSnapshot(query(sessionsRef, orderBy('createdAt', 'desc')), snap => {
-    sessions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  unsubSessions = onSnapshot(query(collection(db,'sessions'), orderBy('createdAt','desc')), snap => {
+    sessions = snap.docs.map(d => ({id:d.id,...d.data()}));
     renderSaved();
   });
 }
@@ -451,23 +475,24 @@ function startListeners() {
 window.switchTab = function(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'ny-ovning') renderThemePills('new-theme-pills', 'new');
-  if (name === 'session') { renderThemePills('session-theme-pills','session'); renderPicker(); renderBuild(); }
-  if (name === 'sparade') renderSaved();
+  if (name==='ny-ovning') renderThemePills('new-theme-pills','new');
+  if (name==='session') { renderThemePills('session-theme-pills','session'); renderPicker(); renderBuild(); }
+  if (name==='sparade') renderSaved();
 };
 
 // ── THEME PILLS ────────────────────────────────────────
 function renderThemePills(id, mode) {
-  const cur = mode === 'new' ? newTheme : sessionTheme;
+  const cur = mode==='new' ? newTheme : mode==='session' ? sessionTheme : editTheme;
   document.getElementById(id).innerHTML = THEMES.map(t =>
     `<button class="theme-pill ${cur===t?'selected':''}" onclick="pickTheme('${t}','${mode}')">${t}</button>`
   ).join('');
 }
 window.pickTheme = function(t, mode) {
-  if (mode === 'new') { newTheme = newTheme===t?'':t; renderThemePills('new-theme-pills','new'); }
-  else { sessionTheme = sessionTheme===t?'':t; renderThemePills('session-theme-pills','session'); }
+  if (mode==='new') { newTheme=newTheme===t?'':t; renderThemePills('new-theme-pills','new'); }
+  else if (mode==='session') { sessionTheme=sessionTheme===t?'':t; renderThemePills('session-theme-pills','session'); }
+  else { editTheme=editTheme===t?'':t; renderThemePills('edit-theme-pills','edit'); }
 };
 renderThemePills('new-theme-pills','new');
 renderThemePills('session-theme-pills','session');
@@ -475,7 +500,7 @@ renderThemePills('session-theme-pills','session');
 // ── DRILL LIBRARY ──────────────────────────────────────
 window.setFilter = function(el, type) {
   document.querySelectorAll('#lib-filters .filter-pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active'); activeFilter = type; renderDrills();
+  el.classList.add('active'); activeFilter=type; renderDrills();
 };
 
 function renderDrills() {
@@ -500,12 +525,65 @@ function renderDrills() {
       <div class="added-by">Tillagd av ${d.addedByName||'Okänd'}</div>
       <div class="drill-actions">
         <button class="btn btn-ghost btn-sm" onclick="toggleSession('${d.id}','lib')">${inS?'✓ Tillagd':'+ Träning'}</button>
+        <button class="btn btn-warning btn-sm" onclick="openEditModal('${d.id}')">✎ Redigera</button>
         <button class="btn btn-danger btn-sm" onclick="deleteDrill('${d.id}')">Ta bort</button>
       </div>
     </div>`;
   }).join('') : `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>Inga övningar hittades.</p></div>`;
 }
 window.renderDrills = renderDrills;
+
+// ── EDIT MODAL ─────────────────────────────────────────
+window.openEditModal = function(id) {
+  const d = drills.find(d => d.id===id); if (!d) return;
+  editingId = id;
+  editTheme = d.theme||'';
+  document.getElementById('e-name').value    = d.name||'';
+  document.getElementById('e-type').value    = d.type||'';
+  document.getElementById('e-dur').value     = d.duration||'';
+  document.getElementById('e-players').value = d.players||'';
+  document.getElementById('e-equip').value   = d.equipment||'';
+  document.getElementById('e-desc').value    = d.desc||'';
+  renderThemePills('edit-theme-pills','edit');
+  document.getElementById('edit-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeEditModal = function() {
+  document.getElementById('edit-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+  editingId = null;
+};
+
+window.saveEdit = async function() {
+  const name = document.getElementById('e-name').value.trim();
+  const type = document.getElementById('e-type').value;
+  const dur  = parseInt(document.getElementById('e-dur').value);
+  if (!name||!type||!dur) { toast('Fyll i namn, typ och tid'); return; }
+  setSyncStatus('syncing');
+  await updateDoc(doc(db,'drills',editingId), {
+    name, type, duration: dur,
+    players:   document.getElementById('e-players').value.trim(),
+    equipment: document.getElementById('e-equip').value.trim(),
+    theme:     editTheme,
+    desc:      document.getElementById('e-desc').value.trim(),
+    editedByName:  currentUser.displayName||currentUser.email,
+    editedAt:      serverTimestamp()
+  });
+  // Update in active session build if present
+  const idx = sessionDrills.findIndex(s => s.id===editingId);
+  if (idx>-1) {
+    sessionDrills[idx] = {...sessionDrills[idx], name, type, duration:dur, theme:editTheme};
+    renderBuild();
+  }
+  closeEditModal();
+  toast('✓ Övning uppdaterad!');
+};
+
+// Close modal on overlay click
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target===document.getElementById('edit-modal')) closeEditModal();
+});
 
 window.deleteDrill = async function(id) {
   if (!confirm('Ta bort övningen? Den försvinner för alla tränare.')) return;
@@ -529,13 +607,13 @@ window.saveDrill = async function() {
   setSyncStatus('syncing');
   await addDoc(collection(db,'drills'), {
     name, type, duration: dur,
-    players:   document.getElementById('d-players').value.trim(),
-    equipment: document.getElementById('d-equip').value.trim(),
-    theme: newTheme,
-    desc:  document.getElementById('d-desc').value.trim(),
-    addedByName:  currentUser.displayName || currentUser.email,
+    players:      document.getElementById('d-players').value.trim(),
+    equipment:    document.getElementById('d-equip').value.trim(),
+    theme:        newTheme,
+    desc:         document.getElementById('d-desc').value.trim(),
+    addedByName:  currentUser.displayName||currentUser.email,
     addedByEmail: currentUser.email,
-    createdAt: serverTimestamp()
+    createdAt:    serverTimestamp()
   });
   window.clearDrillForm();
   toast('✓ Övning sparad och delad!');
@@ -562,7 +640,7 @@ window.renderPicker = renderPicker;
 window.toggleSession = function(id, from) {
   const idx = sessionDrills.findIndex(d => d.id===id);
   if (idx>-1) sessionDrills.splice(idx,1);
-  else { const d = drills.find(d => d.id===id); if(d) sessionDrills.push({...d}); }
+  else { const d=drills.find(d => d.id===id); if(d) sessionDrills.push({...d}); }
   renderPicker(); renderBuild();
   if (from==='lib') renderDrills();
 };
@@ -572,11 +650,11 @@ function renderBuild() {
   const tEl = document.getElementById('session-time');
   if (!el) return;
   if (!sessionDrills.length) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Välj övningar från listan</p></div>`;
-    if (tEl) tEl.textContent=''; return;
+    el.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>Välj övningar från listan</p></div>`;
+    if(tEl) tEl.textContent=''; return;
   }
   const total = sessionDrills.reduce((s,d) => s+(d.duration||0), 0);
-  if (tEl) tEl.textContent = `${total} min`;
+  if (tEl) tEl.textContent=`${total} min`;
   el.innerHTML = sessionDrills.map((d,i) => `
     <div class="session-item">
       <div class="snum">${i+1}</div>
@@ -591,15 +669,15 @@ function renderBuild() {
 window.removeBuild = function(i) { sessionDrills.splice(i,1); renderPicker(); renderBuild(); };
 
 window.saveSession = async function() {
-  const name = document.getElementById('s-name').value.trim() || 'Träning ' + new Date().toLocaleDateString('sv-SE');
-  const date = document.getElementById('s-date').value || new Date().toISOString().split('T')[0];
+  const name = document.getElementById('s-name').value.trim()||'Träning '+new Date().toLocaleDateString('sv-SE');
+  const date = document.getElementById('s-date').value||new Date().toISOString().split('T')[0];
   if (!sessionDrills.length) { toast('Lägg till minst en övning'); return; }
   setSyncStatus('syncing');
   await addDoc(collection(db,'sessions'), {
     name, date, theme: sessionTheme,
-    drills: sessionDrills.map(d => ({ id:d.id, name:d.name, type:d.type, duration:d.duration, theme:d.theme||'' })),
+    drills: sessionDrills.map(d => ({id:d.id,name:d.name,type:d.type,duration:d.duration,theme:d.theme||''})),
     totalTime: sessionDrills.reduce((s,d) => s+(d.duration||0), 0),
-    addedByName:  currentUser.displayName || currentUser.email,
+    addedByName:  currentUser.displayName||currentUser.email,
     addedByEmail: currentUser.email,
     createdAt: serverTimestamp()
   });
@@ -615,7 +693,7 @@ window.saveSession = async function() {
 function renderSaved() {
   const g = document.getElementById('saved-grid'); if (!g) return;
   if (!sessions.length) {
-    g.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">💾</div><p>Inga sparade träningar ännu.</p></div>`;
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">💾</div><p>Inga sparade träningar ännu.</p></div>`;
     return;
   }
   g.innerHTML = sessions.map(s => `
@@ -659,7 +737,6 @@ window.deleteSession = async function(id) {
   await deleteDoc(doc(db,'sessions',id));
   toast('Träning borttagen');
 };
-
 </script>
 </body>
 </html>
