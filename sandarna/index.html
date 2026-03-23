@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sandarna P14 – Träningsplanering</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:#0d0d0d;--deep:#141414;--card:#1c1c1c;--border:#2a2a2a;
+    --red:#d42b2b;--red-dark:#a01f1f;--red-glow:rgba(212,43,43,0.15);
+    --white:#f0f0f0;--muted:#888;
+    --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{background:var(--black);color:var(--white);font-family:var(--fb);min-height:100dvh;}
+
+  header{background:var(--deep);border-bottom:3px solid var(--red);padding:10px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+  .crest{width:38px;height:38px;background:var(--red);flex-shrink:0;clip-path:polygon(50% 0%,100% 20%,100% 80%,50% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:12px;color:#fff;}
+  header h1{font-family:var(--fd);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;line-height:1;}
+  header h1 span{color:var(--red);}
+  header p{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+
+  .tabs{display:flex;background:var(--deep);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:12px 14px;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+  .tab-btn.active{color:var(--red);border-bottom-color:var(--red);}
+
+  main{padding:14px;max-width:1100px;margin:0 auto;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .section-title{font-family:var(--fd);font-size:22px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  .section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,var(--red),transparent);}
+
+  .form-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:16px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+  @media(max-width:560px){.form-grid,.form-grid.three{grid-template-columns:1fr;}}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;}
+  .field input,.field select,.field textarea{background:var(--deep);border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:var(--fb);font-size:16px;padding:10px 12px;outline:none;width:100%;-webkit-appearance:none;transition:border-color .2s;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);}
+  .field textarea{resize:vertical;min-height:80px;}
+  .field select option{background:var(--deep);}
+  .mt12{margin-top:12px;}
+
+  .theme-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .theme-pill{padding:7px 11px;border:1px solid var(--border);border-radius:2px;font-size:11px;font-family:var(--fd);font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;background:none;color:var(--muted);transition:all .15s;-webkit-tap-highlight-color:transparent;}
+  .theme-pill.selected{background:var(--red);border-color:var(--red);color:#fff;}
+
+  .form-actions{display:flex;gap:10px;margin-top:14px;justify-content:flex-end;}
+  @media(max-width:480px){.form-actions{flex-direction:column-reverse;}.form-actions .btn{width:100%;text-align:center;}}
+
+  .btn{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:12px 18px;border:none;border-radius:3px;cursor:pointer;transition:all .2s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+  .btn-primary{background:var(--red);color:#fff;}
+  .btn-primary:active{background:var(--red-dark);}
+  .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+  .btn-ghost:active{border-color:var(--red);color:var(--white);}
+  .btn-sm{font-size:11px;padding:8px 12px;letter-spacing:1.2px;}
+  .btn-danger{background:none;border:1px solid #5a1a1a;color:#c06060;}
+  .btn-danger:active{background:#5a1a1a;color:#fff;}
+
+  .search-input{background:var(--card);border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:var(--fb);font-size:16px;padding:10px 12px;outline:none;width:100%;margin-bottom:10px;-webkit-appearance:none;}
+  .search-input:focus{border-color:var(--red);}
+
+  .pills-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:14px;}
+  .pills-scroll::-webkit-scrollbar{display:none;}
+  .filter-pill{flex-shrink:0;padding:8px 13px;border:1px solid var(--border);border-radius:2px;font-size:11px;font-family:var(--fd);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;background:none;color:var(--muted);white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  .filter-pill.active{border-color:var(--red);color:var(--white);background:var(--red-glow);}
+
+  .drill-type-badge{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-bottom:8px;}
+  .b-Uppvärmning{background:#2a2a00;color:#c8b800;}
+  .b-Teknik{background:#001a2a;color:#4ab0e8;}
+  .b-Taktik{background:#0a2a00;color:#5ac85a;}
+  .b-Fysik{background:#1a0a2a;color:#a05ae8;}
+  .b-Avslutning{background:#2a0000;color:#e85a5a;}
+  .b-Match{background:#1a1a00;color:#e8a000;}
+
+  .drills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  @media(max-width:600px){.drills-grid{grid-template-columns:1fr;}}
+  .drill-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:14px;transition:border-color .2s;}
+  .drill-card.in-session{border-color:var(--red);background:#1f1212;}
+  .drill-card h3{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:5px;}
+  .drill-meta{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:10px;}
+  .drill-desc{font-size:13px;color:#aaa;line-height:1.5;margin-bottom:10px;}
+  .dtag{font-size:11px;background:var(--red-glow);border:1px solid rgba(212,43,43,0.3);color:#e06060;display:inline-block;padding:2px 8px;border-radius:2px;font-family:var(--fd);letter-spacing:1px;text-transform:uppercase;}
+  .drill-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:660px){.two-col{grid-template-columns:1fr;}}
+  .col-label{font-family:var(--fd);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+
+  .picker-list{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;}
+  .picker-item{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:11px 13px;display:flex;align-items:center;gap:10px;}
+  .picker-item.in-session{border-color:var(--red);}
+  .picker-item-info{flex:1;min-width:0;}
+  .picker-item-name{font-family:var(--fd);font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .picker-item-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .session-list{display:flex;flex-direction:column;gap:8px;}
+  .session-item{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:11px 13px;display:flex;align-items:center;gap:10px;}
+  .snum{width:26px;height:26px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;font-weight:900;flex-shrink:0;}
+  .session-item-info{flex:1;min-width:0;}
+  .session-item-name{font-family:var(--fd);font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .session-item-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .empty-state{text-align:center;padding:36px 16px;color:var(--muted);border:1px dashed var(--border);border-radius:4px;}
+  .empty-state .icon{font-size:36px;margin-bottom:8px;}
+  .empty-state p{font-size:13px;}
+
+  .saved-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  @media(max-width:600px){.saved-grid{grid-template-columns:1fr;}}
+  .saved-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px;}
+  .saved-card h3{font-family:var(--fd);font-size:19px;font-weight:900;margin-bottom:6px;}
+  .saved-card .meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
+  .saved-card .dlist{font-size:12px;color:#aaa;line-height:1.9;}
+  .saved-card-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+  .flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--red);color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;border-radius:3px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crest">SBK</div>
+  <div>
+    <h1>Sandarna <span>P14</span></h1>
+    <p>Träningsplanering</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('bibliotek',this)">📚 Bibliotek</button>
+  <button class="tab-btn" onclick="switchTab('ny-ovning',this)">➕ Ny övning</button>
+  <button class="tab-btn" onclick="switchTab('session',this)">⚽ Bygg träning</button>
+  <button class="tab-btn" onclick="switchTab('sparade',this)">💾 Sparade</button>
+</div>
+
+<main>
+  <!-- BIBLIOTEK -->
+  <div id="tab-bibliotek" class="tab-panel active">
+    <div class="section-title">Övningsbibliotek</div>
+    <input class="search-input" id="lib-search" placeholder="🔍  Sök övning..." oninput="renderDrills()">
+    <div class="pills-scroll" id="lib-filters">
+      <button class="filter-pill active" onclick="setFilter(this,'alla')">Alla</button>
+      <button class="filter-pill" onclick="setFilter(this,'Uppvärmning')">Uppvärmning</button>
+      <button class="filter-pill" onclick="setFilter(this,'Teknik')">Teknik</button>
+      <button class="filter-pill" onclick="setFilter(this,'Taktik')">Taktik</button>
+      <button class="filter-pill" onclick="setFilter(this,'Fysik')">Fysik</button>
+      <button class="filter-pill" onclick="setFilter(this,'Match')">Match</button>
+      <button class="filter-pill" onclick="setFilter(this,'Avslutning')">Avslutning</button>
+    </div>
+    <div class="drills-grid" id="drills-grid"></div>
+  </div>
+
+  <!-- NY ÖVNING -->
+  <div id="tab-ny-ovning" class="tab-panel">
+    <div class="section-title">Ny övning</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1">
+          <label>Namn *</label>
+          <input id="d-name" placeholder="t.ex. Passningstriangel" type="text">
+        </div>
+        <div class="field">
+          <label>Typ *</label>
+          <select id="d-type">
+            <option value="">Välj typ...</option>
+            <option>Uppvärmning</option><option>Teknik</option><option>Taktik</option>
+            <option>Fysik</option><option>Match</option><option>Avslutning</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tid (min) *</label>
+          <input id="d-dur" type="number" placeholder="15" min="1" max="120">
+        </div>
+        <div class="field">
+          <label>Spelare</label>
+          <input id="d-players" placeholder="t.ex. 8–12" type="text">
+        </div>
+        <div class="field">
+          <label>Material</label>
+          <input id="d-equip" placeholder="Bollar, koner..." type="text">
+        </div>
+      </div>
+      <div class="field mt12">
+        <label>Tema / fokusområde</label>
+        <div class="theme-pills" id="new-theme-pills"></div>
+      </div>
+      <div class="field mt12">
+        <label>Beskrivning</label>
+        <textarea id="d-desc" placeholder="Hur går övningen till? Vad ska tränaren titta på? Progression?"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="clearDrillForm()">Rensa</button>
+        <button class="btn btn-primary" onclick="saveDrill()">Spara övning →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BYGG TRÄNING -->
+  <div id="tab-session" class="tab-panel">
+    <div class="section-title">Bygg träning</div>
+    <div class="form-card">
+      <div class="form-grid three">
+        <div class="field">
+          <label>Namn på träning</label>
+          <input id="s-name" placeholder="t.ex. Presspel & kontra" type="text">
+        </div>
+        <div class="field">
+          <label>Datum</label>
+          <input id="s-date" type="date">
+        </div>
+        <div class="field">
+          <label>Tema</label>
+          <div class="theme-pills" id="session-theme-pills" style="margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-between">
+      <div class="section-title" style="margin-bottom:0;">Välj övningar</div>
+      <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Spara träning</button>
+    </div>
+
+    <input class="search-input" id="s-search" placeholder="🔍  Sök övning..." oninput="renderPicker()">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Tillgängliga övningar</div>
+        <div class="picker-list" id="picker-list"></div>
+      </div>
+      <div>
+        <div class="col-label">
+          Träningsplan
+          <span id="session-time" style="color:var(--red);margin-left:8px;"></span>
+        </div>
+        <div class="session-list" id="session-build"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPARADE -->
+  <div id="tab-sparade" class="tab-panel">
+    <div class="section-title">Sparade träningar</div>
+    <div class="saved-grid" id="saved-grid"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const THEMES=['Presspel','Omställning','Passningsspel','Inneslutning','Avslut','Uppspel','Dödbollar','Spelbarhet','Kontra','Rörelse utan boll'];
+let drills=JSON.parse(localStorage.getItem('sbk-drills')||'[]');
+let sessions=JSON.parse(localStorage.getItem('sbk-sessions')||'[]');
+let sessionDrills=[],activeFilter='alla',newTheme='',sessionTheme='';
+
+function uid(){return Math.random().toString(36).substr(2,9);}
+function persist(){localStorage.setItem('sbk-drills',JSON.stringify(drills));localStorage.setItem('sbk-sessions',JSON.stringify(sessions));}
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000);}
+
+if(!drills.length){
+  drills=[
+    {id:uid(),name:'Rondo 4v1',type:'Uppvärmning',duration:10,players:'5–10',equipment:'Bollar, koner',theme:'Passningsspel',desc:'Fyra spelare håller bollen mot en försvarare. Snabba beröringar, kommunikation.'},
+    {id:uid(),name:'Pressmönster 4-4-2',type:'Taktik',duration:20,players:'11–14',equipment:'Västar, bollar',theme:'Presspel',desc:'Kompakt 4-4-2. Signal för press vid back. Täckning och trigger-övning.'},
+    {id:uid(),name:'Avslut med täckning',type:'Teknik',duration:15,players:'6–10',equipment:'Bollar, mål, koner',theme:'Avslut',desc:'Löpvändning följt av avslut. Variera med backpass och volleyavslut.'},
+    {id:uid(),name:'7v7 med kontraregler',type:'Match',duration:25,players:'14',equipment:'Västar, bollar, mål',theme:'Kontra',desc:'Halvplansform. Max 4 passningar efter bollvinst. Snabb omvandling.'},
+    {id:uid(),name:'Stretching & nedvarvning',type:'Avslutning',duration:8,players:'Hela laget',equipment:'Ingen',theme:'Spelbarhet',desc:'Statisk och dynamisk stretching. Samling och reflektion.'},
+  ];
+  persist();
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='bibliotek')renderDrills();
+  if(name==='ny-ovning')renderThemePills('new-theme-pills','new');
+  if(name==='session'){renderThemePills('session-theme-pills','session');renderPicker();renderBuild();}
+  if(name==='sparade')renderSaved();
+}
+
+function renderThemePills(id,mode){
+  const cur=mode==='new'?newTheme:sessionTheme;
+  document.getElementById(id).innerHTML=THEMES.map(t=>`<button class="theme-pill ${cur===t?'selected':''}" onclick="pickTheme('${t}','${mode}')">${t}</button>`).join('');
+}
+function pickTheme(t,mode){
+  if(mode==='new'){newTheme=newTheme===t?'':t;renderThemePills('new-theme-pills','new');}
+  else{sessionTheme=sessionTheme===t?'':t;renderThemePills('session-theme-pills','session');}
+}
+renderThemePills('new-theme-pills','new');
+renderThemePills('session-theme-pills','session');
+
+function setFilter(el,type){
+  document.querySelectorAll('#lib-filters .filter-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');activeFilter=type;renderDrills();
+}
+function renderDrills(){
+  const q=(document.getElementById('lib-search')?.value||'').toLowerCase();
+  const list=drills.filter(d=>(activeFilter==='alla'||d.type===activeFilter)&&(!q||d.name.toLowerCase().includes(q)||(d.theme||'').toLowerCase().includes(q)||(d.desc||'').toLowerCase().includes(q)));
+  const g=document.getElementById('drills-grid');if(!g)return;
+  g.innerHTML=list.length?list.map(d=>{
+    const inS=sessionDrills.some(s=>s.id===d.id);
+    return `<div class="drill-card ${inS?'in-session':''}">
+      <span class="drill-type-badge b-${d.type}">${d.type}</span>
+      <h3>${d.name}</h3>
+      <div class="drill-meta"><span>⏱ ${d.duration} min</span>${d.players?`<span>👥 ${d.players}</span>`:''}${d.equipment?`<span>🎒 ${d.equipment}</span>`:''}</div>
+      ${d.desc?`<div class="drill-desc">${d.desc}</div>`:''}
+      ${d.theme?`<span class="dtag">${d.theme}</span>`:''}
+      <div class="drill-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleSession('${d.id}','lib')">${inS?'✓ Tillagd':'+ Träning'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDrill('${d.id}')">Ta bort</button>
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>Inga övningar hittades.</p></div>`;
+}
+
+function deleteDrill(id){
+  if(!confirm('Ta bort övningen?'))return;
+  drills=drills.filter(d=>d.id!==id);sessionDrills=sessionDrills.filter(d=>d.id!==id);
+  persist();renderDrills();renderPicker();renderBuild();toast('Övning borttagen');
+}
+function clearDrillForm(){
+  ['d-name','d-dur','d-players','d-equip','d-desc'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});
+  document.getElementById('d-type').value='';newTheme='';renderThemePills('new-theme-pills','new');
+}
+function saveDrill(){
+  const name=document.getElementById('d-name').value.trim();
+  const type=document.getElementById('d-type').value;
+  const dur=parseInt(document.getElementById('d-dur').value);
+  if(!name||!type||!dur){toast('Fyll i namn, typ och tid');return;}
+  drills.unshift({id:uid(),name,type,duration:dur,
+    players:document.getElementById('d-players').value.trim(),
+    equipment:document.getElementById('d-equip').value.trim(),
+    theme:newTheme,desc:document.getElementById('d-desc').value.trim()
+  });
+  persist();clearDrillForm();toast('✓ Övning sparad!');
+}
+
+function renderPicker(){
+  const q=(document.getElementById('s-search')?.value||'').toLowerCase();
+  const list=drills.filter(d=>!q||d.name.toLowerCase().includes(q)||(d.theme||'').toLowerCase().includes(q));
+  const el=document.getElementById('picker-list');if(!el)return;
+  el.innerHTML=list.length?list.map(d=>{
+    const inS=sessionDrills.some(s=>s.id===d.id);
+    return `<div class="picker-item ${inS?'in-session':''}">
+      <div class="picker-item-info">
+        <div class="picker-item-name">${d.name}</div>
+        <div class="picker-item-meta">${d.type} · ${d.duration} min${d.theme?' · '+d.theme:''}</div>
+      </div>
+      <button class="btn ${inS?'btn-primary':'btn-ghost'} btn-sm" onclick="toggleSession('${d.id}','picker')">${inS?'✓':'+'}</button>
+    </div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:13px;padding:12px;">Inga övningar.</div>`;
+}
+function toggleSession(id,from){
+  const idx=sessionDrills.findIndex(d=>d.id===id);
+  if(idx>-1)sessionDrills.splice(idx,1);
+  else{const d=drills.find(d=>d.id===id);if(d)sessionDrills.push({...d});}
+  renderPicker();renderBuild();if(from==='lib')renderDrills();
+}
+function renderBuild(){
+  const el=document.getElementById('session-build');
+  const tEl=document.getElementById('session-time');
+  if(!el)return;
+  if(!sessionDrills.length){
+    el.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>Välj övningar från listan</p></div>`;
+    if(tEl)tEl.textContent='';return;
+  }
+  const total=sessionDrills.reduce((s,d)=>s+(d.duration||0),0);
+  if(tEl)tEl.textContent=`${total} min`;
+  el.innerHTML=sessionDrills.map((d,i)=>`
+    <div class="session-item">
+      <div class="snum">${i+1}</div>
+      <div class="session-item-info">
+        <div class="session-item-name">${d.name}</div>
+        <div class="session-item-meta">${d.type} · ${d.duration} min${d.theme?' · '+d.theme:''}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeBuild(${i})">✕</button>
+    </div>`).join('');
+}
+function removeBuild(i){sessionDrills.splice(i,1);renderPicker();renderBuild();}
+function saveSession(){
+  const name=document.getElementById('s-name').value.trim()||'Träning '+new Date().toLocaleDateString('sv-SE');
+  const date=document.getElementById('s-date').value||new Date().toISOString().split('T')[0];
+  if(!sessionDrills.length){toast('Lägg till minst en övning');return;}
+  sessions.unshift({id:uid(),name,date,theme:sessionTheme,drills:[...sessionDrills],
+    totalTime:sessionDrills.reduce((s,d)=>s+(d.duration||0),0),createdAt:new Date().toISOString()});
+  persist();
+  sessionDrills=[];document.getElementById('s-name').value='';document.getElementById('s-date').value='';
+  sessionTheme='';renderThemePills('session-theme-pills','session');
+  renderPicker();renderBuild();toast('✓ Träning sparad!');
+}
+
+function renderSaved(){
+  const g=document.getElementById('saved-grid');if(!g)return;
+  if(!sessions.length){g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">💾</div><p>Inga sparade träningar ännu.</p></div>`;return;}
+  g.innerHTML=sessions.map(s=>`
+    <div class="saved-card">
+      <h3>${s.name}</h3>
+      <div class="meta">
+        <span>📅 ${new Date(s.date).toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'short'})}</span>
+        <span>⏱ ${s.totalTime} min</span>
+      </div>
+      ${s.theme?`<span class="dtag">${s.theme}</span><br>`:''}
+      <div class="dlist" style="margin-top:8px;">${s.drills.map((d,i)=>`${i+1}. ${d.name}`).join('<br>')}</div>
+      <div class="saved-card-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadSession('${s.id}')">↗ Ladda</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSession('${s.id}')">Ta bort</button>
+      </div>
+    </div>`).join('');
+}
+function loadSession(id){
+  const s=sessions.find(s=>s.id===id);if(!s)return;
+  sessionDrills=[...s.drills];
+  document.getElementById('s-name').value=s.name;
+  document.getElementById('s-date').value=s.date;
+  sessionTheme=s.theme||'';
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-session').classList.add('active');
+  document.querySelectorAll('.tab-btn')[2].classList.add('active');
+  renderThemePills('session-theme-pills','session');
+  renderPicker();renderBuild();toast('Träning laddad!');
+}
+function deleteSession(id){
+  if(!confirm('Ta bort sparad träning?'))return;
+  sessions=sessions.filter(s=>s.id!==id);persist();renderSaved();toast('Träning borttagen');
+}
+
+renderDrills();
+</script>
+</body>
+</html>
