@@ -6,12 +6,7 @@
 <title>Sandarna P14 – Träningsplanering</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black:#0d0d0d;--deep:#141414;--card:#1c1c1c;--border:#2a2a2a;
-    --red:#d42b2b;--red-dark:#a01f1f;--red-glow:rgba(212,43,43,0.15);
-    --white:#f0f0f0;--muted:#888;
-    --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
-  }
+  :root{--black:#0d0d0d;--deep:#141414;--card:#1c1c1c;--border:#2a2a2a;--red:#d42b2b;--red-dark:#a01f1f;--red-glow:rgba(212,43,43,0.15);--white:#f0f0f0;--muted:#888;--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
   *{box-sizing:border-box;margin:0;padding:0;}
   html{-webkit-text-size-adjust:100%;}
   body{background:var(--black);color:var(--white);font-family:var(--fb);min-height:100dvh;}
@@ -21,6 +16,11 @@
   header h1{font-family:var(--fd);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;line-height:1;}
   header h1 span{color:var(--red);}
   header p{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);margin-left:auto;flex-shrink:0;transition:background .3s;}
+  .sync-dot.syncing{background:#e8a000;animation:pulse 1s infinite;}
+  .sync-dot.ok{background:#5ac85a;}
+  .sync-dot.err{background:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
   .tabs{display:flex;background:var(--deep);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
   .tabs::-webkit-scrollbar{display:none;}
@@ -120,11 +120,21 @@
 
   .flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
 
+  .loading-overlay{position:fixed;inset:0;background:rgba(13,13,13,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px;}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-overlay p{font-family:var(--fd);font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--red);color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;border-radius:3px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p>Ansluter till databasen...</p>
+</div>
 
 <header>
   <div class="crest">SBK</div>
@@ -132,6 +142,7 @@
     <h1>Sandarna <span>P14</span></h1>
     <p>Träningsplanering</p>
   </div>
+  <div class="sync-dot" id="sync-dot" title="Databasstatus"></div>
 </header>
 
 <div class="tabs">
@@ -222,24 +233,18 @@
         </div>
       </div>
     </div>
-
     <div class="flex-between">
       <div class="section-title" style="margin-bottom:0;">Välj övningar</div>
       <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Spara träning</button>
     </div>
-
     <input class="search-input" id="s-search" placeholder="🔍  Sök övning..." oninput="renderPicker()">
-
     <div class="two-col">
       <div>
         <div class="col-label">Tillgängliga övningar</div>
         <div class="picker-list" id="picker-list"></div>
       </div>
       <div>
-        <div class="col-label">
-          Träningsplan
-          <span id="session-time" style="color:var(--red);margin-left:8px;"></span>
-        </div>
+        <div class="col-label">Träningsplan <span id="session-time" style="color:var(--red);margin-left:8px;"></span></div>
         <div class="session-list" id="session-build"></div>
       </div>
     </div>
@@ -254,63 +259,113 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
-const THEMES=['Presspel','Omställning','Passningsspel','Inneslutning','Avslut','Uppspel','Dödbollar','Spelbarhet','Kontra','Rörelse utan boll'];
-let drills=JSON.parse(localStorage.getItem('sbk-drills')||'[]');
-let sessions=JSON.parse(localStorage.getItem('sbk-sessions')||'[]');
-let sessionDrills=[],activeFilter='alla',newTheme='',sessionTheme='';
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, addDoc, deleteDoc, doc,
+  onSnapshot, serverTimestamp, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-function uid(){return Math.random().toString(36).substr(2,9);}
-function persist(){localStorage.setItem('sbk-drills',JSON.stringify(drills));localStorage.setItem('sbk-sessions',JSON.stringify(sessions));}
-function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000);}
+const firebaseConfig = {
+  apiKey: "AIzaSyBi2mrYngEjJDzxmZQaxFdrjT17_-sV0Vw",
+  authDomain: "sandarna-traningsapp.firebaseapp.com",
+  projectId: "sandarna-traningsapp",
+  storageBucket: "sandarna-traningsapp.firebasestorage.app",
+  messagingSenderId: "829288235305",
+  appId: "1:829288235305:web:ecf9831c1876ae6b81f738",
+  measurementId: "G-75VH4VMMZH"
+};
 
-if(!drills.length){
-  drills=[
-    {id:uid(),name:'Rondo 4v1',type:'Uppvärmning',duration:10,players:'5–10',equipment:'Bollar, koner',theme:'Passningsspel',desc:'Fyra spelare håller bollen mot en försvarare. Snabba beröringar, kommunikation.'},
-    {id:uid(),name:'Pressmönster 4-4-2',type:'Taktik',duration:20,players:'11–14',equipment:'Västar, bollar',theme:'Presspel',desc:'Kompakt 4-4-2. Signal för press vid back. Täckning och trigger-övning.'},
-    {id:uid(),name:'Avslut med täckning',type:'Teknik',duration:15,players:'6–10',equipment:'Bollar, mål, koner',theme:'Avslut',desc:'Löpvändning följt av avslut. Variera med backpass och volleyavslut.'},
-    {id:uid(),name:'7v7 med kontraregler',type:'Match',duration:25,players:'14',equipment:'Västar, bollar, mål',theme:'Kontra',desc:'Halvplansform. Max 4 passningar efter bollvinst. Snabb omvandling.'},
-    {id:uid(),name:'Stretching & nedvarvning',type:'Avslutning',duration:8,players:'Hela laget',equipment:'Ingen',theme:'Spelbarhet',desc:'Statisk och dynamisk stretching. Samling och reflektion.'},
-  ];
-  persist();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── STATE ──────────────────────────────────────────────
+const THEMES = ['Presspel','Omställning','Passningsspel','Inneslutning','Avslut','Uppspel','Dödbollar','Spelbarhet','Kontra','Rörelse utan boll'];
+let drills = [], sessions = [], sessionDrills = [];
+let activeFilter = 'alla', newTheme = '', sessionTheme = '';
+
+const syncDot = document.getElementById('sync-dot');
+function setSyncStatus(s) {
+  syncDot.className = 'sync-dot ' + s;
 }
 
-function switchTab(name,btn){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+function toast(msg) {
+  const e = document.getElementById('toast');
+  e.textContent = msg; e.classList.add('show');
+  setTimeout(() => e.classList.remove('show'), 2200);
+}
+
+// ── FIRESTORE LISTENERS (real-time) ────────────────────
+const drillsRef = collection(db, 'drills');
+const sessionsRef = collection(db, 'sessions');
+
+onSnapshot(query(drillsRef, orderBy('createdAt', 'desc')), snap => {
+  drills = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  setSyncStatus('ok');
+  renderDrills();
+  renderPicker();
+  document.getElementById('loading').style.display = 'none';
+}, err => {
+  console.error(err);
+  setSyncStatus('err');
+  document.getElementById('loading').style.display = 'none';
+  toast('Kunde inte ansluta till databasen');
+});
+
+onSnapshot(query(sessionsRef, orderBy('createdAt', 'desc')), snap => {
+  sessions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderSaved();
+});
+
+// ── TABS ───────────────────────────────────────────────
+window.switchTab = function(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
-  if(name==='bibliotek')renderDrills();
-  if(name==='ny-ovning')renderThemePills('new-theme-pills','new');
-  if(name==='session'){renderThemePills('session-theme-pills','session');renderPicker();renderBuild();}
-  if(name==='sparade')renderSaved();
-}
+  if (name === 'ny-ovning') renderThemePills('new-theme-pills', 'new');
+  if (name === 'session') { renderThemePills('session-theme-pills', 'session'); renderPicker(); renderBuild(); }
+  if (name === 'sparade') renderSaved();
+};
 
-function renderThemePills(id,mode){
-  const cur=mode==='new'?newTheme:sessionTheme;
-  document.getElementById(id).innerHTML=THEMES.map(t=>`<button class="theme-pill ${cur===t?'selected':''}" onclick="pickTheme('${t}','${mode}')">${t}</button>`).join('');
+// ── THEME PILLS ────────────────────────────────────────
+function renderThemePills(id, mode) {
+  const cur = mode === 'new' ? newTheme : sessionTheme;
+  document.getElementById(id).innerHTML = THEMES.map(t =>
+    `<button class="theme-pill ${cur===t?'selected':''}" onclick="pickTheme('${t}','${mode}')">${t}</button>`
+  ).join('');
 }
-function pickTheme(t,mode){
-  if(mode==='new'){newTheme=newTheme===t?'':t;renderThemePills('new-theme-pills','new');}
-  else{sessionTheme=sessionTheme===t?'':t;renderThemePills('session-theme-pills','session');}
-}
-renderThemePills('new-theme-pills','new');
-renderThemePills('session-theme-pills','session');
+window.pickTheme = function(t, mode) {
+  if (mode === 'new') { newTheme = newTheme === t ? '' : t; renderThemePills('new-theme-pills', 'new'); }
+  else { sessionTheme = sessionTheme === t ? '' : t; renderThemePills('session-theme-pills', 'session'); }
+};
+renderThemePills('new-theme-pills', 'new');
+renderThemePills('session-theme-pills', 'session');
 
-function setFilter(el,type){
-  document.querySelectorAll('#lib-filters .filter-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');activeFilter=type;renderDrills();
-}
-function renderDrills(){
-  const q=(document.getElementById('lib-search')?.value||'').toLowerCase();
-  const list=drills.filter(d=>(activeFilter==='alla'||d.type===activeFilter)&&(!q||d.name.toLowerCase().includes(q)||(d.theme||'').toLowerCase().includes(q)||(d.desc||'').toLowerCase().includes(q)));
-  const g=document.getElementById('drills-grid');if(!g)return;
-  g.innerHTML=list.length?list.map(d=>{
-    const inS=sessionDrills.some(s=>s.id===d.id);
+// ── DRILL LIBRARY ──────────────────────────────────────
+window.setFilter = function(el, type) {
+  document.querySelectorAll('#lib-filters .filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active'); activeFilter = type; renderDrills();
+};
+
+function renderDrills() {
+  const q = (document.getElementById('lib-search')?.value || '').toLowerCase();
+  const list = drills.filter(d =>
+    (activeFilter === 'alla' || d.type === activeFilter) &&
+    (!q || d.name.toLowerCase().includes(q) || (d.theme||'').toLowerCase().includes(q) || (d.desc||'').toLowerCase().includes(q))
+  );
+  const g = document.getElementById('drills-grid'); if (!g) return;
+  g.innerHTML = list.length ? list.map(d => {
+    const inS = sessionDrills.some(s => s.id === d.id);
     return `<div class="drill-card ${inS?'in-session':''}">
       <span class="drill-type-badge b-${d.type}">${d.type}</span>
       <h3>${d.name}</h3>
-      <div class="drill-meta"><span>⏱ ${d.duration} min</span>${d.players?`<span>👥 ${d.players}</span>`:''}${d.equipment?`<span>🎒 ${d.equipment}</span>`:''}</div>
+      <div class="drill-meta">
+        <span>⏱ ${d.duration} min</span>
+        ${d.players?`<span>👥 ${d.players}</span>`:''}
+        ${d.equipment?`<span>🎒 ${d.equipment}</span>`:''}
+      </div>
       ${d.desc?`<div class="drill-desc">${d.desc}</div>`:''}
       ${d.theme?`<span class="dtag">${d.theme}</span>`:''}
       <div class="drill-actions">
@@ -318,37 +373,50 @@ function renderDrills(){
         <button class="btn btn-danger btn-sm" onclick="deleteDrill('${d.id}')">Ta bort</button>
       </div>
     </div>`;
-  }).join(''):`<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>Inga övningar hittades.</p></div>`;
+  }).join('') : `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>Inga övningar hittades.</p></div>`;
 }
+window.renderDrills = renderDrills;
 
-function deleteDrill(id){
-  if(!confirm('Ta bort övningen?'))return;
-  drills=drills.filter(d=>d.id!==id);sessionDrills=sessionDrills.filter(d=>d.id!==id);
-  persist();renderDrills();renderPicker();renderBuild();toast('Övning borttagen');
-}
-function clearDrillForm(){
-  ['d-name','d-dur','d-players','d-equip','d-desc'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});
-  document.getElementById('d-type').value='';newTheme='';renderThemePills('new-theme-pills','new');
-}
-function saveDrill(){
-  const name=document.getElementById('d-name').value.trim();
-  const type=document.getElementById('d-type').value;
-  const dur=parseInt(document.getElementById('d-dur').value);
-  if(!name||!type||!dur){toast('Fyll i namn, typ och tid');return;}
-  drills.unshift({id:uid(),name,type,duration:dur,
-    players:document.getElementById('d-players').value.trim(),
-    equipment:document.getElementById('d-equip').value.trim(),
-    theme:newTheme,desc:document.getElementById('d-desc').value.trim()
+window.deleteDrill = async function(id) {
+  if (!confirm('Ta bort övningen? Den försvinner för alla tränare.')) return;
+  setSyncStatus('syncing');
+  await deleteDoc(doc(db, 'drills', id));
+  sessionDrills = sessionDrills.filter(d => d.id !== id);
+  renderBuild();
+  toast('Övning borttagen');
+};
+
+window.clearDrillForm = function() {
+  ['d-name','d-dur','d-players','d-equip','d-desc'].forEach(i => { const e = document.getElementById(i); if(e) e.value=''; });
+  document.getElementById('d-type').value = '';
+  newTheme = ''; renderThemePills('new-theme-pills', 'new');
+};
+
+window.saveDrill = async function() {
+  const name = document.getElementById('d-name').value.trim();
+  const type = document.getElementById('d-type').value;
+  const dur = parseInt(document.getElementById('d-dur').value);
+  if (!name || !type || !dur) { toast('Fyll i namn, typ och tid'); return; }
+  setSyncStatus('syncing');
+  await addDoc(drillsRef, {
+    name, type, duration: dur,
+    players: document.getElementById('d-players').value.trim(),
+    equipment: document.getElementById('d-equip').value.trim(),
+    theme: newTheme,
+    desc: document.getElementById('d-desc').value.trim(),
+    createdAt: serverTimestamp()
   });
-  persist();clearDrillForm();toast('✓ Övning sparad!');
-}
+  window.clearDrillForm();
+  toast('✓ Övning sparad och delad!');
+};
 
-function renderPicker(){
-  const q=(document.getElementById('s-search')?.value||'').toLowerCase();
-  const list=drills.filter(d=>!q||d.name.toLowerCase().includes(q)||(d.theme||'').toLowerCase().includes(q));
-  const el=document.getElementById('picker-list');if(!el)return;
-  el.innerHTML=list.length?list.map(d=>{
-    const inS=sessionDrills.some(s=>s.id===d.id);
+// ── SESSION BUILDER ────────────────────────────────────
+function renderPicker() {
+  const q = (document.getElementById('s-search')?.value || '').toLowerCase();
+  const list = drills.filter(d => !q || d.name.toLowerCase().includes(q) || (d.theme||'').toLowerCase().includes(q));
+  const el = document.getElementById('picker-list'); if (!el) return;
+  el.innerHTML = list.length ? list.map(d => {
+    const inS = sessionDrills.some(s => s.id === d.id);
     return `<div class="picker-item ${inS?'in-session':''}">
       <div class="picker-item-info">
         <div class="picker-item-name">${d.name}</div>
@@ -356,25 +424,29 @@ function renderPicker(){
       </div>
       <button class="btn ${inS?'btn-primary':'btn-ghost'} btn-sm" onclick="toggleSession('${d.id}','picker')">${inS?'✓':'+'}</button>
     </div>`;
-  }).join(''):`<div style="color:var(--muted);font-size:13px;padding:12px;">Inga övningar.</div>`;
+  }).join('') : `<div style="color:var(--muted);font-size:13px;padding:12px;">Inga övningar.</div>`;
 }
-function toggleSession(id,from){
-  const idx=sessionDrills.findIndex(d=>d.id===id);
-  if(idx>-1)sessionDrills.splice(idx,1);
-  else{const d=drills.find(d=>d.id===id);if(d)sessionDrills.push({...d});}
-  renderPicker();renderBuild();if(from==='lib')renderDrills();
-}
-function renderBuild(){
-  const el=document.getElementById('session-build');
-  const tEl=document.getElementById('session-time');
-  if(!el)return;
-  if(!sessionDrills.length){
-    el.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>Välj övningar från listan</p></div>`;
-    if(tEl)tEl.textContent='';return;
+window.renderPicker = renderPicker;
+
+window.toggleSession = function(id, from) {
+  const idx = sessionDrills.findIndex(d => d.id === id);
+  if (idx > -1) sessionDrills.splice(idx, 1);
+  else { const d = drills.find(d => d.id === id); if (d) sessionDrills.push({...d}); }
+  renderPicker(); renderBuild();
+  if (from === 'lib') renderDrills();
+};
+
+function renderBuild() {
+  const el = document.getElementById('session-build');
+  const tEl = document.getElementById('session-time');
+  if (!el) return;
+  if (!sessionDrills.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Välj övningar från listan</p></div>`;
+    if (tEl) tEl.textContent = ''; return;
   }
-  const total=sessionDrills.reduce((s,d)=>s+(d.duration||0),0);
-  if(tEl)tEl.textContent=`${total} min`;
-  el.innerHTML=sessionDrills.map((d,i)=>`
+  const total = sessionDrills.reduce((s,d) => s + (d.duration||0), 0);
+  if (tEl) tEl.textContent = `${total} min`;
+  el.innerHTML = sessionDrills.map((d,i) => `
     <div class="session-item">
       <div class="snum">${i+1}</div>
       <div class="session-item-info">
@@ -384,23 +456,36 @@ function renderBuild(){
       <button class="btn btn-danger btn-sm" onclick="removeBuild(${i})">✕</button>
     </div>`).join('');
 }
-function removeBuild(i){sessionDrills.splice(i,1);renderPicker();renderBuild();}
-function saveSession(){
-  const name=document.getElementById('s-name').value.trim()||'Träning '+new Date().toLocaleDateString('sv-SE');
-  const date=document.getElementById('s-date').value||new Date().toISOString().split('T')[0];
-  if(!sessionDrills.length){toast('Lägg till minst en övning');return;}
-  sessions.unshift({id:uid(),name,date,theme:sessionTheme,drills:[...sessionDrills],
-    totalTime:sessionDrills.reduce((s,d)=>s+(d.duration||0),0),createdAt:new Date().toISOString()});
-  persist();
-  sessionDrills=[];document.getElementById('s-name').value='';document.getElementById('s-date').value='';
-  sessionTheme='';renderThemePills('session-theme-pills','session');
-  renderPicker();renderBuild();toast('✓ Träning sparad!');
-}
 
-function renderSaved(){
-  const g=document.getElementById('saved-grid');if(!g)return;
-  if(!sessions.length){g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">💾</div><p>Inga sparade träningar ännu.</p></div>`;return;}
-  g.innerHTML=sessions.map(s=>`
+window.removeBuild = function(i) { sessionDrills.splice(i,1); renderPicker(); renderBuild(); };
+
+window.saveSession = async function() {
+  const name = document.getElementById('s-name').value.trim() || 'Träning ' + new Date().toLocaleDateString('sv-SE');
+  const date = document.getElementById('s-date').value || new Date().toISOString().split('T')[0];
+  if (!sessionDrills.length) { toast('Lägg till minst en övning'); return; }
+  setSyncStatus('syncing');
+  await addDoc(sessionsRef, {
+    name, date, theme: sessionTheme,
+    drills: sessionDrills.map(d => ({ id:d.id, name:d.name, type:d.type, duration:d.duration, theme:d.theme||'' })),
+    totalTime: sessionDrills.reduce((s,d) => s+(d.duration||0), 0),
+    createdAt: serverTimestamp()
+  });
+  sessionDrills = [];
+  document.getElementById('s-name').value = '';
+  document.getElementById('s-date').value = '';
+  sessionTheme = ''; renderThemePills('session-theme-pills','session');
+  renderPicker(); renderBuild();
+  toast('✓ Träning sparad och delad!');
+};
+
+// ── SAVED SESSIONS ─────────────────────────────────────
+function renderSaved() {
+  const g = document.getElementById('saved-grid'); if (!g) return;
+  if (!sessions.length) {
+    g.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">💾</div><p>Inga sparade träningar ännu.</p></div>`;
+    return;
+  }
+  g.innerHTML = sessions.map(s => `
     <div class="saved-card">
       <h3>${s.name}</h3>
       <div class="meta">
@@ -408,32 +493,39 @@ function renderSaved(){
         <span>⏱ ${s.totalTime} min</span>
       </div>
       ${s.theme?`<span class="dtag">${s.theme}</span><br>`:''}
-      <div class="dlist" style="margin-top:8px;">${s.drills.map((d,i)=>`${i+1}. ${d.name}`).join('<br>')}</div>
+      <div class="dlist" style="margin-top:8px;">${(s.drills||[]).map((d,i)=>`${i+1}. ${d.name}`).join('<br>')}</div>
       <div class="saved-card-actions">
         <button class="btn btn-ghost btn-sm" onclick="loadSession('${s.id}')">↗ Ladda</button>
         <button class="btn btn-danger btn-sm" onclick="deleteSession('${s.id}')">Ta bort</button>
       </div>
     </div>`).join('');
 }
-function loadSession(id){
-  const s=sessions.find(s=>s.id===id);if(!s)return;
-  sessionDrills=[...s.drills];
-  document.getElementById('s-name').value=s.name;
-  document.getElementById('s-date').value=s.date;
-  sessionTheme=s.theme||'';
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+
+window.loadSession = function(id) {
+  const s = sessions.find(s => s.id === id); if (!s) return;
+  sessionDrills = (s.drills || []).map(sd => {
+    const full = drills.find(d => d.id === sd.id);
+    return full ? {...full} : {...sd};
+  });
+  document.getElementById('s-name').value = s.name;
+  document.getElementById('s-date').value = s.date;
+  sessionTheme = s.theme || '';
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-session').classList.add('active');
   document.querySelectorAll('.tab-btn')[2].classList.add('active');
   renderThemePills('session-theme-pills','session');
-  renderPicker();renderBuild();toast('Träning laddad!');
-}
-function deleteSession(id){
-  if(!confirm('Ta bort sparad träning?'))return;
-  sessions=sessions.filter(s=>s.id!==id);persist();renderSaved();toast('Träning borttagen');
-}
+  renderPicker(); renderBuild();
+  toast('Träning laddad!');
+};
 
-renderDrills();
+window.deleteSession = async function(id) {
+  if (!confirm('Ta bort sparad träning? Den försvinner för alla tränare.')) return;
+  setSyncStatus('syncing');
+  await deleteDoc(doc(db, 'sessions', id));
+  toast('Träning borttagen');
+};
+
 </script>
 </body>
 </html>
