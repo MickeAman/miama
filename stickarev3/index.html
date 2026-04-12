@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stickräknare</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <meta name="theme-color" content="#f4f1ec">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Stickräknare">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <!-- React + Babel -->
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Firebase compat (works as globals, no build step needed) -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f1ec;
+      --surface:   #fdfcfa;
+      --border:    #e2ddd6;
+      --border2:   #c8c0b5;
+      --ink:       #18120e;
+      --ink2:      #3d3028;
+      --muted:     #5e5048;
+      --soft:      #8a7d74;
+      --accent:    #a0390f;
+      --accent-bg: #fdf0eb;
+      --green:     #166534;
+      --shadow:    0 1px 2px rgba(24,18,14,.05), 0 3px 10px rgba(24,18,14,.07);
+      --shadow-lg: 0 4px 20px rgba(24,18,14,.11);
+      --r:   14px;
+      --rsm:  9px;
+    }
+
+    body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--ink); -webkit-tap-highlight-color:transparent; line-height:1.5; }
+    #root { min-height:100vh; }
+    .app  { min-height:100vh; max-width:480px; margin:0 auto; padding-bottom:80px; }
+
+    /* ── login screen ── */
+    .login-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; text-align:center; }
+    .login-logo   { font-size:52px; margin-bottom:20px; }
+    .login-title  { font-family:'DM Serif Display',serif; font-size:28px; color:var(--ink); margin-bottom:8px; }
+    .login-sub    { font-size:15px; color:var(--muted); margin-bottom:40px; max-width:280px; }
+    .login-btns   { width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px; }
+    .btn-google   { width:100%; padding:14px 20px; background:var(--ink); color:#fff; border:0; border-radius:var(--rsm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:all .15s; }
+    .btn-google:hover { background:var(--ink2); }
+    .btn-google:active { transform:scale(.99); }
+    .btn-anon     { width:100%; padding:12px 20px; background:transparent; border:1.5px solid var(--border2); border-radius:var(--rsm); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; color:var(--muted); cursor:pointer; transition:all .15s; }
+    .btn-anon:hover { background:var(--border); color:var(--ink); }
+    .login-footer { margin-top:48px; font-size:12px; color:var(--soft); }
+
+    /* ── topbar ── */
+    .topbar { position:sticky; top:0; z-index:30; background:var(--bg); border-bottom:1px solid var(--border); padding:12px 18px 10px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .topbar-left  { display:flex; flex-direction:column; }
+    .topbar-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--ink); }
+    .topbar-sub   { font-size:11px; color:var(--muted); }
+    .topbar-right { display:flex; align-items:center; gap:8px; }
+
+    /* language select */
+    .lang-wrap   { position:relative; display:flex; align-items:center; }
+    .lang-select { appearance:none; -webkit-appearance:none; background:var(--surface); border:1px solid var(--border2); border-radius:var(--rsm); padding:7px 26px 7px 28px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--ink2); cursor:pointer; }
+    .lang-select:focus { outline:2px solid var(--ink); outline-offset:1px; }
+    .lang-globe  { position:absolute; left:8px; pointer-events:none; color:var(--muted); }
+    .lang-chev   { position:absolute; right:7px; pointer-events:none; color:var(--muted); }
+
+    /* avatar / sign out */
+    .avatar-btn { width:32px; height:32px; border-radius:50%; border:1.5px solid var(--border2); background:var(--surface); overflow:hidden; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--muted); transition:border-color .15s; flex-shrink:0; }
+    .avatar-btn:hover { border-color:var(--ink); }
+    .avatar-btn img { width:100%; height:100%; object-fit:cover; }
+
+    /* user menu */
+    .user-menu { position:absolute; top:56px; right:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow-lg); padding:8px; min-width:200px; z-index:50; animation:fadeIn .15s; }
+    .user-menu-name { padding:8px 12px 4px; font-size:13px; font-weight:600; color:var(--ink); }
+    .user-menu-email { padding:0 12px 10px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); margin-bottom:6px; }
+    .user-menu-btn { width:100%; padding:9px 12px; background:none; border:0; border-radius:var(--rsm); text-align:left; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:8px; transition:all .15s; }
+    .user-menu-btn:hover { background:var(--bg); color:var(--ink); }
+    .user-menu-btn.danger:hover { background:#fef2f2; color:#b91c1c; }
+
+    /* bottom tabs */
+    .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; z-index:30; background:var(--surface); border-top:1px solid var(--border); display:flex; }
+    .tab-btn { flex:1; padding:10px 0 12px; background:none; border:0; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--soft); font-family:'DM Sans',sans-serif; transition:color .15s; }
+    .tab-btn.active { color:var(--ink); }
+    .tab-lbl  { font-size:10px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; }
+
+    /* section header */
+    .sec-hdr { padding:20px 18px 10px; display:flex; align-items:center; justify-content:space-between; }
+    .sec-lbl  { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+
+    /* fab */
+    .fab { width:40px; height:40px; border-radius:50%; background:var(--ink); color:#fff; border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-lg); flex-shrink:0; transition:transform .15s, background .15s; }
+    .fab:hover  { background:var(--ink2); transform:scale(1.06); }
+    .fab:active { transform:scale(.95); }
+
+    /* project list */
+    .proj-list { padding:0 14px; display:flex; flex-direction:column; gap:10px; }
+    .proj-card { background:var(--surface); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden; cursor:pointer; display:grid; grid-template-columns:1fr; transition:transform .15s, box-shadow .15s; }
+    .proj-card:hover  { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+    .proj-card:active { transform:scale(.99); }
+    .proj-body { padding:14px 16px; display:flex; flex-direction:column; justify-content:center; gap:5px; }
+    .proj-name { font-weight:600; font-size:15px; color:var(--ink); }
+    .proj-meta { font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .dot { width:3px; height:3px; border-radius:50%; background:var(--border2); flex-shrink:0; }
+
+    /* empty */
+    .empty       { text-align:center; padding:56px 20px; }
+    .empty-icon  { margin-bottom:14px; opacity:.4; display:flex; justify-content:center; }
+    .empty-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--ink); margin-bottom:6px; }
+    .empty-sub   { font-size:14px; color:var(--muted); }
+
+    /* modal */
+    .overlay { position:fixed; inset:0; z-index:100; background:rgba(24,18,14,.45); display:flex; align-items:flex-end; justify-content:center; animation:fadeIn .15s; }
+    .sheet   { background:var(--surface); border-radius:20px 20px 0 0; padding:20px 18px 32px; width:100%; max-width:480px; animation:slideUp .2s ease; }
+    .sheet-handle { width:36px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 18px; }
+    .sheet-title  { font-family:'DM Serif Display',serif; font-size:20px; color:var(--ink); margin-bottom:14px; }
+
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes slideUp { from{transform:translateY(32px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    /* field */
+    .field { width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:var(--rsm); background:var(--bg); font-family:'DM Sans',sans-serif; font-size:15px; color:var(--ink); transition:border-color .15s; }
+    .field:focus { outline:none; border-color:var(--ink); }
+    .field::placeholder { color:var(--soft); }
+    textarea.field { resize:vertical; min-height:72px; }
+
+    /* buttons */
+    .btn-dark   { width:100%; padding:13px; background:var(--ink); color:#fff; border:0; border-radius:var(--rsm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .btn-dark:hover  { background:var(--ink2); }
+    .btn-dark:active { transform:scale(.99); }
+    .btn-ghost  { background:none; border:0; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:14px; padding:10px; width:100%; cursor:pointer; }
+    .btn-ghost:hover { color:var(--ink); }
+
+    /* detail topbar */
+    .detail-bar  { position:sticky; top:0; z-index:20; background:var(--bg); border-bottom:1px solid var(--border); padding:10px 14px; display:flex; align-items:center; gap:10px; }
+    .back-btn    { background:none; border:0; display:flex; align-items:center; gap:5px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap; padding:4px 0; transition:color .15s; }
+    .back-btn:hover { color:var(--ink); }
+    .detail-name { flex:1; min-width:0; background:none; border:0; border-bottom:1px solid transparent; font-family:'DM Serif Display',serif; font-size:18px; color:var(--ink); transition:border-color .15s; }
+    .detail-name:focus { outline:none; border-bottom-color:var(--border2); }
+    .icon-btn    { width:34px; height:34px; border-radius:50%; flex-shrink:0; border:1.5px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); transition:all .15s; }
+    .icon-btn:hover  { background:var(--border); color:var(--ink); }
+    .icon-btn:active { transform:scale(.92); }
+    .icon-btn.danger:hover { border-color:#fca5a5; color:#b91c1c; background:#fef2f2; }
+
+    /* sub section */
+    .sub-wrap { padding:0 14px; }
+    .sub-lbl  { font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+
+    /* counter card */
+    .ccard     { background:var(--surface); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow); padding:18px; }
+    .ccard-top { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .ccard-name { flex:1; background:none; border:0; border-bottom:1px solid transparent; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; color:var(--ink); transition:border-color .15s; }
+    .ccard-name:focus { outline:none; border-bottom-color:var(--border2); }
+    .ccard-del  { width:26px; height:26px; border-radius:50%; flex-shrink:0; border:1.5px solid var(--border); background:none; cursor:pointer; color:var(--soft); display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .ccard-del:hover { border-color:#fca5a5; color:#b91c1c; background:#fef2f2; }
+    .ccard-num  { font-family:'DM Serif Display',serif; font-size:58px; line-height:1; text-align:center; color:var(--ink); margin-bottom:13px; }
+    .ccard-unit { font-family:'DM Sans',sans-serif; font-size:13px; color:var(--muted); font-weight:400; margin-left:5px; vertical-align:middle; }
+    .ccard-add  { width:100%; padding:13px; background:var(--ink); color:#fff; border:0; border-radius:var(--rsm); font-size:15px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:7px; transition:all .15s; }
+    .ccard-add:hover  { background:var(--ink2); }
+    .ccard-add:active { transform:scale(.99); }
+    .ccard-row  { display:flex; gap:8px; margin-top:9px; }
+    .ccard-sm   { flex:1; padding:9px; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--rsm); font-size:13px; font-weight:500; color:var(--ink2); cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:5px; transition:all .15s; }
+    .ccard-sm:hover  { background:var(--border); color:var(--ink); }
+    .ccard-sm:active { transform:scale(.98); }
+
+    .add-ctr-btn { width:calc(100% - 28px); margin:4px 14px; padding:13px; background:none; border:1.5px dashed var(--border2); border-radius:var(--r); color:var(--muted); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all .15s; }
+    .add-ctr-btn:hover { border-color:var(--ink); color:var(--ink); background:var(--border); }
+
+    /* delete confirm */
+    .del-row   { display:flex; gap:8px; padding:12px 14px 0; }
+    .btn-danger { flex:1; padding:11px 16px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:var(--rsm); color:#b91c1c; font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .btn-danger:hover  { background:#fee2e2; }
+    .btn-cancel { flex:1; padding:11px; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--rsm); font-size:13px; font-weight:500; color:var(--ink2); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; }
+    .btn-cancel:hover { background:var(--border); }
+
+    /* saving indicator */
+    .saving { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--soft); }
+    .saving-dot { width:6px; height:6px; border-radius:50%; background:var(--soft); animation:pulse 1.2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* toast */
+    .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:9px 18px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; white-space:nowrap; animation:toastIn .2s ease; pointer-events:none; display:flex; align-items:center; gap:6px; }
+    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(6px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+    /* about page */
+    .about      { padding:0 14px 32px; }
+    .about-hero { background:var(--ink); border-radius:var(--r); margin:14px 0; padding:28px 22px; text-align:center; position:relative; overflow:hidden; }
+    .about-hero::before { content:'🧶'; position:absolute; font-size:120px; opacity:.06; right:-16px; bottom:-16px; line-height:1; }
+    .about-hero-title { font-family:'DM Serif Display',serif; font-size:22px; color:#fff; margin-bottom:5px; }
+    .about-hero-sub   { font-size:13px; color:#b8afa8; }
+    .about-cards { display:flex; flex-direction:column; gap:12px; }
+    .acard      { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; box-shadow:var(--shadow); }
+    .acard-text { font-size:14px; color:var(--muted); line-height:1.65; }
+    .swish-card { background:var(--accent-bg); border:1.5px solid #f5c4a8; border-radius:var(--r); padding:20px; box-shadow:var(--shadow); }
+    .swish-hdr  { display:flex; align-items:flex-start; gap:10px; margin-bottom:14px; }
+    .swish-icon { color:var(--accent); flex-shrink:0; }
+    .swish-title { font-weight:700; font-size:15px; color:var(--ink); }
+    .swish-sub   { font-size:13px; color:var(--muted); margin-top:2px; }
+    .swish-num-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--rsm); padding:12px 14px; margin-bottom:12px; }
+    .swish-num-lbl { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--muted); }
+    .swish-num-val { font-family:ui-monospace,'Courier New',monospace; font-size:20px; font-weight:600; color:var(--ink); margin-top:2px; }
+    .swish-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .swish-copy  { padding:11px; background:var(--ink); color:#fff; border:0; border-radius:var(--rsm); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .swish-copy:hover { background:var(--ink2); }
+    .swish-copy.done  { background:var(--green); }
+    .swish-share { padding:11px; background:var(--surface); border:1.5px solid var(--border2); border-radius:var(--rsm); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; color:var(--ink2); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .swish-share:hover { background:var(--bg); }
+    .about-footer { text-align:center; padding:24px 0 0; font-size:11px; color:var(--soft); }
+    .sp   { height:14px; }
+    .sp8  { height:8px; }
+    .sp20 { height:20px; }
+  </style>
+
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react,env">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // ── Firebase init ────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCG1e3KNFDqORVL64-tKjHnIA6b0FZXvDw",
+      authDomain:        "stickraknare3.firebaseapp.com",
+      projectId:         "stickraknare3",
+      storageBucket:     "stickraknare3.firebasestorage.app",
+      messagingSenderId: "411052324712",
+      appId:             "1:411052324712:web:917f52b1ec23ccf51b88dd",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+    const uid  = () => `${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    const SWISH = "0704095845";
+
+    const makeCounter = (index, lang="sv") => ({
+      id: uid(),
+      name: ({sv:`Räknare ${index}`,da:`Tæller ${index}`,en:`Counter ${index}`})[lang] || `Counter ${index}`,
+      count: 0,
+    });
+
+    const makeProject = (name, lang="sv") => ({
+      id: uid(), name, notes: "",
+      counters: [makeCounter(1, lang)],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    });
+
+    const timeAgo = (ts, lang) => {
+      const d=Date.now()-ts, m=Math.floor(d/60000), h=Math.floor(d/3600000), days=Math.floor(d/86400000);
+      if(lang==="sv"){if(m<2)return"nyss";if(m<60)return`${m} min`;if(h<24)return`${h} tim`;return`${days}d`;}
+      if(lang==="da"){if(m<2)return"nu";if(m<60)return`${m} min`;if(h<24)return`${h} t`;return`${days}d`;}
+      if(m<2)return"now";if(m<60)return`${m}m`;if(h<24)return`${h}h`;return`${days}d`;
+    };
+
+    // ── i18n ─────────────────────────────────────────────────────────────────
+    const T = {
+      sv: {
+        appTitle:"Stickräknare", appSub:"Håll koll på dina projekt",
+        signInGoogle:"Logga in med Google", signInAnon:"Fortsätt utan konto",
+        signInSub:"Logga in för att synka projekt mellan enheter",
+        newProject:"Nytt projekt", myProjects:"Mina projekt",
+        noProjects:"Inga projekt ännu", noProjectsSub:"Tryck på + för att skapa ditt första",
+        addCounter:"Lägg till räknare", addRound:"Lägg till varv",
+        undo:"Ångra", reset:"Nollställ", remove:"Ta bort",
+        share:"Dela projekt", shareLink:"Länk kopierad!",
+        projectName:"Projektnamn", notes:"Anteckningar",
+        notesPlaceholder:"Garntyp, färg, nålstorlek…",
+        back:"Projekt", deleteProject:"Ta bort projekt",
+        yes:"Ja, ta bort", no:"Avbryt",
+        counters:"räknare", rounds:"varv",
+        tabProjects:"Projekt", tabAbout:"Om appen",
+        langLabel:"Språk", saving:"Sparar…", saved:"Sparat",
+        signOut:"Logga ut", signedInAs:"Inloggad som",
+        anonUser:"Anonym användare", linkAccount:"Koppla Google-konto",
+        founderTitle:"Om appen", founderSub:"Gjord med kärlek för stickare",
+        founderP1:"Stickräknaren är byggd av en pappa i Sverige som ville ha ett enkelt sätt att hålla koll på varv — utan krångel.",
+        founderP2:"Appen är gratis och kommer alltid vara det. Om du gillar den och vill stötta framtida uppdateringar är en liten Swish alltid uppskattad.",
+        swishTitle:"Swisha en donation", swishDesc:"Valfritt belopp, helt frivilligt. Tack!",
+        swishNumber:"Swish-nummer", copyNumber:"Kopiera", copied:"Kopierat!",
+        shareSwish:"Dela", footer:"gjord med ♥ i sverige",
+      },
+      da: {
+        appTitle:"Pindetæller", appSub:"Hold styr på dine projekter",
+        signInGoogle:"Log ind med Google", signInAnon:"Fortsæt uden konto",
+        signInSub:"Log ind for at synkronisere projekter på tværs af enheder",
+        newProject:"Nyt projekt", myProjects:"Mine projekter",
+        noProjects:"Ingen projekter endnu", noProjectsSub:"Tryk + for at oprette dit første",
+        addCounter:"Tilføj tæller", addRound:"Tilføj omgang",
+        undo:"Fortryd", reset:"Nulstil", remove:"Fjern",
+        share:"Del projekt", shareLink:"Link kopieret!",
+        projectName:"Projektnavn", notes:"Notater",
+        notesPlaceholder:"Garntype, farve, pindenummer…",
+        back:"Projekter", deleteProject:"Slet projekt",
+        yes:"Ja, slet", no:"Annuller",
+        counters:"tællere", rounds:"omgange",
+        tabProjects:"Projekter", tabAbout:"Om appen",
+        langLabel:"Sprog", saving:"Gemmer…", saved:"Gemt",
+        signOut:"Log ud", signedInAs:"Logget ind som",
+        anonUser:"Anonym bruger", linkAccount:"Tilknyt Google-konto",
+        founderTitle:"Om appen", founderSub:"Lavet med kærlighed til strikkere",
+        founderP1:"Pindetælleren er bygget af en far i Sverige, der ville have en enkel måde at holde styr på omgange.",
+        founderP2:"Appen er gratis og vil altid være det. Hvis du kan lide den, er en lille Swish altid værdsat.",
+        swishTitle:"Swish en donation", swishDesc:"Valgfrit beløb, helt frivilligt. Tak!",
+        swishNumber:"Swish-nummer", copyNumber:"Kopiér", copied:"Kopieret!",
+        shareSwish:"Del", footer:"lavet med ♥ i sverige",
+      },
+      en: {
+        appTitle:"Row Counter", appSub:"Keep track of your projects",
+        signInGoogle:"Sign in with Google", signInAnon:"Continue without account",
+        signInSub:"Sign in to sync projects across devices",
+        newProject:"New project", myProjects:"My projects",
+        noProjects:"No projects yet", noProjectsSub:"Tap + to create your first one",
+        addCounter:"Add counter", addRound:"Add round",
+        undo:"Undo", reset:"Reset", remove:"Remove",
+        share:"Share project", shareLink:"Link copied!",
+        projectName:"Project name", notes:"Notes",
+        notesPlaceholder:"Yarn type, colour, needle size…",
+        back:"Projects", deleteProject:"Delete project",
+        yes:"Yes, delete", no:"Cancel",
+        counters:"counters", rounds:"rounds",
+        tabProjects:"Projects", tabAbout:"About",
+        langLabel:"Language", saving:"Saving…", saved:"Saved",
+        signOut:"Sign out", signedInAs:"Signed in as",
+        anonUser:"Anonymous user", linkAccount:"Link Google account",
+        founderTitle:"About", founderSub:"Made with love for knitters",
+        founderP1:"Row Counter was built by a dad in Sweden who wanted a simple way to track rounds — no fuss.",
+        founderP2:"The app is free and always will be. If you enjoy it, a small Swish donation is always appreciated.",
+        swishTitle:"Send a Swish donation", swishDesc:"Any amount, totally optional. Thank you!",
+        swishNumber:"Swish number", copyNumber:"Copy", copied:"Copied!",
+        shareSwish:"Share", footer:"made with ♥ in sweden",
+      },
+    };
+    const LANG_NAMES = { sv:"Svenska", da:"Dansk", en:"English" };
+
+    // ── SVG icons (Lucide paths) ──────────────────────────────────────────────
+    const Icon = ({ d, size=16, ...p }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
+        {[].concat(d).map((path,i) => <path key={i} d={path}/>)}
+      </svg>
+    );
+    const icons = {
+      plus:      "M12 5v14M5 12h14",
+      arrowLeft: "M19 12H5M12 19l-7-7 7-7",
+      share:     ["M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8","M16 6l-4-4-4 4","M12 2v13"],
+      trash:     ["M3 6h18","M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6","M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"],
+      minus:     "M5 12h14",
+      undo:      ["M3 7v6h6","M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"],
+      x:         "M18 6L6 18M6 6l12 12",
+      folder:    ["M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"],
+      heart:     "M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z",
+      copy:      ["M20 9H11a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-9a2 2 0 00-2-2z","M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"],
+      check:     "M20 6L9 17l-5-5",
+      globe:     ["M12 2a10 10 0 100 20A10 10 0 0012 2z","M2 12h20","M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"],
+      chevDown:  "M6 9l6 6 6-6",
+      book:      ["M4 19.5A2.5 2.5 0 016.5 17H20","M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"],
+      user:      ["M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2","M12 3a4 4 0 100 8 4 4 0 000-8z"],
+      logOut:    ["M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4","M16 17l5-5-5-5","M21 12H9"],
+    };
+    const Ic = ({ name, size=16, ...p }) => <Icon d={icons[name]} size={size} {...p} />;
+
+    // ── Firestore helpers ─────────────────────────────────────────────────────
+    const projectsRef = (userId) => db.collection("users").doc(userId).collection("projects");
+
+    // ── COUNTER CARD ──────────────────────────────────────────────────────────
+    function CounterCard({ counter, t, onUpdate, onRemove, canRemove }) {
+      const [name, setName] = useState(counter.name);
+      useEffect(() => setName(counter.name), [counter.name]);
+      const commit = () => { const n = name.trim()||counter.name; setName(n); onUpdate({name:n}); };
+      return (
+        <div className="ccard">
+          <div className="ccard-top">
+            <input className="ccard-name" value={name}
+              onChange={e=>setName(e.target.value)}
+              onBlur={commit} onKeyDown={e=>e.key==="Enter"&&e.target.blur()} />
+            {canRemove && <button className="ccard-del" onClick={onRemove}><Ic name="x" size={12}/></button>}
+          </div>
+          <div className="ccard-num">{counter.count}<span className="ccard-unit">{t.rounds}</span></div>
+          <button className="ccard-add" onClick={()=>onUpdate({count:counter.count+1})}>
+            <Ic name="plus" size={16}/> {t.addRound}
+          </button>
+          <div className="ccard-row">
+            <button className="ccard-sm" onClick={()=>onUpdate({count:Math.max(0,counter.count-1)})}>
+              <Ic name="minus" size={13}/> {t.undo}
+            </button>
+            <button className="ccard-sm" onClick={()=>onUpdate({count:0})}>
+              <Ic name="undo" size={13}/> {t.reset}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── PROJECT DETAIL ────────────────────────────────────────────────────────
+    function ProjectDetail({ project, userId, onBack, onDelete, lang, t }) {
+      const [name, setName]     = useState(project.name);
+      const [notes, setNotes]   = useState(project.notes||"");
+      const [confirm, setConfirm] = useState(false);
+      const [saving, setSaving] = useState(false);
+      const [toast, setToast]   = useState(null);
+      const saveTimer = useRef(null);
+
+      const showToast = msg => { setToast(msg); setTimeout(()=>setToast(null), 2000); };
+
+      const saveToFirestore = useCallback((patch) => {
+        setSaving(true);
+        clearTimeout(saveTimer.current);
+        saveTimer.current = setTimeout(async () => {
+          try {
+            await projectsRef(userId).doc(project.id).update({...patch, updatedAt: Date.now()});
+          } catch(e) { console.error(e); }
+          setSaving(false);
+        }, 800);
+      }, [userId, project.id]);
+
+      const [localProject, setLocalProject] = useState(project);
+      useEffect(() => setLocalProject(project), [project.id]);
+
+      const update = (patch) => {
+        const updated = {...localProject, ...patch};
+        setLocalProject(updated);
+        saveToFirestore(patch);
+      };
+
+      const commitName = () => { const n = name.trim()||localProject.name; setName(n); update({name:n}); };
+      const updCtr = (id, p) => update({ counters: localProject.counters.map(c=>c.id===id?{...c,...p}:c) });
+      const addCtr = () => update({ counters: [...localProject.counters, makeCounter(localProject.counters.length+1, lang)] });
+      const delCtr = id => update({ counters: localProject.counters.filter(c=>c.id!==id) });
+
+      const handleShare = async () => {
+        const url = `https://stickraknare.se/p/${project.id.slice(0,8)}`;
+        try { if(navigator.share){ await navigator.share({title:localProject.name,url}); return; } } catch(_){}
+        try { await navigator.clipboard.writeText(url); } catch(_){}
+        showToast(t.shareLink);
+      };
+
+      return (
+        <div>
+          <div className="detail-bar">
+            <button className="back-btn" onClick={onBack}><Ic name="arrowLeft" size={15}/>{t.back}</button>
+            <input className="detail-name" value={name}
+              onChange={e=>setName(e.target.value)}
+              onBlur={commitName} onKeyDown={e=>e.key==="Enter"&&e.target.blur()} />
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              {saving && <span className="saving"><span className="saving-dot"/></span>}
+              <button className="icon-btn" onClick={handleShare}><Ic name="share" size={15}/></button>
+              <button className="icon-btn danger" onClick={()=>setConfirm(true)}><Ic name="trash" size={15}/></button>
+            </div>
+          </div>
+
+          <div className="sp"/>
+          <div className="sub-wrap">
+            <div className="sub-lbl">{t.notes}</div>
+            <textarea className="field" placeholder={t.notesPlaceholder} value={notes}
+              onChange={e=>setNotes(e.target.value)} onBlur={()=>update({notes})} />
+          </div>
+
+          <div className="sp"/>
+          <div className="sub-wrap">
+            <div className="sub-lbl" style={{marginBottom:10}}>{localProject.counters.length} {t.counters}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:11}}>
+              {localProject.counters.map(c=>(
+                <CounterCard key={c.id} counter={c} t={t}
+                  onUpdate={p=>updCtr(c.id,p)}
+                  onRemove={()=>delCtr(c.id)}
+                  canRemove={localProject.counters.length>1} />
+              ))}
+            </div>
+          </div>
+          <div className="sp8"/>
+          <button className="add-ctr-btn" onClick={addCtr}><Ic name="plus" size={15}/> {t.addCounter}</button>
+
+          {confirm && (
+            <div className="del-row">
+              <button className="btn-danger" onClick={async()=>{ await projectsRef(userId).doc(project.id).delete(); onDelete(); setConfirm(false); }}>
+                <Ic name="trash" size={14}/> {t.yes}
+              </button>
+              <button className="btn-cancel" onClick={()=>setConfirm(false)}>{t.no}</button>
+            </div>
+          )}
+          {toast && <div className="toast"><Ic name="check" size={14}/>{toast}</div>}
+        </div>
+      );
+    }
+
+    // ── PROJECT LIST ──────────────────────────────────────────────────────────
+    function ProjectList({ projects, onOpen, onCreate, t, lang }) {
+      const sorted = [...projects].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+      return (
+        <div>
+          <div className="sec-hdr">
+            <span className="sec-lbl">{t.myProjects}</span>
+            <button className="fab" onClick={onCreate}><Ic name="plus" size={20}/></button>
+          </div>
+          {sorted.length===0
+            ? <div className="empty">
+                <div className="empty-icon"><Ic name="book" size={44}/></div>
+                <div className="empty-title">{t.noProjects}</div>
+                <div className="empty-sub">{t.noProjectsSub}</div>
+              </div>
+            : <div className="proj-list">
+                {sorted.map(p=>(
+                  <div key={p.id} className="proj-card" onClick={()=>onOpen(p.id)}>
+                    <div className="proj-body">
+                      <div className="proj-name">{p.name}</div>
+                      <div className="proj-meta">
+                        <span>{p.counters?.length||0} {t.counters}</span>
+                        <div className="dot"/>
+                        <span>{(p.counters||[]).reduce((s,c)=>s+c.count,0)} {t.rounds}</span>
+                        <div className="dot"/>
+                        <span>{timeAgo(p.updatedAt||p.createdAt||0, lang)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+          }
+        </div>
+      );
+    }
+
+    // ── NEW PROJECT MODAL ─────────────────────────────────────────────────────
+    function NewModal({ t, onClose, onCreate }) {
+      const [name, setName] = useState("");
+      const ref = useRef();
+      useEffect(()=>{ setTimeout(()=>ref.current?.focus(),80); },[]);
+      const submit = () => { const n=name.trim(); if(!n) return; onCreate(n); onClose(); };
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="sheet" onClick={e=>e.stopPropagation()}>
+            <div className="sheet-handle"/>
+            <div className="sheet-title">{t.newProject}</div>
+            <input ref={ref} className="field" placeholder={t.projectName} value={name}
+              onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}
+              style={{marginBottom:12}} />
+            <button className="btn-dark" onClick={submit}><Ic name="plus" size={16}/>{t.newProject}</button>
+            <button className="btn-ghost" onClick={onClose}>{t.no}</button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── ABOUT PAGE ────────────────────────────────────────────────────────────
+    function AboutPage({ t }) {
+      const [copied, setCopied] = useState(false);
+      const copy = async () => {
+        try { await navigator.clipboard.writeText(SWISH); } catch(_){}
+        setCopied(true); setTimeout(()=>setCopied(false),1800);
+      };
+      const share = async () => {
+        try { if(navigator.share) await navigator.share({text:`${t.swishTitle}\n${t.swishNumber}: ${SWISH}`}); } catch(_){}
+      };
+      return (
+        <div className="about">
+          <div className="about-hero">
+            <div className="about-hero-title">{t.founderTitle}</div>
+            <div className="about-hero-sub">{t.founderSub}</div>
+          </div>
+          <div className="about-cards">
+            <div className="acard"><div className="acard-text">{t.founderP1}</div></div>
+            <div className="swish-card">
+              <div className="swish-hdr">
+                <div className="swish-icon"><Ic name="heart" size={20}/></div>
+                <div>
+                  <div className="swish-title">{t.swishTitle}</div>
+                  <div className="swish-sub">{t.swishDesc}</div>
+                </div>
+              </div>
+              <div className="swish-num-row">
+                <div className="swish-num-lbl">{t.swishNumber}</div>
+                <div className="swish-num-val">{SWISH}</div>
+              </div>
+              <div className="swish-btns">
+                <button className={`swish-copy${copied?" done":""}`} onClick={copy}>
+                  {copied ? <><Ic name="check" size={14}/> {t.copied}</> : <><Ic name="copy" size={14}/> {t.copyNumber}</>}
+                </button>
+                <button className="swish-share" onClick={share}><Ic name="share" size={14}/> {t.shareSwish}</button>
+              </div>
+            </div>
+            <div className="acard"><div className="acard-text">{t.founderP2}</div></div>
+          </div>
+          <div className="about-footer">{t.footer}</div>
+        </div>
+      );
+    }
+
+    // ── LOGIN SCREEN ──────────────────────────────────────────────────────────
+    function LoginScreen({ t, onGoogle, onAnon }) {
+      return (
+        <div className="login-screen">
+          <div className="login-logo">🧶</div>
+          <div className="login-title">{t.appTitle}</div>
+          <div className="login-sub">{t.signInSub}</div>
+          <div className="login-btns">
+            <button className="btn-google" onClick={onGoogle}>
+              <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#fff" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#fff" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#fff" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#fff" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.48a4.77 4.77 0 014.48-3.3z"/></svg>
+              {t.signInGoogle}
+            </button>
+            <button className="btn-anon" onClick={onAnon}>{t.signInAnon}</button>
+          </div>
+          <div className="login-footer">{t.footer}</div>
+        </div>
+      );
+    }
+
+    // ── USER MENU ─────────────────────────────────────────────────────────────
+    function UserMenu({ user, t, onClose, onSignOut }) {
+      const ref = useRef();
+      useEffect(() => {
+        const handler = e => { if(ref.current && !ref.current.contains(e.target)) onClose(); };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+      }, []);
+      return (
+        <div className="user-menu" ref={ref}>
+          <div className="user-menu-name">{user.isAnonymous ? t.anonUser : (user.displayName||"")}</div>
+          {!user.isAnonymous && <div className="user-menu-email">{user.email}</div>}
+          <button className="user-menu-btn danger" onClick={onSignOut}><Ic name="logOut" size={14}/>{t.signOut}</button>
+        </div>
+      );
+    }
+
+    // ── APP ROOT ──────────────────────────────────────────────────────────────
+    function App() {
+      const [lang, setLang] = useState(()=>localStorage.getItem("sticka-lang")||"sv");
+      const [tab, setTab]   = useState("projects");
+      const [user, setUser] = useState(undefined); // undefined=loading, null=logged out
+      const [projects, setProjects] = useState([]);
+      const [activeId, setActiveId] = useState(null);
+      const [showNew, setShowNew]   = useState(false);
+      const [showMenu, setShowMenu] = useState(false);
+      const t = T[lang]||T.sv;
+
+      useEffect(()=>localStorage.setItem("sticka-lang",lang),[lang]);
+
+      // auth listener
+      useEffect(()=>{
+        return auth.onAuthStateChanged(u => setUser(u||null));
+      },[]);
+
+      // firestore listener
+      useEffect(()=>{
+        if(!user) return;
+        const unsub = projectsRef(user.uid)
+          .orderBy("updatedAt","desc")
+          .onSnapshot(snap=>{
+            setProjects(snap.docs.map(d=>({id:d.id,...d.data()})));
+          }, err=>console.error(err));
+        return ()=>unsub();
+      },[user]);
+
+      const signInGoogle = async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try { await auth.signInWithPopup(provider); } catch(e){ console.error(e); }
+      };
+      const signInAnon = async () => {
+        try { await auth.signInAnonymously(); } catch(e){ console.error(e); }
+      };
+      const signOut = async () => {
+        setShowMenu(false);
+        setActiveId(null);
+        setProjects([]);
+        await auth.signOut();
+      };
+
+      const createProject = async (name) => {
+        if(!user) return;
+        const p = makeProject(name, lang);
+        try {
+          await projectsRef(user.uid).doc(p.id).set(p);
+          setActiveId(p.id);
+        } catch(e){ console.error(e); }
+      };
+
+      const activeProject = projects.find(p=>p.id===activeId);
+
+      // loading
+      if(user===undefined) return (
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}>
+          <div style={{fontSize:32}}>🧶</div>
+        </div>
+      );
+
+      // login
+      if(user===null) return <LoginScreen t={t} onGoogle={signInGoogle} onAnon={signInAnon}/>;
+
+      return (
+        <div className="app">
+          {!activeProject && (
+            <div className="topbar">
+              <div className="topbar-left">
+                <div className="topbar-title">{t.appTitle}</div>
+                <div className="topbar-sub">{t.appSub}</div>
+              </div>
+              <div className="topbar-right">
+                <div className="lang-wrap">
+                  <Ic name="globe" size={13} className="lang-globe" style={{position:"absolute",left:8,pointerEvents:"none",color:"var(--muted)"}}/>
+                  <select className="lang-select" value={lang} onChange={e=>setLang(e.target.value)} aria-label={t.langLabel}>
+                    {Object.entries(LANG_NAMES).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+                  </select>
+                  <Ic name="chevDown" size={11} style={{position:"absolute",right:7,pointerEvents:"none",color:"var(--muted)"}}/>
+                </div>
+                <div style={{position:"relative"}}>
+                  <button className="avatar-btn" onClick={()=>setShowMenu(m=>!m)}>
+                    {user.photoURL
+                      ? <img src={user.photoURL} alt="avatar"/>
+                      : <Ic name="user" size={16}/>
+                    }
+                  </button>
+                  {showMenu && <UserMenu user={user} t={t} onClose={()=>setShowMenu(false)} onSignOut={signOut}/>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeProject
+            ? <ProjectDetail project={activeProject} userId={user.uid} onBack={()=>setActiveId(null)} onDelete={()=>setActiveId(null)} lang={lang} t={t}/>
+            : tab==="projects"
+              ? <ProjectList projects={projects} onOpen={setActiveId} onCreate={()=>setShowNew(true)} t={t} lang={lang}/>
+              : <AboutPage t={t}/>
+          }
+
+          {!activeProject && (
+            <nav className="tabbar">
+              <button className={`tab-btn${tab==="projects"?" active":""}`} onClick={()=>setTab("projects")}>
+                <Ic name="folder" size={20}/><span className="tab-lbl">{t.tabProjects}</span>
+              </button>
+              <button className={`tab-btn${tab==="about"?" active":""}`} onClick={()=>setTab("about")}>
+                <Ic name="heart" size={20}/><span className="tab-lbl">{t.tabAbout}</span>
+              </button>
+            </nav>
+          )}
+
+          {showNew && <NewModal t={t} onClose={()=>setShowNew(false)} onCreate={createProject}/>}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+  </script>
+
+</body>
+</html>
