@@ -297,7 +297,7 @@
         signOut:"Logga ut", signedInAs:"Inloggad som",
         anonUser:"Anonym användare", linkAccount:"Koppla Google-konto",
         founderTitle:"Om appen", founderSub:"Gjord med kärlek för stickare",
-        founderP1:"Stickräknaren är byggd av stickare i Sverige som ville ha ett enkelt sätt att hålla koll på varv — utan krångel.",
+        founderP1:"Stickräknaren är byggd av en pappa i Sverige som ville ha ett enkelt sätt att hålla koll på varv — utan krångel.",
         founderP2:"Appen är gratis och kommer alltid vara det. Om du gillar den och vill stötta framtida uppdateringar är en liten Swish alltid uppskattad.",
         swishTitle:"Swisha en donation", swishDesc:"Valfritt belopp, helt frivilligt. Tack!",
         swishNumber:"Swish-nummer", copyNumber:"Kopiera", copied:"Kopierat!",
@@ -326,7 +326,7 @@
         signOut:"Log ud", signedInAs:"Logget ind som",
         anonUser:"Anonym bruger", linkAccount:"Tilknyt Google-konto",
         founderTitle:"Om appen", founderSub:"Lavet med kærlighed til strikkere",
-        founderP1:"Pindetælleren er bygget i Sverige, der ville have en enkel måde at holde styr på omgange.",
+        founderP1:"Pindetælleren er bygget af en far i Sverige, der ville have en enkel måde at holde styr på omgange.",
         founderP2:"Appen er gratis og vil altid være det. Hvis du kan lide den, er en lille Swish altid værdsat.",
         swishTitle:"Swish en donation", swishDesc:"Valgfrit beløb, helt frivilligt. Tak!",
         swishNumber:"Swish-nummer", copyNumber:"Kopiér", copied:"Kopieret!",
@@ -355,7 +355,7 @@
         signOut:"Sign out", signedInAs:"Signed in as",
         anonUser:"Anonymous user", linkAccount:"Link Google account",
         founderTitle:"About", founderSub:"Made with love for knitters",
-        founderP1:"Row Counter was built by a knitter in Sweden who wanted a simple way to track rounds — no fuss.",
+        founderP1:"Row Counter was built by a dad in Sweden who wanted a simple way to track rounds — no fuss.",
         founderP2:"The app is free and always will be. If you enjoy it, a small Swish donation is always appreciated.",
         swishTitle:"Send a Swish donation", swishDesc:"Any amount, totally optional. Thank you!",
         swishNumber:"Swish number", copyNumber:"Copy", copied:"Copied!",
@@ -699,9 +699,55 @@
 
       useEffect(()=>localStorage.setItem("sticka-lang",lang),[lang]);
 
+      // ── migrate old localStorage data to Firestore ──────────────────────────
+      const migrateFromLocalStorage = async (userId) => {
+        const migrated = localStorage.getItem("sticka-migrated");
+        if (migrated) return; // already done
+
+        const count1 = parseInt(localStorage.getItem("stick-count1")||"0", 10);
+        const count2 = parseInt(localStorage.getItem("stick-count2")||"0", 10);
+        const name1  = localStorage.getItem("stick-name1");
+        const name2  = localStorage.getItem("stick-name2");
+        const showSecond = localStorage.getItem("stick-hide-2") !== "true";
+
+        // also check new project format
+        let extraCounters = [];
+        try {
+          const raw = localStorage.getItem("stick-extra");
+          if (raw) extraCounters = JSON.parse(raw)||[];
+        } catch(_){}
+
+        // nothing to migrate
+        const hasOldData = count1 > 0 || count2 > 0 || extraCounters.some(c=>c.count>0);
+        if (!hasOldData) { localStorage.setItem("sticka-migrated","1"); return; }
+
+        // build counters array from old data
+        const counters = [{ id:uid(), name:name1||"Räknare 1", count:count1 }];
+        if (showSecond) counters.push({ id:uid(), name:name2||"Räknare 2", count:count2 });
+        extraCounters.forEach(c => counters.push({ id:uid(), name:c.name||"Räknare", count:c.count||0 }));
+
+        const project = {
+          id: uid(),
+          name: "Mina räknare",
+          notes: "",
+          counters,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+
+        try {
+          await projectsRef(userId).doc(project.id).set(project);
+          localStorage.setItem("sticka-migrated", "1");
+          console.log("✅ Migrerade gamla räknare till Firestore");
+        } catch(e) { console.error("Migration failed:", e); }
+      };
+
       // auth listener
       useEffect(()=>{
-        return auth.onAuthStateChanged(u => setUser(u||null));
+        return auth.onAuthStateChanged(async u => {
+          setUser(u||null);
+          if (u) await migrateFromLocalStorage(u.uid);
+        });
       },[]);
 
       // firestore listener
