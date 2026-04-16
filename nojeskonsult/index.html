@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dans på Ön – Hedesunda 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --warm: #e8dcc8;
+    --amber: #c8851a;
+    --rust: #9b3d1a;
+    --forest: #2a4a2e;
+    --water: #3a6b7a;
+    --night: #1a1410;
+    --gold: #d4a843;
+    --text: #2a1f0f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 0 6rem 0;
+    overflow: hidden;
+    background: var(--night);
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 120% 60% at 50% 100%, rgba(200,133,26,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 80% at 20% 30%, rgba(58,107,122,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 60% at 80% 20%, rgba(42,74,46,0.4) 0%, transparent 50%),
+      linear-gradient(180deg, #0d1a12 0%, #1a1410 60%, #2a1508 100%);
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+
+  .water-reflection {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 35%;
+    background: linear-gradient(180deg, transparent 0%, rgba(58,107,122,0.15) 40%, rgba(200,133,26,0.1) 100%);
+  }
+
+  .water-lines {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+  }
+
+  .water-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,168,67,0.4), transparent);
+    animation: ripple 4s ease-in-out infinite;
+    left: 0; right: 0;
+  }
+
+  @keyframes ripple {
+    0%, 100% { transform: scaleX(1); opacity: 0.3; }
+    50% { transform: scaleX(1.02); opacity: 0.7; }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 2rem;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4rem, 12vw, 10rem);
+    font-weight: 900;
+    line-height: 0.9;
+    color: var(--cream);
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s forwards;
+  }
+
+  .hero-title .italic {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-weight: 400;
+    font-style: italic;
+    color: rgba(245,240,232,0.7);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+
+  .hero-dates {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .hero-date-chip {
+    background: rgba(212,168,67,0.15);
+    border: 1px solid rgba(212,168,67,0.4);
+    color: var(--gold);
+    padding: 0.5rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(245,240,232,0.4);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  .scroll-arrow {
+    width: 20px;
+    height: 20px;
+    border-right: 1px solid rgba(245,240,232,0.3);
+    border-bottom: 1px solid rgba(245,240,232,0.3);
+    transform: rotate(45deg);
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(26,20,16,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,168,67,0.2);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: rgba(245,240,232,0.7);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* SECTIONS */
+  .section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 3rem;
+  }
+
+  /* EVENTS */
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .event-card {
+    background: var(--night);
+    border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .event-card:hover {
+    border-color: rgba(212,168,67,0.5);
+    transform: translateY(-4px);
+  }
+
+  .event-card-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .event-card-top {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+  }
+
+  .event-date-block {
+    background: rgba(212,168,67,0.12);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .event-day-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .event-month {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(212,168,67,0.6);
+    margin-top: 0.3rem;
+  }
+
+  .event-day-name {
+    font-size: 0.6rem;
+    color: rgba(245,240,232,0.3);
+    margin-top: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .event-body {
+    padding: 1rem 1.5rem 1.2rem 1.5rem;
+    color: var(--cream);
+    flex: 1;
+  }
+
+  .event-time {
+    font-size: 0.7rem;
+    color: rgba(212,168,67,0.7);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+
+  .event-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    color: var(--cream);
+  }
+
+  .event-artists {
+    margin-bottom: 0.8rem;
+    line-height: 1.8;
+  }
+
+  .event-artists span {
+    display: inline-block;
+    background: rgba(212,168,67,0.1);
+    border: 1px solid rgba(212,168,67,0.25);
+    color: var(--gold);
+    font-size: 0.78rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    margin: 0.15rem 0.15rem 0 0;
+  }
+
+  .event-info-line {
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.35);
+    margin-top: 0.6rem;
+    line-height: 1.5;
+  }
+
+  .event-actions {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    display: flex;
+    gap: 0.6rem;
+    border-top: 1px solid rgba(212,168,67,0.1);
+  }
+
+  .btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-gold {
+    background: var(--gold);
+    color: var(--night);
+  }
+
+  .btn-gold:hover { background: #e8bc55; }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(212,168,67,0.3);
+    color: var(--gold);
+  }
+
+  .btn-outline:hover {
+    background: rgba(212,168,67,0.1);
+    border-color: var(--gold);
+  }
+
+  /* PLANNING SECTION */
+  .planning-bg {
+    background: var(--forest);
+    color: var(--cream);
+    padding: 6rem 2rem;
+  }
+
+  .planning-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .planning-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 700px) {
+    .planning-grid { grid-template-columns: 1fr; }
+    .events-grid { grid-template-columns: 1fr; }
+  }
+
+  .planner-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(245,240,232,0.15);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+
+  .planner-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--gold);
+  }
+
+  .checklist {
+    list-style: none;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+    font-size: 0.9rem;
+    color: rgba(245,240,232,0.8);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .checklist li:hover { color: var(--cream); }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid rgba(212,168,67,0.4);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+
+  .check-box.checked {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .check-box.checked::after {
+    content: '✓';
+    color: var(--night);
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .checklist li.done { color: rgba(245,240,232,0.35); text-decoration: line-through; }
+
+  .info-list {
+    list-style: none;
+  }
+
+  .info-list li {
+    display: flex;
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+    font-size: 0.9rem;
+    color: rgba(245,240,232,0.8);
+    align-items: flex-start;
+  }
+
+  .info-list li:last-child { border-bottom: none; }
+
+  .info-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+  }
+
+  /* SHARE */
+  .share-section {
+    background: var(--warm);
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .share-inner { max-width: 600px; margin: 0 auto; }
+
+  .share-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    margin-bottom: 1rem;
+  }
+
+  .share-desc {
+    color: rgba(42,31,15,0.6);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .share-btns {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .share-btn-fb { background: #1877f2; color: white; }
+  .share-btn-wa { background: #25d366; color: white; }
+  .share-btn-copy { background: var(--night); color: var(--cream); }
+
+  .share-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+  /* FORUM */
+  .forum-section {
+    padding: 6rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .forum-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .comment-form {
+    background: var(--night);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+  .form-input {
+    background: rgba(245,240,232,0.05);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+
+  .form-input::placeholder { color: rgba(245,240,232,0.3); }
+  .form-input:focus { outline: none; border-color: var(--gold); }
+
+  textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+    margin-bottom: 1rem;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .event-select {
+    background: rgba(245,240,232,0.05);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    color: rgba(245,240,232,0.7);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .event-select option { background: var(--night); }
+
+  .comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .comment {
+    background: white;
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    border-left: 3px solid var(--gold);
+    position: relative;
+  }
+
+  .comment-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .comment-author {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--night);
+  }
+
+  .comment-tag {
+    font-size: 0.7rem;
+    background: rgba(200,133,26,0.15);
+    color: var(--amber);
+    border: 1px solid rgba(200,133,26,0.3);
+    padding: 0.15rem 0.6rem;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+  }
+
+  .comment-time {
+    font-size: 0.75rem;
+    color: rgba(42,31,15,0.4);
+  }
+
+  .comment-text {
+    font-size: 0.9rem;
+    color: rgba(42,31,15,0.75);
+    line-height: 1.6;
+  }
+
+  .comment-likes {
+    margin-top: 0.8rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .like-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: rgba(42,31,15,0.45);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .like-btn:hover, .like-btn.liked { color: var(--rust); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,20,16,0.85);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    position: relative;
+  }
+
+  .modal-overlay.active .modal { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: rgba(42,31,15,0.4);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal p {
+    font-size: 0.9rem;
+    color: rgba(42,31,15,0.6);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .modal-share-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .modal-share-btn {
+    padding: 0.9rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transition: opacity 0.2s;
+  }
+
+  .modal-share-btn:hover { opacity: 0.85; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--forest);
+    color: var(--cream);
+    padding: 0.8rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    z-index: 300;
+    transition: transform 0.3s;
+    border: 1px solid rgba(212,168,67,0.3);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .icon { display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle; }
+  .icon svg { width:15px;height:15px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round; }
+  .icon-lg svg { width:18px;height:18px; }
+  .info-icon.icon svg { width:17px;height:17px; }
+
+  footer {
+    background: var(--night);
+    color: rgba(245,240,232,0.4);
+    text-align: center;
+    padding: 3rem 2rem;
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(212,168,67,0.1);
+  }
+
+  footer a { color: var(--gold); text-decoration: none; }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,168,67,0.3), transparent);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<!-- STARS -->
+<div id="starsContainer"></div>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="stars" id="stars"></div>
+  <div class="water-reflection"></div>
+  <div class="water-lines" id="waterLines"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Folkparken vid Dalälven · Hedesunda</p>
+    <h1 class="hero-title">Dans<br>på <span class="italic">Ön</span></h1>
+    <p class="hero-subtitle">Sommar 2026</p>
+    <div class="hero-dates">
+      <span class="hero-date-chip">Tis 7 Juli</span>
+      <span class="hero-date-chip">Tis 14 Juli</span>
+      <span class="hero-date-chip">Tis 21 Juli</span>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scrolla</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">Ön · 2026</span>
+  <ul class="nav-links">
+    <li><a href="#events">Kvällar</a></li>
+    <li><a href="#planning">Planering</a></li>
+    <li><a href="#forum">Forum</a></li>
+  </ul>
+</nav>
+
+<!-- EVENTS -->
+<section class="section" id="events">
+  <p class="section-label">Program</p>
+  <h2 class="section-title">Årets tre<br>danskvällar</h2>
+
+  <div class="events-grid">
+
+    <!-- Event 1 -->
+    <div class="event-card">
+      <div class="event-card-inner">
+        <div class="event-card-top">
+          <div class="event-date-block">
+            <div class="event-day-num">7</div>
+            <div class="event-month">Juli</div>
+            <div class="event-day-name">Tisdag</div>
+          </div>
+          <div>
+            <div class="event-time">20:00 – 01:00 · Folkparken på Ön</div>
+            <div class="event-name">Öppningskväll</div>
+          </div>
+        </div>
+        <div class="event-body">
+          <div class="event-artists">
+            <span>Rivstart</span>
+            <span>Sofie Svensson & Dom Där</span>
+            <span>Blixterz</span>
+          </div>
+          <div class="event-info-line"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg></span> Entré betalas på plats &nbsp;·&nbsp; <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M8 6v4M16 6v4M2 10h20M3 6h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H6v1a1 1 0 0 1-2 0v-1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg></span> Buss: gavlenojeskonsult.se</div>
+        </div>
+        <div class="event-actions">
+          <button class="btn btn-gold" onclick="openShareModal('7 Juli – Öppningskväll')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span> Dela</button>
+          <button class="btn btn-outline" onclick="addToCalendar('7 juli')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg></span> Kalender</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 2 -->
+    <div class="event-card">
+      <div class="event-card-inner">
+        <div class="event-card-top">
+          <div class="event-date-block">
+            <div class="event-day-num">14</div>
+            <div class="event-month">Juli</div>
+            <div class="event-day-name">Tisdag</div>
+          </div>
+          <div>
+            <div class="event-time">20:00 – 01:00 · Folkparken på Ön</div>
+            <div class="event-name">Midsommarveckan</div>
+          </div>
+        </div>
+        <div class="event-body">
+          <div class="event-artists">
+            <span>Kuselofte</span>
+            <span>Streaplers</span>
+          </div>
+          <div class="event-info-line"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg></span> Entré betalas på plats &nbsp;·&nbsp; <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M8 6v4M16 6v4M2 10h20M3 6h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H6v1a1 1 0 0 1-2 0v-1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg></span> Buss: gavlenojeskonsult.se</div>
+        </div>
+        <div class="event-actions">
+          <button class="btn btn-gold" onclick="openShareModal('14 Juli – Streaplers & Kuselofte')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span> Dela</button>
+          <button class="btn btn-outline" onclick="addToCalendar('14 juli')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg></span> Kalender</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 3 -->
+    <div class="event-card">
+      <div class="event-card-inner">
+        <div class="event-card-top">
+          <div class="event-date-block">
+            <div class="event-day-num">21</div>
+            <div class="event-month">Juli</div>
+            <div class="event-day-name">Tisdag</div>
+          </div>
+          <div>
+            <div class="event-time">20:00 – 01:00 · Folkparken på Ön</div>
+            <div class="event-name">Sommarfinale</div>
+          </div>
+        </div>
+        <div class="event-body">
+          <div class="event-artists">
+            <span>Erik Meduza</span>
+            <span>Danzbanderz</span>
+            <span>Larz Kristerz</span>
+          </div>
+          <div class="event-info-line"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg></span> Entré betalas på plats &nbsp;·&nbsp; <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M8 6v4M16 6v4M2 10h20M3 6h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H6v1a1 1 0 0 1-2 0v-1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg></span> Buss: gavlenojeskonsult.se</div>
+        </div>
+        <div class="event-actions">
+          <button class="btn btn-gold" onclick="openShareModal('21 Juli – Larz Kristerz & mer')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span> Dela</button>
+          <button class="btn btn-outline" onclick="addToCalendar('21 juli')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg></span> Kalender</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PLANNING -->
+<section class="planning-bg" id="planning">
+  <div class="planning-inner">
+    <p class="section-label" style="color:var(--gold);">Förberedelser</p>
+    <h2 class="section-title" style="color:var(--cream);">Planera<br>kvällen</h2>
+
+    <div class="planning-grid">
+      <div class="planner-card">
+        <h3>Checklista</h3>
+        <ul class="checklist" id="checklist">
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Kolla vilka artister som spelar</li>
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Fixa sällskap – kolla forumet</li>
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Boka buss (gavlenojeskonsult.se)</li>
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Kolla väderprognosen</li>
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Ta ut kontanter (entré på plats)</li>
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Bekväma skor – du dansar hela natten</li>
+          <li onclick="toggleCheck(this)"><div class="check-box"></div>Dela med kompisarna</li>
+        </ul>
+      </div>
+
+      <div class="planner-card">
+        <h3>Praktisk info</h3>
+        <ul class="info-list">
+          <li><span class="info-icon icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><div><strong style="color:var(--cream)">Plats</strong><br>Ön, Hedesunda (vid Dalälven)</div></li>
+          <li><span class="info-icon icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><div><strong style="color:var(--cream)">Tid</strong><br>Alla tre kvällar: 20:00 – 01:00</div></li>
+          <li><span class="info-icon icon"><svg viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg></span><div><strong style="color:var(--cream)">Entré</strong><br>Betalas på plats. Kontanter rekommenderas.</div></li>
+          <li><span class="info-icon icon"><svg viewBox="0 0 24 24"><path d="M8 6v4M16 6v4M2 10h20M3 6h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H6v1a1 1 0 0 1-2 0v-1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg></span><div><strong style="color:var(--cream)">Buss</strong><br>Bussalternativ finns – se gavlenojeskonsult.se för tidtabell</div></li>
+          <li><span class="info-icon icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><strong style="color:var(--cream)">Arrangör</strong><br>Mattias Dahl / Hedesunda IF (ny arrangör 2026)</div></li>
+          <li><span class="info-icon icon"><svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></span><div><strong style="color:var(--cream)">Klädsel</strong><br>Sommarafton vid älven – ta med en lager extra</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHARE BANNER -->
+<div class="share-section">
+  <div class="share-inner">
+    <h2 class="share-title">Tipsa gänget</h2>
+    <p class="share-desc">Tre tisdagskvällar vid Dalälven – ju fler desto roligare. Dela med alla som borde vara med.</p>
+    <div class="share-btns">
+      <button class="share-btn share-btn-fb" onclick="shareToFacebook()">
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></span> Facebook
+      </button>
+      <button class="share-btn share-btn-wa" onclick="shareToWhatsApp()">
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> WhatsApp
+      </button>
+      <button class="share-btn share-btn-copy" onclick="copyLink()">
+        <span class="icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> Kopiera länk
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FORUM -->
+<section class="forum-section" id="forum">
+  <div class="forum-header">
+    <div>
+      <p class="section-label">Öppet forum</p>
+      <h2 class="section-title" style="margin-bottom:0">Snacket<br>om Ön</h2>
+    </div>
+    <div style="font-size:0.85rem;color:rgba(42,31,15,0.5);">Öppet för alla · Inga konton</div>
+  </div>
+
+  <div class="comment-form" id="commentForm">
+    <div class="form-row">
+      <input class="form-input" id="commentName" placeholder="Ditt namn" maxlength="50">
+      <input class="form-input" id="commentLocation" placeholder="Varifrån? (frivilligt)" maxlength="50">
+    </div>
+    <textarea class="form-input" id="commentText" placeholder="Skriv något... Söker sällskap? Minnen från förra året? Tips?"></textarea>
+    <div class="form-footer">
+      <select class="event-select" id="commentEvent">
+        <option value="">Gäller alla kvällar</option>
+        <option value="7 juli">7 Juli – Öppningskväll</option>
+        <option value="14 juli">14 Juli – Streaplers m.fl.</option>
+        <option value="21 juli">21 Juli – Larz Kristerz m.fl.</option>
+      </select>
+      <button class="btn btn-gold" onclick="postComment()"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span> Posta inlägg</button>
+    </div>
+  </div>
+
+  <div class="comments-list" id="commentsList"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);margin-bottom:0.5rem;font-style:italic;">Dans på Ön</p>
+  <p>Hedesunda, Gävle · Folkparken vid Dalälven</p>
+  <p style="margin-top:0.5rem">Officiell info: <a href="https://www.visithedesunda.se/evenemang" target="_blank">visithedesunda.se</a> · Arrangör: <a href="https://gavlenojeskonsult.se" target="_blank">gavlenojeskonsult.se</a></p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="shareModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>Dela <span id="modalEventName"></span></h3>
+    <p>Sprid glädjen – skicka till dem som borde vara med!</p>
+    <div class="modal-share-btns">
+      <button class="modal-share-btn" style="background:#1877f2;color:white" onclick="shareToFacebook()"><span class="icon"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></span> Dela på Facebook</button>
+      <button class="modal-share-btn" style="background:#25d366;color:white" onclick="shareToWhatsApp()"><span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> Skicka på WhatsApp</button>
+      <button class="modal-share-btn" style="background:#1da1f2;color:white" onclick="shareToTwitter()"><span class="icon"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></span> Dela på X/Twitter</button>
+      <button class="modal-share-btn" style="background:#f0ebe1;color:#1a1410" onclick="copyLink()"><span class="icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> Kopiera länk</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 1;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*60}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s`;
+  starsEl.appendChild(s);
+}
+
+// Water lines
+const wl = document.getElementById('waterLines');
+for (let i = 0; i < 8; i++) {
+  const line = document.createElement('div');
+  line.className = 'water-line';
+  line.style.cssText = `bottom:${i*12}%;animation-delay:${i*0.5}s;animation-duration:${3+i*0.4}s;opacity:${0.2+i*0.05}`;
+  wl.appendChild(line);
+}
+
+// Checklist
+function toggleCheck(li) {
+  li.classList.toggle('done');
+  const box = li.querySelector('.check-box');
+  box.classList.toggle('checked');
+}
+
+// Comments data
+let comments = [
+  { id: 1, name: 'Karin S.', location: 'Gävle', text: 'Åkte hit med hela gänget förra sommaren – absolut bäst! Larz Kristerz spelade tills det gick runt. Bokar buss till 21:a direkt!', event: '21 juli', time: 'idag', likes: 12, liked: false },
+  { id: 2, name: 'Per-Erik', location: 'Hedesunda', text: 'Någon som söker sällskap från byn till 7 juli? Vi är tre stycken och har plats i bilen.', event: '7 juli', time: 'igår', likes: 5, liked: false },
+  { id: 3, name: 'Majken', location: 'Sandviken', text: 'Streaplers på Ön – det är klassiker! Tog med mamma förra gången, nu tar jag med hela familjen 🎶', event: '14 juli', time: '2 dagar sedan', likes: 8, liked: false },
+];
+
+function renderComments() {
+  const list = document.getElementById('commentsList');
+  if (comments.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:rgba(42,31,15,0.4);padding:2rem">Bli först att skriva något!</p>';
+    return;
+  }
+  list.innerHTML = comments.map(c => `
+    <div class="comment" id="comment-${c.id}">
+      <div class="comment-meta">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span class="comment-author">${escapeHtml(c.name)}</span>
+          ${c.location ? `<span style="font-size:0.75rem;color:rgba(42,31,15,0.4)">· ${escapeHtml(c.location)}</span>` : ''}
+          ${c.event ? `<span class="comment-tag">${c.event}</span>` : ''}
+        </div>
+        <span class="comment-time">${c.time}</span>
+      </div>
+      <p class="comment-text">${escapeHtml(c.text)}</p>
+      <div class="comment-likes">
+        <button class="like-btn ${c.liked ? 'liked' : ''}" onclick="toggleLike(${c.id})">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${c.liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span>${c.likes}</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleLike(id) {
+  const c = comments.find(x => x.id === id);
+  if (!c) return;
+  c.liked = !c.liked;
+  c.likes += c.liked ? 1 : -1;
+  renderComments();
+  }
+
+function postComment() {
+  const name = document.getElementById('commentName').value.trim();
+  const location = document.getElementById('commentLocation').value.trim();
+  const text = document.getElementById('commentText').value.trim();
+  const event = document.getElementById('commentEvent').value;
+
+  if (!name || !text) {
+    showToast('Fyll i ditt namn och ett meddelande 👋');
+    return;
+  }
+
+  comments.unshift({
+    id: Date.now(),
+    name, location, text, event,
+    time: 'just nu',
+    likes: 0,
+    liked: false
+  });
+
+  document.getElementById('commentName').value = '';
+  document.getElementById('commentLocation').value = '';
+  document.getElementById('commentText').value = '';
+  document.getElementById('commentEvent').value = '';
+
+  renderComments();
+  showToast('Inlägg postat! 🎉');
+  }
+
+// Share
+function openShareModal(eventName) {
+  document.getElementById('modalEventName').textContent = eventName;
+  document.getElementById('shareModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('shareModal').classList.remove('active');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('shareModal')) closeModal();
+}
+
+const shareUrl = window.location.href;
+const shareText = 'Dans på Ön i Hedesunda – tre magiska sommarkvällar vid Dalälven 💃🕺';
+
+function shareToFacebook() {
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+}
+
+function shareToWhatsApp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+}
+
+function shareToTwitter() {
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    showToast('Länk kopierad! 🔗');
+    closeModal();
+  });
+}
+
+function addToCalendar(date) {
+  showToast(`Lägg till ${date} i din kalender via din telefonapp 📅`);
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Init
+renderComments();
+</script>
+</body>
+</html>
