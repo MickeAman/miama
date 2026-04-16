@@ -109,6 +109,23 @@ nav{position:sticky;top:0;z-index:100;background:rgba(28,32,40,.95);backdrop-fil
 .info-list li:last-child{border-bottom:none;}
 .info-icon{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center;}
 
+/* ─── AMAZON CTA ─── */
+.amazon-section{background:var(--dusk);padding:5rem 2rem;border-top:1px solid rgba(200,164,86,.1);border-bottom:1px solid rgba(200,164,86,.1);}
+.amazon-inner{max-width:1100px;margin:0 auto;}
+.amazon-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--birch);line-height:1.1;margin-bottom:.8rem;text-align:center;}
+.amazon-desc{color:rgba(245,240,232,.5);text-align:center;margin-bottom:2.5rem;font-size:.95rem;}
+.amazon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-bottom:1.2rem;}
+.amazon-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,164,86,.15);border-radius:10px;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;text-decoration:none;color:inherit;transition:border-color .25s,transform .25s,background .25s;}
+.amazon-card:hover{border-color:rgba(200,164,86,.5);transform:translateY(-3px);background:rgba(255,255,255,.07);}
+.amazon-card-icon{width:44px;height:44px;background:rgba(200,164,86,.12);border:1px solid rgba(200,164,86,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.amazon-card-icon svg{width:22px;height:22px;stroke:var(--gold);}
+.amazon-card-body{flex:1;}
+.amazon-card-label{font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ember);margin-bottom:.3rem;}
+.amazon-card-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--birch);margin-bottom:.4rem;}
+.amazon-card-desc{font-size:.82rem;color:rgba(245,240,232,.45);line-height:1.5;}
+.amazon-card-cta{display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600;color:var(--gold);letter-spacing:.03em;margin-top:auto;}
+.amazon-disclaimer{text-align:center;font-size:.7rem;color:rgba(245,240,232,.2);letter-spacing:.05em;}
+
 /* ─── SHARE ─── */
 .share-section{background:var(--linen);border-top:1px solid rgba(74,94,58,.12);border-bottom:1px solid rgba(74,94,58,.12);padding:4rem 2rem;text-align:center;}
 .share-inner{max-width:600px;margin:0 auto;}
@@ -383,6 +400,67 @@ footer a{color:var(--gold);text-decoration:none;}
       </div>
     </div>
   </section>
+
+  <!-- AMAZON CTA -->
+  <div class="amazon-section">
+    <div class="amazon-inner">
+      <p class="section-label" style="color:var(--ember);text-align:center">Inför kvällen</p>
+      <h2 class="amazon-title">Packa rätt<br>för Ön</h2>
+      <p class="amazon-desc">Dalälven bjuder på mygg, gräsmatta och förfest. Här är tre saker du faktiskt behöver.</p>
+      <div class="amazon-grid">
+
+        <a href="https://www.amazon.se/s?k=bärbar+bluetooth+högtalare&tag=miama38-21" target="_blank" rel="noopener sponsored" class="amazon-card">
+          <div class="amazon-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1.5"/><path d="M6 7V5a6 6 0 0 1 12 0v2"/></svg>
+          </div>
+          <div class="amazon-card-body">
+            <div class="amazon-card-label">Förfesten</div>
+            <div class="amazon-card-name">Bärbar bluetooth-högtalare</div>
+            <div class="amazon-card-desc">Sätt igång stämningen redan vid parkering.</div>
+          </div>
+          <div class="amazon-card-cta">Hitta på Amazon <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </a>
+
+        <a href="https://www.amazon.se/s?k=campingstol+vikbar&tag=miama38-21" target="_blank" rel="noopener sponsored" class="amazon-card">
+          <div class="amazon-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18 9 6l3 6 3-6 6 12"/><line x1="5" y1="14" x2="19" y2="14"/></svg>
+          </div>
+          <div class="amazon-card-body">
+            <div class="amazon-card-label">Gräsmattan</div>
+            <div class="amazon-card-name">Campingstol / solstol</div>
+            <div class="amazon-card-desc">Kom tidigt, ta en bra plats vid scenen.</div>
+          </div>
+          <div class="amazon-card-cta">Hitta på Amazon <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </a>
+
+        <a href="https://www.amazon.se/s?k=myggmedel+spray&tag=miama38-21" target="_blank" rel="noopener sponsored" class="amazon-card">
+          <div class="amazon-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          </div>
+          <div class="amazon-card-body">
+            <div class="amazon-card-label">Dalälven-klassikern</div>
+            <div class="amazon-card-name">Myggmedel</div>
+            <div class="amazon-card-desc">Ingen sommarkväll vid älven utan det här.</div>
+          </div>
+          <div class="amazon-card-cta">Hitta på Amazon <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </a>
+
+        <a href="https://www.amazon.se/s?k=party+pool+badring+uppblåsbar&tag=miama38-21" target="_blank" rel="noopener sponsored" class="amazon-card">
+          <div class="amazon-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c.5-2 2.5-4 6-4s5.5 2 6 4c.5 2 2.5 4 6 4"/><path d="M2 18c.5-2 2.5-4 6-4s5.5 2 6 4c.5 2 2.5 4 6 4"/><path d="M2 6c.5-2 2.5-4 6-4s5.5 2 6 4c.5 2 2.5 4 6 4"/></svg>
+          </div>
+          <div class="amazon-card-body">
+            <div class="amazon-card-label">Före & efter dansen</div>
+            <div class="amazon-card-name">Party & bad-prylar</div>
+            <div class="amazon-card-desc">Badring, vattenpistol, partyset – Dalälven är din lekplats.</div>
+          </div>
+          <div class="amazon-card-cta">Hitta på Amazon <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </a>
+
+      </div>
+      <p class="amazon-disclaimer">Sponsrade länkar · Amazon affiliate</p>
+    </div>
+  </div>
 
   <!-- SHARE -->
   <div class="share-section">
