@@ -208,8 +208,8 @@
     .icon-btn:active { transform:scale(.92); }
     .icon-btn.active { background:var(--ink); color:var(--bg); border-color:var(--ink); }
 
-    /* counter switcher tabs when multiple counters */
-    .ctr-tabs { display:flex; gap:6px; padding: 6px 14px 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    /* counter switcher tabs — sits below the tap zone (thumb-reachable) */
+    .ctr-tabs { display:flex; gap:6px; padding: 10px 14px 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .ctr-tabs::-webkit-scrollbar { display: none; }
     .ctr-tab { padding:7px 12px; background:var(--surface); border:1.5px solid var(--border); border-radius:999px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .15s; display:flex; align-items:center; gap:6px; user-select:none; -webkit-user-select:none; }
     .ctr-tab.active { background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:600; padding-right: 6px; }
@@ -254,7 +254,7 @@
       user-select: none;
       -webkit-user-select: none;
       padding: 20px;
-      min-height: 420px;
+      min-height: 360px;
       touch-action: manipulation;
     }
     .tap-zone::before {
@@ -936,21 +936,6 @@
             </button>
           </div>
 
-          {/* Counter tabs — long-press a tab (or double-click) to rename inline.
-              The "add counter" button lives below the tap zone for thumb reach. */}
-          <div className="ctr-tabs">
-            {localProject.counters.map(c => (
-              <CounterTab key={c.id}
-                counter={c}
-                active={c.id===activeCtrId}
-                canRemove={localProject.counters.length > 1}
-                onSelect={()=>{ setActiveCtrId(c.id); haptic(5); }}
-                onRename={(newName)=>updCtr(c.id, { name: newName })}
-                onRemove={()=>delCtr(c.id)}
-              />
-            ))}
-          </div>
-
           {/* THE BIG TAP ZONE */}
           <div
             ref={tapZoneRef}
@@ -998,6 +983,23 @@
               <div className="tap-hint">↑ {t.tapToAdd}</div>
             )}
           </div>
+
+          {/* Counter tabs — placed directly below the tap zone for thumb reach.
+              Long-press (or double-click) to rename inline. × to remove. */}
+          {localProject.counters.length > 1 && (
+            <div className="ctr-tabs">
+              {localProject.counters.map(c => (
+                <CounterTab key={c.id}
+                  counter={c}
+                  active={c.id===activeCtrId}
+                  canRemove={localProject.counters.length > 1}
+                  onSelect={()=>{ setActiveCtrId(c.id); haptic(5); }}
+                  onRename={(newName)=>updCtr(c.id, { name: newName })}
+                  onRemove={()=>delCtr(c.id)}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Action row: undo / reset */}
           <div className="knit-actions">
