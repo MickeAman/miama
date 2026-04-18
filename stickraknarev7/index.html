@@ -392,6 +392,24 @@
     .swish-share:hover { background:var(--bg); }
     .about-footer { text-align:center; padding:24px 0 0; font-size:11px; color:var(--soft); }
 
+    /* release notes */
+    .release-card { padding: 18px 20px; }
+    .release-hdr { margin-bottom: 12px; }
+    .release-title { font-family:'Fraunces', serif; font-weight:600; font-size:16px; color:var(--ink); letter-spacing:-0.01em; }
+    .release-entry { padding-top: 4px; }
+    .release-entry + .release-entry { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .release-meta { display:flex; align-items:baseline; gap:8px; margin-bottom:8px; }
+    .release-version { font-size:12px; font-weight:700; color:var(--ink); background:var(--bg); border:1px solid var(--border); padding:2px 8px; border-radius:999px; letter-spacing:0.02em; }
+    .release-date { font-size:11px; color:var(--soft); text-transform:lowercase; }
+    .release-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .release-list li { font-size:13px; color:var(--muted); line-height:1.5; padding-left:18px; position:relative; }
+    .release-list li::before {
+      content:'';
+      position:absolute; left:4px; top:8px;
+      width:6px; height:6px; border-radius:50%;
+      background: var(--warm);
+    }
+
     .sp   { height:14px; }
     .sp8  { height:8px; }
     .sp20 { height:20px; }
@@ -527,11 +545,11 @@
         tabProjects:"Projekt", tabAbout:"Om",
         langLabel:"Språk", saving:"Sparar…", saved:"Sparat",
         signOut:"Logga ut", darkMode:"Mörkt läge", anonUser:"Anonym användare",
-        founderTitle:"Om appen", founderSub:"För min fru och hennes stickklubb",
-        founderP1:"Stickräknaren byggde jag till min fru och hennes stickklubb — ett gäng kvinnor som älskar att sticka ihop, dricka te och prata om livet. De behövde något enklare än krångliga appar och papperslappar som försvinner.",
-        founderP2:"Allt jag ville var en sak: en knapp stor nog att trycka på medan händerna håller i stickor och garn. Resten är bonus.",
-        founderP3:"Appen är <strong>gratis</strong> och kommer alltid vara det. Om du gillar den får du gärna dela med dig till andra stickare — det betyder allt. En liten Swish är också alltid uppskattad ☕",
-        swishTitle:"Swisha en kaffe", swishDesc:"Valfritt belopp, helt frivilligt. Tack!",
+        founderTitle:"Om appen", founderSub:"För min fru och stickklubben Sticka & Dricka",
+        founderP1:"Stickräknaren byggde jag till min fru och hennes stickklubb Sticka & Dricka — ett gäng kvinnor som älskar att sticka ihop, skåla i bubbel och prata om livet. De behövde något enklare än krångliga appar och papperslappar som försvinner.",
+        founderP2:"Allt jag ville var en sak: en knapp stor nog att trycka på medan ena handen håller i stickorna och andra i champagneglaset. Resten är bonus.",
+        founderP3:"Appen är <strong>gratis</strong> och kommer alltid vara det. Om du gillar den får du gärna dela med dig till andra stickare — det betyder allt. En liten Swish är också alltid uppskattad 🥂",
+        swishTitle:"Swisha ett glas bubbel", swishDesc:"Valfritt belopp, helt frivilligt. Tack!",
         swishNumber:"Swish-nummer", copyNumber:"Kopiera", copied:"Kopierat!",
         shareSwish:"Dela", footer:"gjord med ♥ i sverige",
         amzProject:"Köp garn till projektet", amzProjectSub:"Hitta garn, stickor & tillbehör",
@@ -542,6 +560,19 @@
         repeatOf:"rapport", repeatLength:"Varv per rapport", targetRows:"Mål (antal varv)", repeatHint:"T.ex. 8 för en 8-varvs rapport",
         counterName:"Räknarens namn", done:"Klart!", goalReached:"Mål uppnått!",
         confirmReset:"Nollställa räknaren?",
+        whatsNew:"Nyheter i senaste versionen",
+        releaseNotes: [
+          { v:"2.0", date:"april 2026", items:[
+            "Helt ny räknarvy — tryck var som helst på skärmen för +1",
+            "Flera räknare per projekt, byt namn genom att långtrycka",
+            "Mönsterrapport: se vilken rad du är på i din rapport",
+            "Mål per räknare med progress och liten festlig notis när du når målet",
+            "Mörkt läge för kvällsstickningen",
+            "Projekt får egna färger så du enkelt skiljer dem åt",
+            "Skärm-på-knapp så telefonen inte slocknar mitt i varvet",
+            "Norska tillagt som språk"
+          ]}
+        ],
       },
       no: {
         appTitle:"Pinnteller", appSub:"Prosjekter og omganger, enkelt",
@@ -566,11 +597,11 @@
         tabProjects:"Prosjekter", tabAbout:"Om",
         langLabel:"Språk", saving:"Lagrer…", saved:"Lagret",
         signOut:"Logg ut", darkMode:"Mørk modus", anonUser:"Anonym bruker",
-        founderTitle:"Om appen", founderSub:"Til kona mi og strikkeklubben hennes",
-        founderP1:"Pinntelleren har jeg laget til kona mi og strikkeklubben hennes — en gjeng kvinner som elsker å strikke sammen, drikke te og prate om livet. De trengte noe enklere enn kronglete apper og papirlapper som forsvinner.",
-        founderP2:"Alt jeg ville var én ting: en knapp stor nok til å trykke på mens hendene holder pinner og garn. Resten er bonus.",
-        founderP3:"Appen er <strong>gratis</strong> og kommer alltid til å være det. Hvis du liker den, del den gjerne med andre strikkere — det betyr alt. En liten Swish er også alltid satt pris på ☕",
-        swishTitle:"Swish en kaffe", swishDesc:"Valgfritt beløp, helt frivillig. Takk!",
+        founderTitle:"Om appen", founderSub:"Til kona mi og strikkeklubben Sticka & Dricka",
+        founderP1:"Pinntelleren har jeg laget til kona mi og strikkeklubben hennes Sticka & Dricka — en gjeng kvinner som elsker å strikke sammen, skåle i bobler og prate om livet. De trengte noe enklere enn kronglete apper og papirlapper som forsvinner.",
+        founderP2:"Alt jeg ville var én ting: en knapp stor nok til å trykke på mens én hånd holder pinnene og den andre champagneglasset. Resten er bonus.",
+        founderP3:"Appen er <strong>gratis</strong> og kommer alltid til å være det. Hvis du liker den, del den gjerne med andre strikkere — det betyr alt. En liten Swish er også alltid satt pris på 🥂",
+        swishTitle:"Swish et glass bobler", swishDesc:"Valgfritt beløp, helt frivillig. Takk!",
         swishNumber:"Swish-nummer", copyNumber:"Kopier", copied:"Kopiert!",
         shareSwish:"Del", footer:"laget med ♥ i sverige",
         amzProject:"Kjøp garn til prosjektet", amzProjectSub:"Finn garn, pinner & tilbehør",
@@ -581,6 +612,19 @@
         repeatOf:"rapport", repeatLength:"Omganger per rapport", targetRows:"Mål (antall omganger)", repeatHint:"F.eks. 8 for en 8-omgangs rapport",
         counterName:"Tellerens navn", done:"Ferdig!", goalReached:"Mål nådd!",
         confirmReset:"Nullstille telleren?",
+        whatsNew:"Nyheter i siste versjon",
+        releaseNotes: [
+          { v:"2.0", date:"april 2026", items:[
+            "Helt ny tellervisning — trykk hvor som helst på skjermen for +1",
+            "Flere tellere per prosjekt, endre navn ved å holde inne",
+            "Mønsterrapport: se hvilken rad du er på i rapporten",
+            "Mål per teller med fremdrift og en liten festlig varsel når du når målet",
+            "Mørk modus for kveldsstrikking",
+            "Prosjekter får egne farger så du enkelt skiller dem",
+            "Skjerm-på-knapp så telefonen ikke slukner midt i omgangen",
+            "Norsk lagt til som språk"
+          ]}
+        ],
       },
       da: {
         appTitle:"Pindetæller", appSub:"Projekter og omgange, enkelt",
@@ -605,11 +649,11 @@
         tabProjects:"Projekter", tabAbout:"Om",
         langLabel:"Sprog", saving:"Gemmer…", saved:"Gemt",
         signOut:"Log ud", darkMode:"Mørk tilstand", anonUser:"Anonym bruger",
-        founderTitle:"Om appen", founderSub:"Til min kone og hendes strikkeklub",
-        founderP1:"Pindetælleren har jeg bygget til min kone og hendes strikkeklub — en flok kvinder, der elsker at strikke sammen, drikke te og snakke om livet. De havde brug for noget enklere end besværlige apps og papirlapper, der bliver væk.",
-        founderP2:"Alt jeg ville var én ting: en knap stor nok til at trykke på, mens hænderne holder om pinde og garn. Resten er bonus.",
-        founderP3:"Appen er <strong>gratis</strong> og vil altid være det. Hvis du kan lide den, del den gerne med andre strikkere — det betyder alt. En lille Swish er også altid værdsat ☕",
-        swishTitle:"Swish en kop kaffe", swishDesc:"Valgfrit beløb, helt frivilligt. Tak!",
+        founderTitle:"Om appen", founderSub:"Til min kone og strikkeklubben Sticka & Dricka",
+        founderP1:"Pindetælleren har jeg bygget til min kone og hendes strikkeklub Sticka & Dricka — en flok kvinder, der elsker at strikke sammen, skåle i bobler og snakke om livet. De havde brug for noget enklere end besværlige apps og papirlapper, der bliver væk.",
+        founderP2:"Alt jeg ville var én ting: en knap stor nok til at trykke på, mens den ene hånd holder pindene og den anden champagneglasset. Resten er bonus.",
+        founderP3:"Appen er <strong>gratis</strong> og vil altid være det. Hvis du kan lide den, del den gerne med andre strikkere — det betyder alt. En lille Swish er også altid værdsat 🥂",
+        swishTitle:"Swish et glas bobler", swishDesc:"Valgfrit beløb, helt frivilligt. Tak!",
         swishNumber:"Swish-nummer", copyNumber:"Kopiér", copied:"Kopieret!",
         shareSwish:"Del", footer:"lavet med ♥ i sverige",
         amzProject:"Køb garn til projektet", amzProjectSub:"Find garn, pinde & tilbehør",
@@ -620,6 +664,19 @@
         repeatOf:"rapport", repeatLength:"Omgange pr. rapport", targetRows:"Mål (antal omgange)", repeatHint:"F.eks. 8 for en 8-omgangs rapport",
         counterName:"Tællerens navn", done:"Færdig!", goalReached:"Mål nået!",
         confirmReset:"Nulstille tælleren?",
+        whatsNew:"Nyheder i seneste version",
+        releaseNotes: [
+          { v:"2.0", date:"april 2026", items:[
+            "Helt ny tællervisning — tryk hvor som helst på skærmen for +1",
+            "Flere tællere pr. projekt, omdøb ved at holde nede",
+            "Mønsterrapport: se hvilken række du er på i rapporten",
+            "Mål pr. tæller med fremgang og en lille festlig besked når du når målet",
+            "Mørk tilstand til aftenstrikningen",
+            "Projekter får egne farver så du nemt skelner dem",
+            "Skærm-til-knap så telefonen ikke går i dvale midt i omgangen",
+            "Norsk tilføjet som sprog"
+          ]}
+        ],
       },
       en: {
         appTitle:"Row Counter", appSub:"Projects and rounds, simply",
@@ -644,11 +701,11 @@
         tabProjects:"Projects", tabAbout:"About",
         langLabel:"Language", saving:"Saving…", saved:"Saved",
         signOut:"Sign out", darkMode:"Dark mode", anonUser:"Anonymous user",
-        founderTitle:"About", founderSub:"For my wife and her knitting club",
-        founderP1:"I built Row Counter for my wife and her knitting club — a group of women who love to knit together, drink tea, and talk about life. They needed something simpler than fiddly apps and paper notes that go missing.",
-        founderP2:"All I wanted was one thing: a button big enough to tap while your hands are holding needles and yarn. Everything else is a bonus.",
-        founderP3:"The app is <strong>free</strong> and always will be. If you enjoy it, please share it with other knitters — it means the world. A small Swish donation is also always appreciated ☕",
-        swishTitle:"Buy me a coffee (Swish)", swishDesc:"Any amount, totally optional. Thank you!",
+        founderTitle:"About", founderSub:"For my wife and her knitting club Sticka & Dricka",
+        founderP1:"I built Row Counter for my wife and her knitting club Sticka & Dricka — a group of women who love to knit together, clink their champagne glasses, and talk about life. They needed something simpler than fiddly apps and paper notes that go missing.",
+        founderP2:"All I wanted was one thing: a button big enough to tap while one hand holds the needles and the other a glass of bubbly. Everything else is a bonus.",
+        founderP3:"The app is <strong>free</strong> and always will be. If you enjoy it, please share it with other knitters — it means the world. A small Swish donation is also always appreciated 🥂",
+        swishTitle:"Buy me a glass of bubbly (Swish)", swishDesc:"Any amount, totally optional. Thank you!",
         swishNumber:"Swish number", copyNumber:"Copy", copied:"Copied!",
         shareSwish:"Share", footer:"made with ♥ in sweden",
         amzProject:"Buy yarn for this project", amzProjectSub:"Find yarn, needles & accessories",
@@ -659,6 +716,19 @@
         repeatOf:"repeat", repeatLength:"Rows per repeat", targetRows:"Goal (total rows)", repeatHint:"e.g. 8 for an 8-row repeat",
         counterName:"Counter name", done:"Done!", goalReached:"Goal reached!",
         confirmReset:"Reset counter?",
+        whatsNew:"What's new in the latest version",
+        releaseNotes: [
+          { v:"2.0", date:"April 2026", items:[
+            "All-new counter view — tap anywhere on the screen for +1",
+            "Multiple counters per project, long-press a tab to rename",
+            "Pattern repeat tracking — see which row you're on in the repeat",
+            "Per-counter goals with progress and a small celebration when you hit it",
+            "Dark mode for evening knitting",
+            "Projects get their own colour tag so you can tell them apart",
+            "Keep-screen-on button so your phone doesn't lock mid-row",
+            "Norwegian added as a language"
+          ]}
+        ],
       },
     };
     const LANG_NAMES = { sv:"Svenska", no:"Norsk", da:"Dansk", en:"English" };
@@ -1288,6 +1358,28 @@
                 <button className="swish-share" onClick={share}><Ic name="share" size={14}/> {t.shareSwish}</button>
               </div>
             </div>
+
+            {/* Release notes */}
+            {Array.isArray(t.releaseNotes) && t.releaseNotes.length > 0 && (
+              <div className="acard release-card">
+                <div className="release-hdr">
+                  <div className="release-title">{t.whatsNew}</div>
+                </div>
+                {t.releaseNotes.map((r, i) => (
+                  <div key={i} className="release-entry">
+                    <div className="release-meta">
+                      <span className="release-version">v{r.v}</span>
+                      <span className="release-date">{r.date}</span>
+                    </div>
+                    <ul className="release-list">
+                      {r.items.map((item, j) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="about-footer">{t.footer}</div>
         </div>
