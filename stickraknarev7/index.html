@@ -178,10 +178,12 @@
     textarea.field { resize:vertical; min-height:72px; }
 
     /* swatch picker */
-    .swatch-picker { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-    .swatch-chip { width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:transform .15s, border-color .15s; }
+    .swatch-picker { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; position:relative; }
+    .swatch-chip { width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:transform .15s, border-color .15s; padding:0; background-clip:padding-box; display:flex; align-items:center; justify-content:center; }
     .swatch-chip:hover { transform:scale(1.1); }
     .swatch-chip.active { border-color:var(--ink); transform:scale(1.1); }
+    .swatch-chip-custom { position:relative; }
+    .swatch-chip-plus { font-size:18px; font-weight:300; color:#fff; line-height:1; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
 
     /* buttons */
     .btn-dark   { width:100%; padding:13px; background:var(--ink); color:var(--bg); border:0; border-radius:var(--rsm); font-size:15px; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -772,6 +774,54 @@
     // ── Firestore helpers ────────────────────────────────────────────────────
     const projectsRef = (userId) => db.collection("users").doc(userId).collection("projects");
 
+    // ── SWATCH PICKER ────────────────────────────────────────────────────────
+    // Presets + a "custom" chip that opens the native colour picker for full
+    // freedom. Custom colours are persisted per-project just like presets.
+    function SwatchPicker({ value, onChange }) {
+      const [customOpen, setCustomOpen] = useState(false);
+      const inputRef = useRef();
+      const isPreset = SWATCHES.includes(value);
+      const customValue = isPreset ? "#b89770" : value;
+
+      const openPicker = () => {
+        // Open native colour picker via hidden input
+        setTimeout(() => inputRef.current?.click(), 0);
+      };
+
+      return (
+        <div className="swatch-picker">
+          {SWATCHES.map(c => (
+            <button key={c} type="button"
+              className={`swatch-chip ${value===c?"active":""}`}
+              style={{background:c}}
+              aria-label={`Color ${c}`}
+              onClick={()=>onChange(c)} />
+          ))}
+          {/* Custom colour chip — shows current custom colour, or a
+              rainbow conic gradient when no custom colour is chosen yet */}
+          <button type="button"
+            className={`swatch-chip swatch-chip-custom ${!isPreset?"active":""}`}
+            style={{
+              background: !isPreset
+                ? value
+                : "conic-gradient(from 0deg, #ef4444, #f59e0b, #eab308, #22c55e, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444)"
+            }}
+            aria-label="Pick custom color"
+            onClick={openPicker}>
+            {isPreset && <span className="swatch-chip-plus">+</span>}
+          </button>
+          <input
+            ref={inputRef}
+            type="color"
+            value={customValue}
+            onChange={(e)=>onChange(e.target.value)}
+            style={{position:'absolute', opacity:0, width:1, height:1, pointerEvents:'none'}}
+            aria-hidden="true"
+          />
+        </div>
+      );
+    }
+
     // ── COUNTER TAB ──────────────────────────────────────────────────────────
     // Long-press (or double-click) to rename inline.
     // When active, shows small edit/remove icons.
@@ -1175,14 +1225,7 @@
 
             {/* Swatch color */}
             <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:8}}>{t.color}</div>
-            <div className="swatch-picker">
-              {SWATCHES.map(c => (
-                <div key={c}
-                  className={`swatch-chip ${project.swatch===c?"active":""}`}
-                  style={{background:c}}
-                  onClick={()=>onUpdateProject({swatch: c})} />
-              ))}
-            </div>
+            <SwatchPicker value={project.swatch} onChange={(c)=>onUpdateProject({swatch: c})} />
 
             <div className="sp"/>
 
@@ -1307,11 +1350,7 @@
               onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}
               style={{marginBottom:14}} />
             <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:8}}>{t.color}</div>
-            <div className="swatch-picker">
-              {SWATCHES.map(c => (
-                <div key={c} className={`swatch-chip ${swatch===c?"active":""}`} style={{background:c}} onClick={()=>setSwatch(c)} />
-              ))}
-            </div>
+            <SwatchPicker value={swatch} onChange={setSwatch} />
             <button className="btn-dark" onClick={submit}><Ic name="plus" size={16}/>{t.newProject}</button>
             <button className="btn-ghost" onClick={onClose}>{t.no}</button>
           </div>
