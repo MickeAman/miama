@@ -936,8 +936,8 @@
             </button>
           </div>
 
-          {/* Counter tabs — always visible, so "+" is always discoverable.
-              Long-press a tab (or double-click) to rename inline. */}
+          {/* Counter tabs — long-press a tab (or double-click) to rename inline.
+              The "add counter" button lives below the tap zone for thumb reach. */}
           <div className="ctr-tabs">
             {localProject.counters.map(c => (
               <CounterTab key={c.id}
@@ -949,9 +949,6 @@
                 onRemove={()=>delCtr(c.id)}
               />
             ))}
-            <button className="ctr-tab-add" onClick={addCtr} title={t.addCounter} aria-label={t.addCounter}>
-              <Ic name="plus" size={13}/> {t.addCounter}
-            </button>
           </div>
 
           {/* THE BIG TAP ZONE */}
@@ -1011,6 +1008,12 @@
               <Ic name="undo" size={14}/> {t.reset}
             </button>
           </div>
+
+          {/* Add counter — placed here (below the tap zone) so it's within
+              thumb reach on the bottom of the phone. */}
+          <button className="add-ctr-btn" onClick={addCtr}>
+            <Ic name="plus" size={15}/> {t.addCounter}
+          </button>
 
           {/* Notes (collapsed by default) */}
           <div className="notes-panel">
