@@ -211,12 +211,36 @@
     /* counter switcher tabs when multiple counters */
     .ctr-tabs { display:flex; gap:6px; padding: 6px 14px 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .ctr-tabs::-webkit-scrollbar { display: none; }
-    .ctr-tab { padding:7px 14px; background:var(--surface); border:1.5px solid var(--border); border-radius:999px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .15s; display:flex; align-items:center; gap:6px; }
-    .ctr-tab.active { background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:600; }
+    .ctr-tab { padding:7px 12px; background:var(--surface); border:1.5px solid var(--border); border-radius:999px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .15s; display:flex; align-items:center; gap:6px; user-select:none; -webkit-user-select:none; }
+    .ctr-tab.active { background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:600; padding-right: 6px; }
+    .ctr-tab.editing { padding: 4px 8px; background:var(--surface); border-color:var(--ink); }
+    .ctr-tab-name { max-width: 140px; overflow:hidden; text-overflow:ellipsis; }
     .ctr-tab-count { font-variant-numeric: tabular-nums; opacity:.7; font-size:11px; font-weight:600; }
     .ctr-tab.active .ctr-tab-count { opacity:1; }
-    .ctr-tab-add { padding:7px 12px; background:transparent; border:1.5px dashed var(--border2); border-radius:999px; font-size:13px; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0; }
-    .ctr-tab-add:hover { border-color:var(--ink); color:var(--ink); }
+    .ctr-tab-edit, .ctr-tab-del {
+      width:20px; height:20px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      opacity:0.55; transition: opacity .15s, background .15s;
+      margin-left: 2px;
+    }
+    .ctr-tab-edit:hover, .ctr-tab-del:hover { opacity:1; background: rgba(255,255,255,0.12); }
+    .ctr-tab-del:hover { background: rgba(252,165,165,0.25); color:#fca5a5; }
+    .ctr-tab-input {
+      background:transparent; border:0; outline:none;
+      font-family:inherit; font-size:13px; font-weight:600; color:var(--ink);
+      width: 140px; padding: 3px 2px;
+      border-bottom: 1.5px solid var(--ink);
+    }
+    .ctr-tab-add {
+      padding:7px 12px; background:transparent;
+      border:1.5px dashed var(--border2); border-radius:999px;
+      font-size:13px; color:var(--muted); cursor:pointer;
+      display:flex; align-items:center; gap:5px; flex-shrink:0;
+      font-family:inherit; font-weight:500;
+      transition:all .15s;
+    }
+    .ctr-tab-add:hover { border-color:var(--ink); color:var(--ink); background:var(--surface-2); }
+    .ctr-tab-add:active { transform:scale(.96); }
 
     /* THE BIG TAP AREA */
     .tap-zone {
@@ -678,6 +702,73 @@
     // ── Firestore helpers ────────────────────────────────────────────────────
     const projectsRef = (userId) => db.collection("users").doc(userId).collection("projects");
 
+    // ── COUNTER TAB ──────────────────────────────────────────────────────────
+    // Long-press (or double-click) to rename inline.
+    // When active, shows small edit/remove icons.
+    function CounterTab({ counter, active, canRemove, onSelect, onRename, onRemove }) {
+      const [editing, setEditing] = useState(false);
+      const [name, setName] = useState(counter.name);
+      const inputRef = useRef();
+      const pressTimer = useRef();
+
+      useEffect(() => setName(counter.name), [counter.name]);
+      useEffect(() => { if (editing) setTimeout(()=>inputRef.current?.select(), 30); }, [editing]);
+
+      const startPress = () => {
+        clearTimeout(pressTimer.current);
+        pressTimer.current = setTimeout(() => { haptic(20); setEditing(true); }, 500);
+      };
+      const cancelPress = () => clearTimeout(pressTimer.current);
+
+      const commit = () => {
+        const n = name.trim() || counter.name;
+        setName(n); onRename(n); setEditing(false);
+      };
+      const cancel = () => { setName(counter.name); setEditing(false); };
+
+      if (editing) {
+        return (
+          <div className={`ctr-tab ${active?"active":""} editing`}>
+            <input ref={inputRef} className="ctr-tab-input" value={name}
+              onChange={e=>setName(e.target.value)}
+              onBlur={commit}
+              onKeyDown={e=>{ if(e.key==="Enter") commit(); else if(e.key==="Escape") cancel(); }}
+              maxLength={24}
+            />
+          </div>
+        );
+      }
+
+      return (
+        <button
+          className={`ctr-tab ${active?"active":""}`}
+          onClick={onSelect}
+          onDoubleClick={()=>setEditing(true)}
+          onTouchStart={startPress}
+          onTouchEnd={cancelPress}
+          onTouchMove={cancelPress}
+          onMouseDown={startPress}
+          onMouseUp={cancelPress}
+          onMouseLeave={cancelPress}
+        >
+          <span className="ctr-tab-name">{counter.name}</span>
+          <span className="ctr-tab-count">{counter.count}</span>
+          {active && (
+            <>
+              <span className="ctr-tab-edit" onClick={(e)=>{ e.stopPropagation(); setEditing(true); }} title="Rename">
+                <Ic name="edit" size={11}/>
+              </span>
+              {canRemove && (
+                <span className="ctr-tab-del" onClick={(e)=>{ e.stopPropagation(); if(confirm(`${counter.name}?`)) onRemove(); }} title="Remove">
+                  <Ic name="x" size={11}/>
+                </span>
+              )}
+            </>
+          )}
+        </button>
+      );
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // KNIT VIEW — the redesigned project detail view
     // ═══════════════════════════════════════════════════════════════════════
@@ -845,22 +936,23 @@
             </button>
           </div>
 
-          {/* Counter tabs (only if more than 1) */}
-          {localProject.counters.length > 1 && (
-            <div className="ctr-tabs">
-              {localProject.counters.map(c => (
-                <button key={c.id}
-                  className={`ctr-tab ${c.id===activeCtrId?"active":""}`}
-                  onClick={()=>{ setActiveCtrId(c.id); haptic(5); }}>
-                  {c.name}
-                  <span className="ctr-tab-count">{c.count}</span>
-                </button>
-              ))}
-              <button className="ctr-tab-add" onClick={addCtr}>
-                <Ic name="plus" size={13}/>
-              </button>
-            </div>
-          )}
+          {/* Counter tabs — always visible, so "+" is always discoverable.
+              Long-press a tab (or double-click) to rename inline. */}
+          <div className="ctr-tabs">
+            {localProject.counters.map(c => (
+              <CounterTab key={c.id}
+                counter={c}
+                active={c.id===activeCtrId}
+                canRemove={localProject.counters.length > 1}
+                onSelect={()=>{ setActiveCtrId(c.id); haptic(5); }}
+                onRename={(newName)=>updCtr(c.id, { name: newName })}
+                onRemove={()=>delCtr(c.id)}
+              />
+            ))}
+            <button className="ctr-tab-add" onClick={addCtr} title={t.addCounter} aria-label={t.addCounter}>
+              <Ic name="plus" size={13}/> {t.addCounter}
+            </button>
+          </div>
 
           {/* THE BIG TAP ZONE */}
           <div
@@ -958,10 +1050,8 @@
               onClose={()=>setShowSettings(false)}
               onUpdateProject={update}
               onUpdateCounter={(p) => updCtr(activeCtr.id, p)}
-              onDeleteCounter={() => { if (localProject.counters.length > 1) { delCtr(activeCtr.id); setShowSettings(false); } }}
               onShare={handleShare}
               onDeleteProject={()=>setConfirmDelete(true)}
-              canDeleteCounter={localProject.counters.length > 1}
             />
           )}
 
@@ -987,9 +1077,11 @@
     }
 
     // ── SETTINGS SHEET ───────────────────────────────────────────────────────
-    function SettingsSheet({ project, activeCtr, t, dark, setDark, onClose, onUpdateProject, onUpdateCounter, onDeleteCounter, onShare, onDeleteProject, canDeleteCounter }) {
+    // Note: counter renaming and removal live inline in the counter tabs
+    // (tap the active tab's edit icon, or long-press any tab). Settings
+    // only covers project-wide config + per-counter pattern/target numbers.
+    function SettingsSheet({ project, activeCtr, t, dark, setDark, onClose, onUpdateProject, onUpdateCounter, onShare, onDeleteProject }) {
       const [projName, setProjName] = useState(project.name);
-      const [ctrName, setCtrName]   = useState(activeCtr.name);
       const [repeat, setRepeat]     = useState(activeCtr.repeatLength || 0);
       const [target, setTarget]     = useState(activeCtr.targetCount || 0);
 
@@ -1019,14 +1111,10 @@
 
             <div className="sp"/>
 
-            {/* Counter name */}
-            <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:6}}>{t.counterName}</div>
-            <input className="field" value={ctrName} onChange={e=>setCtrName(e.target.value)}
-              onBlur={()=>onUpdateCounter({name: ctrName.trim() || activeCtr.name})} />
-
-            <div className="sp"/>
-
-            {/* Repeat & target */}
+            {/* Per-counter: repeat & target (for active counter) */}
+            <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:4}}>
+              {activeCtr.name}
+            </div>
             <div className="setting-row">
               <div>
                 <div className="setting-lbl">{t.repeatLength}</div>
@@ -1061,11 +1149,6 @@
             <button className="btn-dark" onClick={()=>{ onShare(); onClose(); }} style={{marginBottom:8}}>
               <Ic name="share" size={15}/> {t.share}
             </button>
-            {canDeleteCounter && (
-              <button className="btn-ghost" style={{color:'var(--muted)'}} onClick={onDeleteCounter}>
-                <Ic name="trash" size={13}/> {t.remove} "{activeCtr.name}"
-              </button>
-            )}
             <button className="btn-ghost" style={{color:'#b91c1c'}} onClick={()=>{ onDeleteProject(); onClose(); }}>
               {t.deleteProject}
             </button>
