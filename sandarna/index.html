@@ -6,7 +6,7 @@
 <title>Sandarna – Träningsplanering</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#f4f1ea;--surface:#ebe5d4;--card:#ffffff;--card2:#faf6ec;--border:#dcd4bf;--primary:#2f5d8a;--primary-dark:#1f4263;--primary-soft:rgba(47,93,138,0.10);--accent:#e8b94a;--accent-dark:#b88a1f;--text:#2c3138;--muted:#7a7568;--ok:#3a8a3e;--warn:#c89200;--error:#c14545;--shadow:0 1px 2px rgba(45,55,72,0.04),0 2px 8px rgba(45,55,72,0.05);--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
+  :root{--bg:#f4f1ea;--surface:#ebe5d4;--card:#ffffff;--card2:#faf6ec;--border:#dcd4bf;--primary:#3d6b4a;--primary-dark:#27482f;--primary-soft:rgba(61,107,74,0.10);--accent:#e8b94a;--accent-dark:#b88a1f;--text:#2c3138;--muted:#7a7568;--ok:#3a8a3e;--warn:#c89200;--error:#c14545;--shadow:0 1px 2px rgba(45,55,72,0.04),0 2px 8px rgba(45,55,72,0.05);--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
   *{box-sizing:border-box;margin:0;padding:0;}html{-webkit-text-size-adjust:100%;}
   body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100dvh;}
 
@@ -100,7 +100,7 @@
   .drill-card h3{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:5px;}
   .drill-meta{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:10px;}
   .drill-desc{font-size:13px;color:#55606b;line-height:1.5;margin-bottom:10px;}
-  .dtag{font-size:11px;background:var(--primary-soft);border:1px solid rgba(47,93,138,0.3);color:var(--primary);display:inline-block;padding:2px 8px;border-radius:2px;font-family:var(--fd);letter-spacing:1px;text-transform:uppercase;}
+  .dtag{font-size:11px;background:var(--primary-soft);border:1px solid rgba(61,107,74,0.3);color:var(--primary);display:inline-block;padding:2px 8px;border-radius:2px;font-family:var(--fd);letter-spacing:1px;text-transform:uppercase;}
   .added-by{font-size:11px;color:var(--muted);margin-top:8px;}
   .drill-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
@@ -155,6 +155,20 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--primary);color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;border-radius:3px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* ICONS (Lucide, MIT) */
+  .icon{width:1em;height:1em;vertical-align:-0.18em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+  .icon-lg{width:1.25em;height:1.25em;vertical-align:-0.25em;}
+  .icon-xl{width:38px;height:38px;}
+  .btn .icon,.tab-btn .icon,.filter-pill .icon,.btn-signout .icon,.reorder-btn .icon{margin-right:6px;}
+  .btn .icon:last-child,.tab-btn .icon:last-child,.filter-pill .icon:last-child,.reorder-btn .icon:last-child{margin-right:0;margin-left:6px;}
+  .btn .icon:only-child,.tab-btn .icon:only-child,.filter-pill .icon:only-child,.reorder-btn .icon:only-child{margin:0;}
+  .drill-meta .icon,.saved-card .meta .icon{width:14px;height:14px;vertical-align:-2px;margin-right:3px;color:var(--muted);}
+  .empty-state .icon-xl{margin-bottom:8px;color:var(--muted);}
+  .search-wrap{position:relative;margin-bottom:10px;}
+  .search-wrap .search-input{padding-left:36px;margin-bottom:0;}
+  .search-wrap .search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none;}
+  .archived-tag .icon{width:11px;height:11px;vertical-align:-1px;margin-right:3px;}
+
   /* ARCHIVED + REORDER */
   .archived-tag{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-bottom:6px;background:#eee2c4;color:#7a5c00;}
   .drill-card.archived,.saved-card.archived{opacity:.78;background:var(--card2);}
@@ -174,6 +188,35 @@
 </style>
 </head>
 <body>
+
+<!-- Icons (Lucide, MIT licensed — https://lucide.dev) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></symbol>
+    <symbol id="i-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><rect width="12" height="8" x="6" y="14"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
+    <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  </defs>
+</svg>
 
 <!-- AUTH -->
 <div id="auth-screen">
@@ -217,7 +260,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Redigera övning</div>
-      <button class="modal-close" onclick="closeEditModal()">✕</button>
+      <button class="modal-close" onclick="closeEditModal()" aria-label="Stäng"><svg class="icon"><use href="#i-x"/></svg></button>
     </div>
     <div class="form-grid">
       <div class="field" style="grid-column:1/-1">
@@ -255,7 +298,7 @@
     </div>
     <div class="form-actions">
       <button class="btn btn-ghost" onclick="closeEditModal()">Avbryt</button>
-      <button class="btn btn-primary" onclick="saveEdit()">Spara ändringar →</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Spara ändringar<svg class="icon"><use href="#i-arrow-right"/></svg></button>
     </div>
   </div>
 </div>
@@ -267,23 +310,26 @@
     <div><h1>Sandarna</h1><div style="font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;line-height:1;margin-top:3px;">Tränarverktyget</div></div>
     <div class="header-right">
       <span class="user-email" id="user-email-display"></span>
-      <button class="btn-signout" onclick="handleSignOut()">Logga ut</button>
+      <button class="btn-signout" onclick="handleSignOut()"><svg class="icon"><use href="#i-log-out"/></svg>Logga ut</button>
       <div class="sync-dot ok" id="sync-dot"></div>
     </div>
   </header>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('bibliotek',this)">📚 Bibliotek</button>
-    <button class="tab-btn" onclick="switchTab('ny-ovning',this)">➕ Ny övning</button>
-    <button class="tab-btn" onclick="switchTab('session',this)">⚽ Bygg träning</button>
-    <button class="tab-btn" onclick="switchTab('sparade',this)">💾 Sparade</button>
+    <button class="tab-btn active" onclick="switchTab('bibliotek',this)"><svg class="icon"><use href="#i-book"/></svg>Bibliotek</button>
+    <button class="tab-btn" onclick="switchTab('ny-ovning',this)"><svg class="icon"><use href="#i-plus"/></svg>Ny övning</button>
+    <button class="tab-btn" onclick="switchTab('session',this)"><svg class="icon"><use href="#i-clipboard"/></svg>Bygg träning</button>
+    <button class="tab-btn" onclick="switchTab('sparade',this)"><svg class="icon"><use href="#i-bookmark"/></svg>Sparade</button>
   </div>
 
   <main>
     <!-- BIBLIOTEK -->
     <div id="tab-bibliotek" class="tab-panel active">
       <div class="section-title">Övningsbibliotek</div>
-      <input class="search-input" id="lib-search" placeholder="🔍  Sök övning..." oninput="renderDrills()">
+      <div class="search-wrap">
+        <svg class="icon search-ico"><use href="#i-search"/></svg>
+        <input class="search-input" id="lib-search" placeholder="Sök övning..." oninput="renderDrills()">
+      </div>
       <div class="pills-scroll" id="lib-filters">
         <button class="filter-pill active" onclick="setFilter(this,'alla')">Alla</button>
         <button class="filter-pill" onclick="setFilter(this,'Uppvärmning')">Uppvärmning</button>
@@ -295,7 +341,7 @@
       </div>
       <div class="flex-between" style="margin-bottom:10px;">
         <span style="font-size:11px;color:var(--muted);font-family:var(--fd);letter-spacing:1.5px;text-transform:uppercase;" id="lib-count"></span>
-        <button class="filter-pill" id="lib-archive-toggle" onclick="toggleArchived('drills')">Visa arkiverade</button>
+        <button class="filter-pill" id="lib-archive-toggle" onclick="toggleArchived('drills')"><svg class="icon"><use href="#i-archive"/></svg>Visa arkiverade</button>
       </div>
       <div class="drills-grid" id="drills-grid"></div>
     </div>
@@ -340,7 +386,7 @@
         </div>
         <div class="form-actions">
           <button class="btn btn-ghost" onclick="clearDrillForm()">Rensa</button>
-          <button class="btn btn-primary" onclick="saveDrill()">Spara övning →</button>
+          <button class="btn btn-primary" onclick="saveDrill()">Spara övning<svg class="icon"><use href="#i-arrow-right"/></svg></button>
         </div>
       </div>
     </div>
@@ -366,9 +412,12 @@
       </div>
       <div class="flex-between">
         <div class="section-title" style="margin-bottom:0;">Välj övningar</div>
-        <button class="btn btn-primary btn-sm" onclick="saveSession()">💾 Spara träning</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSession()"><svg class="icon"><use href="#i-save"/></svg>Spara träning</button>
       </div>
-      <input class="search-input" id="s-search" placeholder="🔍  Sök övning..." oninput="renderPicker()">
+      <div class="search-wrap">
+        <svg class="icon search-ico"><use href="#i-search"/></svg>
+        <input class="search-input" id="s-search" placeholder="Sök övning..." oninput="renderPicker()">
+      </div>
       <div class="two-col">
         <div>
           <div class="col-label">Tillgängliga övningar</div>
@@ -386,7 +435,7 @@
       <div class="section-title">Sparade träningar</div>
       <div class="flex-between" style="margin-bottom:10px;">
         <span style="font-size:11px;color:var(--muted);font-family:var(--fd);letter-spacing:1.5px;text-transform:uppercase;" id="saved-count"></span>
-        <button class="filter-pill" id="saved-archive-toggle" onclick="toggleArchived('sessions')">Visa arkiverade</button>
+        <button class="filter-pill" id="saved-archive-toggle" onclick="toggleArchived('sessions')"><svg class="icon"><use href="#i-archive"/></svg>Visa arkiverade</button>
       </div>
       <div class="saved-grid" id="saved-grid"></div>
     </div>
@@ -542,44 +591,46 @@ function renderDrills() {
   g.innerHTML = list.length ? list.map(d => {
     const inS = sessionDrills.some(s => s.id===d.id);
     return `<div class="drill-card ${inS?'in-session':''} ${d.archived?'archived':''}">
-      ${d.archived?'<span class="archived-tag">📦 Arkiverad</span><br>':''}
+      ${d.archived?'<span class="archived-tag"><svg class="icon"><use href="#i-archive"/></svg>Arkiverad</span><br>':''}
       <span class="drill-type-badge b-${d.type}">${d.type}</span>
       <h3>${d.name}</h3>
       <div class="drill-meta">
-        <span>⏱ ${d.duration} min</span>
-        ${d.players?`<span>👥 ${d.players}</span>`:''}
-        ${d.equipment?`<span>🎒 ${d.equipment}</span>`:''}
+        <span><svg class="icon"><use href="#i-clock"/></svg>${d.duration} min</span>
+        ${d.players?`<span><svg class="icon"><use href="#i-users"/></svg>${d.players}</span>`:''}
+        ${d.equipment?`<span><svg class="icon"><use href="#i-package"/></svg>${d.equipment}</span>`:''}
       </div>
       ${d.desc?`<div class="drill-desc">${d.desc}</div>`:''}
       ${d.theme?`<span class="dtag">${d.theme}</span>`:''}
       <div class="added-by">Tillagd av ${d.addedByName||'Okänd'}${d.editedByName?` · Senast ändrad av ${d.editedByName}`:''}</div>
       <div class="drill-actions">
         ${d.archived ? `
-          <button class="btn btn-ghost btn-sm" onclick="restoreDrill('${d.id}')">↺ Återställ</button>
-          <button class="btn btn-danger btn-sm" onclick="hardDeleteDrill('${d.id}')">Ta bort permanent</button>
+          <button class="btn btn-ghost btn-sm" onclick="restoreDrill('${d.id}')"><svg class="icon"><use href="#i-rotate-ccw"/></svg>Återställ</button>
+          <button class="btn btn-danger btn-sm" onclick="hardDeleteDrill('${d.id}')"><svg class="icon"><use href="#i-trash"/></svg>Ta bort permanent</button>
         ` : `
-          <button class="btn btn-ghost btn-sm" onclick="toggleSession('${d.id}','lib')">${inS?'✓ Tillagd':'+ Träning'}</button>
-          <button class="btn btn-warning btn-sm" onclick="openEditModal('${d.id}')">✎ Redigera</button>
-          <button class="btn btn-danger btn-sm" onclick="archiveDrill('${d.id}')">Arkivera</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleSession('${d.id}','lib')"><svg class="icon"><use href="#${inS?'i-check':'i-plus'}"/></svg>${inS?'Tillagd':'Träning'}</button>
+          <button class="btn btn-warning btn-sm" onclick="openEditModal('${d.id}')"><svg class="icon"><use href="#i-pencil"/></svg>Redigera</button>
+          <button class="btn btn-danger btn-sm" onclick="archiveDrill('${d.id}')"><svg class="icon"><use href="#i-archive"/></svg>Arkivera</button>
         `}
       </div>
     </div>`;
-  }).join('') : `<div class="empty-state" style="grid-column:1/-1"><div class="icon">${showArchivedDrills?'📦':'🔍'}</div><p>${showArchivedDrills?'Inga arkiverade övningar.':'Inga övningar hittades.'}</p></div>`;
+  }).join('') : `<div class="empty-state" style="grid-column:1/-1"><svg class="icon icon-xl"><use href="#${showArchivedDrills?'i-archive':'i-search'}"/></svg><p>${showArchivedDrills?'Inga arkiverade övningar.':'Inga övningar hittades.'}</p></div>`;
 }
 window.renderDrills = renderDrills;
 
 window.toggleArchived = function(kind) {
+  const setLabel = (btn, on) => {
+    btn.classList.toggle('active', on);
+    btn.innerHTML = on
+      ? '<svg class="icon"><use href="#i-rotate-ccw"/></svg>Visa aktiva'
+      : '<svg class="icon"><use href="#i-archive"/></svg>Visa arkiverade';
+  };
   if (kind==='drills') {
     showArchivedDrills = !showArchivedDrills;
-    const btn = document.getElementById('lib-archive-toggle');
-    btn.classList.toggle('active', showArchivedDrills);
-    btn.textContent = showArchivedDrills ? '↩ Visa aktiva' : 'Visa arkiverade';
+    setLabel(document.getElementById('lib-archive-toggle'), showArchivedDrills);
     renderDrills();
   } else {
     showArchivedSessions = !showArchivedSessions;
-    const btn = document.getElementById('saved-archive-toggle');
-    btn.classList.toggle('active', showArchivedSessions);
-    btn.textContent = showArchivedSessions ? '↩ Visa aktiva' : 'Visa arkiverade';
+    setLabel(document.getElementById('saved-archive-toggle'), showArchivedSessions);
     renderSaved();
   }
 };
@@ -628,7 +679,7 @@ window.saveEdit = async function() {
     renderBuild();
   }
   closeEditModal();
-  toast('✓ Övning uppdaterad!');
+  toast('Övning uppdaterad');
 };
 
 // Close modal on overlay click
@@ -645,13 +696,13 @@ window.archiveDrill = async function(id) {
     archivedAt: serverTimestamp()
   });
   sessionDrills = sessionDrills.filter(d => d.id!==id);
-  renderBuild(); toast('📦 Övning arkiverad');
+  renderBuild(); toast('Övning arkiverad');
 };
 
 window.restoreDrill = async function(id) {
   setSyncStatus('syncing');
   await updateDoc(doc(db,'drills',id), { archived: false });
-  toast('↺ Övning återställd');
+  toast('Övning återställd');
 };
 
 window.hardDeleteDrill = async function(id) {
@@ -684,7 +735,7 @@ window.saveDrill = async function() {
     createdAt:    serverTimestamp()
   });
   window.clearDrillForm();
-  toast('✓ Övning sparad och delad!');
+  toast('Övning sparad och delad');
 };
 
 // ── SESSION BUILDER ────────────────────────────────────
@@ -699,7 +750,7 @@ function renderPicker() {
         <div class="picker-item-name">${d.name}</div>
         <div class="picker-item-meta">${d.type} · ${d.duration} min${d.theme?' · '+d.theme:''}</div>
       </div>
-      <button class="btn ${inS?'btn-primary':'btn-ghost'} btn-sm" onclick="toggleSession('${d.id}','picker')">${inS?'✓':'+'}</button>
+      <button class="btn ${inS?'btn-primary':'btn-ghost'} btn-sm" onclick="toggleSession('${d.id}','picker')" aria-label="${inS?'Tillagd':'Lägg till'}"><svg class="icon"><use href="#${inS?'i-check':'i-plus'}"/></svg></button>
     </div>`;
   }).join('') : `<div style="color:var(--muted);font-size:13px;padding:12px;">Inga övningar.</div>`;
 }
@@ -718,7 +769,7 @@ function renderBuild() {
   const tEl = document.getElementById('session-time');
   if (!el) return;
   if (!sessionDrills.length) {
-    el.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>Välj övningar från listan</p></div>`;
+    el.innerHTML=`<div class="empty-state"><svg class="icon icon-xl"><use href="#i-clipboard"/></svg><p>Välj övningar från listan</p></div>`;
     if(tEl) tEl.textContent=''; return;
   }
   const total = sessionDrills.reduce((s,d) => s+(d.duration||0), 0);
@@ -727,15 +778,15 @@ function renderBuild() {
   el.innerHTML = sessionDrills.map((d,i) => `
     <div class="session-item">
       <div class="reorder-col">
-        <button class="reorder-btn" onclick="moveBuild(${i},-1)" ${i===0?'disabled':''} aria-label="Flytta upp">▲</button>
-        <button class="reorder-btn" onclick="moveBuild(${i},1)" ${i===last?'disabled':''} aria-label="Flytta ner">▼</button>
+        <button class="reorder-btn" onclick="moveBuild(${i},-1)" ${i===0?'disabled':''} aria-label="Flytta upp"><svg class="icon"><use href="#i-chevron-up"/></svg></button>
+        <button class="reorder-btn" onclick="moveBuild(${i},1)" ${i===last?'disabled':''} aria-label="Flytta ner"><svg class="icon"><use href="#i-chevron-down"/></svg></button>
       </div>
       <div class="snum">${i+1}</div>
       <div class="session-item-info">
         <div class="session-item-name">${d.name}</div>
         <div class="session-item-meta">${d.type} · ${d.duration} min${d.theme?' · '+d.theme:''}</div>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="removeBuild(${i})" aria-label="Ta bort">✕</button>
+      <button class="btn btn-danger btn-sm" onclick="removeBuild(${i})" aria-label="Ta bort"><svg class="icon"><use href="#i-x"/></svg></button>
     </div>`).join('');
 }
 
@@ -767,7 +818,7 @@ window.saveSession = async function() {
   document.getElementById('s-date').value='';
   sessionTheme=''; renderThemePills('session-theme-pills','session');
   renderPicker(); renderBuild();
-  toast('✓ Träning sparad och delad!');
+  toast('Träning sparad och delad');
 };
 
 // ── SAVED SESSIONS ─────────────────────────────────────
@@ -777,28 +828,28 @@ function renderSaved() {
   const cnt = document.getElementById('saved-count');
   if (cnt) cnt.textContent = list.length ? `${list.length} träning${list.length===1?'':'ar'}` : '';
   if (!list.length) {
-    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">${showArchivedSessions?'📦':'💾'}</div><p>${showArchivedSessions?'Inga arkiverade träningar.':'Inga sparade träningar ännu.'}</p></div>`;
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg class="icon icon-xl"><use href="#${showArchivedSessions?'i-archive':'i-bookmark'}"/></svg><p>${showArchivedSessions?'Inga arkiverade träningar.':'Inga sparade träningar ännu.'}</p></div>`;
     return;
   }
   g.innerHTML = list.map(s => `
     <div class="saved-card ${s.archived?'archived':''}">
-      ${s.archived?'<span class="archived-tag">📦 Arkiverad</span><br>':''}
+      ${s.archived?'<span class="archived-tag"><svg class="icon"><use href="#i-archive"/></svg>Arkiverad</span><br>':''}
       <h3>${s.name}</h3>
       <div class="meta">
-        <span>📅 ${new Date(s.date).toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'short'})}</span>
-        <span>⏱ ${s.totalTime} min</span>
+        <span><svg class="icon"><use href="#i-calendar"/></svg>${new Date(s.date).toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'short'})}</span>
+        <span><svg class="icon"><use href="#i-clock"/></svg>${s.totalTime} min</span>
       </div>
       ${s.theme?`<span class="dtag">${s.theme}</span><br>`:''}
       <div class="dlist" style="margin-top:8px;">${(s.drills||[]).map((d,i)=>`${i+1}. ${d.name} <span style="color:var(--muted);">(${d.duration} min)</span>`).join('<br>')}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Skapad av ${s.addedByName||'Okänd'}</div>
       <div class="saved-card-actions">
         ${s.archived ? `
-          <button class="btn btn-ghost btn-sm" onclick="restoreSession('${s.id}')">↺ Återställ</button>
-          <button class="btn btn-danger btn-sm" onclick="hardDeleteSession('${s.id}')">Ta bort permanent</button>
+          <button class="btn btn-ghost btn-sm" onclick="restoreSession('${s.id}')"><svg class="icon"><use href="#i-rotate-ccw"/></svg>Återställ</button>
+          <button class="btn btn-danger btn-sm" onclick="hardDeleteSession('${s.id}')"><svg class="icon"><use href="#i-trash"/></svg>Ta bort permanent</button>
         ` : `
-          <button class="btn btn-ghost btn-sm" onclick="loadSession('${s.id}')">↗ Ladda</button>
-          <button class="btn btn-ghost btn-sm" onclick="printSession('${s.id}')">🖨 Skriv ut / PDF</button>
-          <button class="btn btn-danger btn-sm" onclick="archiveSession('${s.id}')">Arkivera</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadSession('${s.id}')"><svg class="icon"><use href="#i-external"/></svg>Ladda</button>
+          <button class="btn btn-ghost btn-sm" onclick="printSession('${s.id}')"><svg class="icon"><use href="#i-printer"/></svg>Skriv ut / PDF</button>
+          <button class="btn btn-danger btn-sm" onclick="archiveSession('${s.id}')"><svg class="icon"><use href="#i-archive"/></svg>Arkivera</button>
         `}
       </div>
     </div>`).join('');
@@ -830,13 +881,13 @@ window.archiveSession = async function(id) {
     archivedByName: currentUser.displayName||currentUser.email,
     archivedAt: serverTimestamp()
   });
-  toast('📦 Träning arkiverad');
+  toast('Träning arkiverad');
 };
 
 window.restoreSession = async function(id) {
   setSyncStatus('syncing');
   await updateDoc(doc(db,'sessions',id), { archived: false });
-  toast('↺ Träning återställd');
+  toast('Träning återställd');
 };
 
 window.hardDeleteSession = async function(id) {
@@ -855,11 +906,11 @@ window.printSession = function(id) {
     body{padding:32px;color:#222;line-height:1.45;}
     h1{font-size:28px;margin-bottom:4px;}
     .sub{color:#666;font-size:13px;margin-bottom:18px;}
-    .meta{font-size:13px;color:#444;margin-bottom:18px;border-bottom:2px solid #2f5d8a;padding-bottom:10px;}
+    .meta{font-size:13px;color:#444;margin-bottom:18px;border-bottom:2px solid #3d6b4a;padding-bottom:10px;}
     .meta span{margin-right:18px;}
     .drill{border:1px solid #ccc;border-radius:6px;padding:12px 14px;margin-bottom:10px;page-break-inside:avoid;}
     .drill-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
-    .num{background:#2f5d8a;color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;}
+    .num{background:#3d6b4a;color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;}
     .drill h2{font-size:16px;}
     .drill .info{color:#666;font-size:12px;margin-bottom:6px;}
     .drill p{font-size:13px;margin-top:4px;}
@@ -869,7 +920,7 @@ window.printSession = function(id) {
   const drillsHtml = fullDrills.map((d,i) => `
     <div class="drill">
       <div class="drill-head"><span class="num">${i+1}</span><h2>${escapeHtml(d.name)}</h2></div>
-      <div class="info">${escapeHtml(d.type||'')} · ${d.duration||'?'} min${d.theme?' · '+escapeHtml(d.theme):''}${d.players?' · 👥 '+escapeHtml(d.players):''}${d.equipment?' · 🎒 '+escapeHtml(d.equipment):''}</div>
+      <div class="info">${escapeHtml(d.type||'')} · ${d.duration||'?'} min${d.theme?' · '+escapeHtml(d.theme):''}${d.players?' · Spelare: '+escapeHtml(d.players):''}${d.equipment?' · Material: '+escapeHtml(d.equipment):''}</div>
       ${d.desc?`<p>${escapeHtml(d.desc).replace(/\n/g,'<br>')}</p>`:''}
     </div>
   `).join('');
@@ -877,9 +928,9 @@ window.printSession = function(id) {
     <h1>${escapeHtml(s.name)}</h1>
     <div class="sub">Sandarna Tränarverktyget</div>
     <div class="meta">
-      <span>📅 ${dateStr}</span>
-      <span>⏱ ${s.totalTime||0} min totalt</span>
-      ${s.theme?`<span>🎯 ${escapeHtml(s.theme)}</span>`:''}
+      <span>Datum: ${dateStr}</span>
+      <span>Tid: ${s.totalTime||0} min totalt</span>
+      ${s.theme?`<span>Tema: ${escapeHtml(s.theme)}</span>`:''}
     </div>
     ${drillsHtml}
     <div class="footer">Skapad av ${escapeHtml(s.addedByName||'Okänd')}</div>
