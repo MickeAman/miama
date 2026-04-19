@@ -154,6 +154,23 @@
 
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--primary);color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;border-radius:3px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ARCHIVED + REORDER */
+  .archived-tag{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-bottom:6px;background:#eee2c4;color:#7a5c00;}
+  .drill-card.archived,.saved-card.archived{opacity:.78;background:var(--card2);}
+  .reorder-col{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
+  .reorder-btn{background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:22px;border-radius:3px;font-size:13px;cursor:pointer;line-height:1;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  .reorder-btn:active{border-color:var(--primary);color:var(--primary);}
+  .reorder-btn:disabled{opacity:.3;cursor:default;}
+
+  /* PRINT */
+  @media print{
+    body{background:#fff;color:#000;}
+    #auth-screen,header,.tabs,.toast,.loading-overlay,.modal-overlay,.drill-actions,.saved-card-actions,.flex-between,.form-card,.section-title::after,#lib-filters,.search-input,#lib-archive-toggle,#saved-archive-toggle,#lib-count,#saved-count{display:none !important;}
+    main{padding:0;max-width:none;}
+    .tab-panel{display:block !important;}
+    .saved-card,.drill-card{box-shadow:none;border:1px solid #999;page-break-inside:avoid;margin-bottom:12px;}
+  }
 </style>
 </head>
 <body>
@@ -276,6 +293,10 @@
         <button class="filter-pill" onclick="setFilter(this,'Match')">Match</button>
         <button class="filter-pill" onclick="setFilter(this,'Avslutning')">Avslutning</button>
       </div>
+      <div class="flex-between" style="margin-bottom:10px;">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--fd);letter-spacing:1.5px;text-transform:uppercase;" id="lib-count"></span>
+        <button class="filter-pill" id="lib-archive-toggle" onclick="toggleArchived('drills')">Visa arkiverade</button>
+      </div>
       <div class="drills-grid" id="drills-grid"></div>
     </div>
 
@@ -363,6 +384,10 @@
     <!-- SPARADE -->
     <div id="tab-sparade" class="tab-panel">
       <div class="section-title">Sparade träningar</div>
+      <div class="flex-between" style="margin-bottom:10px;">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--fd);letter-spacing:1.5px;text-transform:uppercase;" id="saved-count"></span>
+        <button class="filter-pill" id="saved-archive-toggle" onclick="toggleArchived('sessions')">Visa arkiverade</button>
+      </div>
       <div class="saved-grid" id="saved-grid"></div>
     </div>
   </main>
@@ -391,6 +416,7 @@ const db    = getFirestore(fbApp);
 const THEMES = ['Presspel','Omställning','Passningsspel','Inneslutning','Avslut','Uppspel','Dödbollar','Spelbarhet','Kontra','Rörelse utan boll'];
 let drills = [], sessions = [], sessionDrills = [];
 let activeFilter = 'alla', newTheme = '', sessionTheme = '', editTheme = '';
+let showArchivedDrills = false, showArchivedSessions = false;
 let currentUser = null, editingId = null;
 let unsubDrills = null, unsubSessions = null;
 
@@ -506,13 +532,17 @@ window.setFilter = function(el, type) {
 function renderDrills() {
   const q = (document.getElementById('lib-search')?.value||'').toLowerCase();
   const list = drills.filter(d =>
+    (showArchivedDrills ? d.archived===true : !d.archived) &&
     (activeFilter==='alla'||d.type===activeFilter) &&
     (!q||d.name.toLowerCase().includes(q)||(d.theme||'').toLowerCase().includes(q)||(d.desc||'').toLowerCase().includes(q))
   );
+  const cnt = document.getElementById('lib-count');
+  if (cnt) cnt.textContent = list.length ? `${list.length} övning${list.length===1?'':'ar'}` : '';
   const g = document.getElementById('drills-grid'); if (!g) return;
   g.innerHTML = list.length ? list.map(d => {
     const inS = sessionDrills.some(s => s.id===d.id);
-    return `<div class="drill-card ${inS?'in-session':''}">
+    return `<div class="drill-card ${inS?'in-session':''} ${d.archived?'archived':''}">
+      ${d.archived?'<span class="archived-tag">📦 Arkiverad</span><br>':''}
       <span class="drill-type-badge b-${d.type}">${d.type}</span>
       <h3>${d.name}</h3>
       <div class="drill-meta">
@@ -522,16 +552,37 @@ function renderDrills() {
       </div>
       ${d.desc?`<div class="drill-desc">${d.desc}</div>`:''}
       ${d.theme?`<span class="dtag">${d.theme}</span>`:''}
-      <div class="added-by">Tillagd av ${d.addedByName||'Okänd'}</div>
+      <div class="added-by">Tillagd av ${d.addedByName||'Okänd'}${d.editedByName?` · Senast ändrad av ${d.editedByName}`:''}</div>
       <div class="drill-actions">
-        <button class="btn btn-ghost btn-sm" onclick="toggleSession('${d.id}','lib')">${inS?'✓ Tillagd':'+ Träning'}</button>
-        <button class="btn btn-warning btn-sm" onclick="openEditModal('${d.id}')">✎ Redigera</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteDrill('${d.id}')">Ta bort</button>
+        ${d.archived ? `
+          <button class="btn btn-ghost btn-sm" onclick="restoreDrill('${d.id}')">↺ Återställ</button>
+          <button class="btn btn-danger btn-sm" onclick="hardDeleteDrill('${d.id}')">Ta bort permanent</button>
+        ` : `
+          <button class="btn btn-ghost btn-sm" onclick="toggleSession('${d.id}','lib')">${inS?'✓ Tillagd':'+ Träning'}</button>
+          <button class="btn btn-warning btn-sm" onclick="openEditModal('${d.id}')">✎ Redigera</button>
+          <button class="btn btn-danger btn-sm" onclick="archiveDrill('${d.id}')">Arkivera</button>
+        `}
       </div>
     </div>`;
-  }).join('') : `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>Inga övningar hittades.</p></div>`;
+  }).join('') : `<div class="empty-state" style="grid-column:1/-1"><div class="icon">${showArchivedDrills?'📦':'🔍'}</div><p>${showArchivedDrills?'Inga arkiverade övningar.':'Inga övningar hittades.'}</p></div>`;
 }
 window.renderDrills = renderDrills;
+
+window.toggleArchived = function(kind) {
+  if (kind==='drills') {
+    showArchivedDrills = !showArchivedDrills;
+    const btn = document.getElementById('lib-archive-toggle');
+    btn.classList.toggle('active', showArchivedDrills);
+    btn.textContent = showArchivedDrills ? '↩ Visa aktiva' : 'Visa arkiverade';
+    renderDrills();
+  } else {
+    showArchivedSessions = !showArchivedSessions;
+    const btn = document.getElementById('saved-archive-toggle');
+    btn.classList.toggle('active', showArchivedSessions);
+    btn.textContent = showArchivedSessions ? '↩ Visa aktiva' : 'Visa arkiverade';
+    renderSaved();
+  }
+};
 
 // ── EDIT MODAL ─────────────────────────────────────────
 window.openEditModal = function(id) {
@@ -585,12 +636,29 @@ document.getElementById('edit-modal').addEventListener('click', e => {
   if (e.target===document.getElementById('edit-modal')) closeEditModal();
 });
 
-window.deleteDrill = async function(id) {
-  if (!confirm('Ta bort övningen? Den försvinner för alla tränare.')) return;
+window.archiveDrill = async function(id) {
+  if (!confirm('Arkivera övningen? Den döljs för alla tränare men kan återställas.')) return;
+  setSyncStatus('syncing');
+  await updateDoc(doc(db,'drills',id), {
+    archived: true,
+    archivedByName: currentUser.displayName||currentUser.email,
+    archivedAt: serverTimestamp()
+  });
+  sessionDrills = sessionDrills.filter(d => d.id!==id);
+  renderBuild(); toast('📦 Övning arkiverad');
+};
+
+window.restoreDrill = async function(id) {
+  setSyncStatus('syncing');
+  await updateDoc(doc(db,'drills',id), { archived: false });
+  toast('↺ Övning återställd');
+};
+
+window.hardDeleteDrill = async function(id) {
+  if (!confirm('Ta bort övningen permanent? Det går inte att ångra.')) return;
   setSyncStatus('syncing');
   await deleteDoc(doc(db,'drills',id));
-  sessionDrills = sessionDrills.filter(d => d.id!==id);
-  renderBuild(); toast('Övning borttagen');
+  toast('Övning permanent borttagen');
 };
 
 window.clearDrillForm = function() {
@@ -655,18 +723,31 @@ function renderBuild() {
   }
   const total = sessionDrills.reduce((s,d) => s+(d.duration||0), 0);
   if (tEl) tEl.textContent=`${total} min`;
+  const last = sessionDrills.length-1;
   el.innerHTML = sessionDrills.map((d,i) => `
     <div class="session-item">
+      <div class="reorder-col">
+        <button class="reorder-btn" onclick="moveBuild(${i},-1)" ${i===0?'disabled':''} aria-label="Flytta upp">▲</button>
+        <button class="reorder-btn" onclick="moveBuild(${i},1)" ${i===last?'disabled':''} aria-label="Flytta ner">▼</button>
+      </div>
       <div class="snum">${i+1}</div>
       <div class="session-item-info">
         <div class="session-item-name">${d.name}</div>
         <div class="session-item-meta">${d.type} · ${d.duration} min${d.theme?' · '+d.theme:''}</div>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="removeBuild(${i})">✕</button>
+      <button class="btn btn-danger btn-sm" onclick="removeBuild(${i})" aria-label="Ta bort">✕</button>
     </div>`).join('');
 }
 
 window.removeBuild = function(i) { sessionDrills.splice(i,1); renderPicker(); renderBuild(); };
+
+window.moveBuild = function(i, delta) {
+  const j = i + delta;
+  if (j < 0 || j >= sessionDrills.length) return;
+  const [item] = sessionDrills.splice(i, 1);
+  sessionDrills.splice(j, 0, item);
+  renderBuild();
+};
 
 window.saveSession = async function() {
   const name = document.getElementById('s-name').value.trim()||'Träning '+new Date().toLocaleDateString('sv-SE');
@@ -692,23 +773,33 @@ window.saveSession = async function() {
 // ── SAVED SESSIONS ─────────────────────────────────────
 function renderSaved() {
   const g = document.getElementById('saved-grid'); if (!g) return;
-  if (!sessions.length) {
-    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">💾</div><p>Inga sparade träningar ännu.</p></div>`;
+  const list = sessions.filter(s => showArchivedSessions ? s.archived===true : !s.archived);
+  const cnt = document.getElementById('saved-count');
+  if (cnt) cnt.textContent = list.length ? `${list.length} träning${list.length===1?'':'ar'}` : '';
+  if (!list.length) {
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="icon">${showArchivedSessions?'📦':'💾'}</div><p>${showArchivedSessions?'Inga arkiverade träningar.':'Inga sparade träningar ännu.'}</p></div>`;
     return;
   }
-  g.innerHTML = sessions.map(s => `
-    <div class="saved-card">
+  g.innerHTML = list.map(s => `
+    <div class="saved-card ${s.archived?'archived':''}">
+      ${s.archived?'<span class="archived-tag">📦 Arkiverad</span><br>':''}
       <h3>${s.name}</h3>
       <div class="meta">
         <span>📅 ${new Date(s.date).toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'short'})}</span>
         <span>⏱ ${s.totalTime} min</span>
       </div>
       ${s.theme?`<span class="dtag">${s.theme}</span><br>`:''}
-      <div class="dlist" style="margin-top:8px;">${(s.drills||[]).map((d,i)=>`${i+1}. ${d.name}`).join('<br>')}</div>
+      <div class="dlist" style="margin-top:8px;">${(s.drills||[]).map((d,i)=>`${i+1}. ${d.name} <span style="color:var(--muted);">(${d.duration} min)</span>`).join('<br>')}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Skapad av ${s.addedByName||'Okänd'}</div>
       <div class="saved-card-actions">
-        <button class="btn btn-ghost btn-sm" onclick="loadSession('${s.id}')">↗ Ladda</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteSession('${s.id}')">Ta bort</button>
+        ${s.archived ? `
+          <button class="btn btn-ghost btn-sm" onclick="restoreSession('${s.id}')">↺ Återställ</button>
+          <button class="btn btn-danger btn-sm" onclick="hardDeleteSession('${s.id}')">Ta bort permanent</button>
+        ` : `
+          <button class="btn btn-ghost btn-sm" onclick="loadSession('${s.id}')">↗ Ladda</button>
+          <button class="btn btn-ghost btn-sm" onclick="printSession('${s.id}')">🖨 Skriv ut / PDF</button>
+          <button class="btn btn-danger btn-sm" onclick="archiveSession('${s.id}')">Arkivera</button>
+        `}
       </div>
     </div>`).join('');
 }
@@ -731,12 +822,78 @@ window.loadSession = function(id) {
   toast('Träning laddad!');
 };
 
-window.deleteSession = async function(id) {
-  if (!confirm('Ta bort sparad träning? Den försvinner för alla tränare.')) return;
+window.archiveSession = async function(id) {
+  if (!confirm('Arkivera träningen? Den döljs för alla tränare men kan återställas.')) return;
+  setSyncStatus('syncing');
+  await updateDoc(doc(db,'sessions',id), {
+    archived: true,
+    archivedByName: currentUser.displayName||currentUser.email,
+    archivedAt: serverTimestamp()
+  });
+  toast('📦 Träning arkiverad');
+};
+
+window.restoreSession = async function(id) {
+  setSyncStatus('syncing');
+  await updateDoc(doc(db,'sessions',id), { archived: false });
+  toast('↺ Träning återställd');
+};
+
+window.hardDeleteSession = async function(id) {
+  if (!confirm('Ta bort träningen permanent? Det går inte att ångra.')) return;
   setSyncStatus('syncing');
   await deleteDoc(doc(db,'sessions',id));
-  toast('Träning borttagen');
+  toast('Träning permanent borttagen');
 };
+
+window.printSession = function(id) {
+  const s = sessions.find(s => s.id===id); if (!s) return;
+  const dateStr = new Date(s.date).toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const fullDrills = (s.drills||[]).map(sd => drills.find(d => d.id===sd.id) || sd);
+  const css = `
+    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+    body{padding:32px;color:#222;line-height:1.45;}
+    h1{font-size:28px;margin-bottom:4px;}
+    .sub{color:#666;font-size:13px;margin-bottom:18px;}
+    .meta{font-size:13px;color:#444;margin-bottom:18px;border-bottom:2px solid #2f5d8a;padding-bottom:10px;}
+    .meta span{margin-right:18px;}
+    .drill{border:1px solid #ccc;border-radius:6px;padding:12px 14px;margin-bottom:10px;page-break-inside:avoid;}
+    .drill-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
+    .num{background:#2f5d8a;color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;}
+    .drill h2{font-size:16px;}
+    .drill .info{color:#666;font-size:12px;margin-bottom:6px;}
+    .drill p{font-size:13px;margin-top:4px;}
+    .footer{margin-top:24px;font-size:11px;color:#888;border-top:1px solid #ddd;padding-top:8px;}
+    @media print{body{padding:14px;}}
+  `;
+  const drillsHtml = fullDrills.map((d,i) => `
+    <div class="drill">
+      <div class="drill-head"><span class="num">${i+1}</span><h2>${escapeHtml(d.name)}</h2></div>
+      <div class="info">${escapeHtml(d.type||'')} · ${d.duration||'?'} min${d.theme?' · '+escapeHtml(d.theme):''}${d.players?' · 👥 '+escapeHtml(d.players):''}${d.equipment?' · 🎒 '+escapeHtml(d.equipment):''}</div>
+      ${d.desc?`<p>${escapeHtml(d.desc).replace(/\n/g,'<br>')}</p>`:''}
+    </div>
+  `).join('');
+  const html = `<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8"><title>${escapeHtml(s.name)} – Sandarna</title><style>${css}</style></head><body>
+    <h1>${escapeHtml(s.name)}</h1>
+    <div class="sub">Sandarna Tränarverktyget</div>
+    <div class="meta">
+      <span>📅 ${dateStr}</span>
+      <span>⏱ ${s.totalTime||0} min totalt</span>
+      ${s.theme?`<span>🎯 ${escapeHtml(s.theme)}</span>`:''}
+    </div>
+    ${drillsHtml}
+    <div class="footer">Skapad av ${escapeHtml(s.addedByName||'Okänd')}</div>
+  </body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) { toast('Tillåt popup-fönster för att skriva ut'); return; }
+  w.document.write(html);
+  w.document.close();
+  w.onload = () => { w.focus(); w.print(); };
+};
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 </script>
 </body>
 </html>
