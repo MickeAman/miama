@@ -3,19 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Sandarna – Träningsplanering</title>
+<title>Sandarna P14 – Träningsplanering</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#f4f1ea;--surface:#ebe5d4;--card:#ffffff;--card2:#faf6ec;--border:#dcd4bf;--primary:#3d6b4a;--primary-dark:#27482f;--primary-soft:rgba(61,107,74,0.10);--accent:#e8b94a;--accent-dark:#b88a1f;--text:#2c3138;--muted:#7a7568;--ok:#3a8a3e;--warn:#c89200;--error:#c14545;--shadow:0 1px 2px rgba(45,55,72,0.04),0 2px 8px rgba(45,55,72,0.05);--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
+  :root{--bg:#F5F5F5;--surface:#ECECEC;--card:#ffffff;--card2:#F0F0F0;--border:#D6D6D6;--primary:#C8102E;--primary-dark:#8E0B20;--primary-soft:rgba(200,16,46,0.10);--secondary:#000000;--accent:#e8b94a;--accent-dark:#b88a1f;--text:#1A1A1A;--muted:#6B6B6B;--ok:#3a8a3e;--warn:#c89200;--error:#C8102E;--shadow:0 1px 2px rgba(0,0,0,0.04),0 2px 8px rgba(0,0,0,0.06);--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;}
   *{box-sizing:border-box;margin:0;padding:0;}html{-webkit-text-size-adjust:100%;}
   body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100dvh;}
 
   /* AUTH */
   #auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
   .auth-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:32px 24px;width:100%;max-width:380px;box-shadow:var(--shadow);}
-  .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
-  .auth-crest{width:44px;height:44px;background:var(--primary);clip-path:polygon(50% 0%,100% 20%,100% 80%,50% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:13px;color:#fff;flex-shrink:0;}
-  .auth-logo h1{font-family:var(--fd);font-weight:900;font-size:24px;letter-spacing:2px;text-transform:uppercase;line-height:1;}
+  .auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+  .auth-logo h1{font-family:var(--fd);font-weight:900;font-size:24px;letter-spacing:2px;text-transform:uppercase;line-height:1;color:var(--secondary);}
   .auth-logo h1 span{color:var(--primary);}
   .auth-tabs{display:flex;margin-bottom:24px;border:1px solid var(--border);border-radius:3px;overflow:hidden;}
   .auth-tab{flex:1;background:none;border:none;color:var(--muted);font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px;cursor:pointer;transition:all .2s;}
@@ -30,9 +29,11 @@
 
   /* HEADER */
   header{background:var(--card);border-bottom:3px solid var(--primary);padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
-  .crest{width:36px;height:36px;background:var(--primary);flex-shrink:0;clip-path:polygon(50% 0%,100% 20%,100% 80%,50% 100%,0% 80%,0% 20%);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:11px;color:#fff;}
-  header h1{font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;line-height:1;}
+  .brand-logo{height:40px;width:auto;flex-shrink:0;display:block;}
+  .auth-brand-logo{height:64px;width:auto;flex-shrink:0;display:block;}
+  header h1{font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;line-height:1;color:var(--secondary);}
   header h1 span{color:var(--primary);}
+  .tagline{font-size:10px;color:var(--primary);font-family:var(--fd);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;line-height:1;margin-top:4px;}
   .header-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .user-email{font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .btn-signout{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -222,10 +223,10 @@
 <div id="auth-screen">
   <div class="auth-box">
     <div class="auth-logo">
-      <div class="auth-crest">SBK</div>
+      <img class="auth-brand-logo" src="public/logo.png" alt="Sandarna BK">
       <div>
-        <h1>Sandarna</h1>
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Tränarverktyget</div>
+        <h1>Sandarna P14</h1>
+        <div class="tagline">Klubben med hjärtat i Majorna</div>
       </div>
     </div>
     <div class="auth-tabs">
@@ -306,8 +307,8 @@
 <!-- APP -->
 <div id="app" style="display:none;">
   <header>
-    <div class="crest">SBK</div>
-    <div><h1>Sandarna</h1><div style="font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;line-height:1;margin-top:3px;">Tränarverktyget</div></div>
+    <img class="brand-logo" src="public/logo.png" alt="Sandarna BK">
+    <div><h1>Sandarna P14</h1><div class="tagline">Klubben med hjärtat i Majorna</div></div>
     <div class="header-right">
       <span class="user-email" id="user-email-display"></span>
       <button class="btn-signout" onclick="handleSignOut()"><svg class="icon"><use href="#i-log-out"/></svg>Logga ut</button>
@@ -679,7 +680,7 @@ window.saveEdit = async function() {
     renderBuild();
   }
   closeEditModal();
-  toast('Övning uppdaterad');
+  toast('Övning uppdaterad ❤️🖤');
 };
 
 // Close modal on overlay click
@@ -696,20 +697,20 @@ window.archiveDrill = async function(id) {
     archivedAt: serverTimestamp()
   });
   sessionDrills = sessionDrills.filter(d => d.id!==id);
-  renderBuild(); toast('Övning arkiverad');
+  renderBuild(); toast('Övning arkiverad ❤️🖤');
 };
 
 window.restoreDrill = async function(id) {
   setSyncStatus('syncing');
   await updateDoc(doc(db,'drills',id), { archived: false });
-  toast('Övning återställd');
+  toast('Övning återställd ❤️🖤');
 };
 
 window.hardDeleteDrill = async function(id) {
   if (!confirm('Ta bort övningen permanent? Det går inte att ångra.')) return;
   setSyncStatus('syncing');
   await deleteDoc(doc(db,'drills',id));
-  toast('Övning permanent borttagen');
+  toast('Övning permanent borttagen ❤️🖤');
 };
 
 window.clearDrillForm = function() {
@@ -735,7 +736,7 @@ window.saveDrill = async function() {
     createdAt:    serverTimestamp()
   });
   window.clearDrillForm();
-  toast('Övning sparad och delad');
+  toast('Övning sparad och delad ❤️🖤');
 };
 
 // ── SESSION BUILDER ────────────────────────────────────
@@ -818,7 +819,7 @@ window.saveSession = async function() {
   document.getElementById('s-date').value='';
   sessionTheme=''; renderThemePills('session-theme-pills','session');
   renderPicker(); renderBuild();
-  toast('Träning sparad och delad');
+  toast('Träning sparad och delad ❤️🖤');
 };
 
 // ── SAVED SESSIONS ─────────────────────────────────────
@@ -870,7 +871,7 @@ window.loadSession = function(id) {
   document.querySelectorAll('.tab-btn')[2].classList.add('active');
   renderThemePills('session-theme-pills','session');
   renderPicker(); renderBuild();
-  toast('Träning laddad!');
+  toast('Träning laddad ❤️🖤');
 };
 
 window.archiveSession = async function(id) {
@@ -881,20 +882,20 @@ window.archiveSession = async function(id) {
     archivedByName: currentUser.displayName||currentUser.email,
     archivedAt: serverTimestamp()
   });
-  toast('Träning arkiverad');
+  toast('Träning arkiverad ❤️🖤');
 };
 
 window.restoreSession = async function(id) {
   setSyncStatus('syncing');
   await updateDoc(doc(db,'sessions',id), { archived: false });
-  toast('Träning återställd');
+  toast('Träning återställd ❤️🖤');
 };
 
 window.hardDeleteSession = async function(id) {
   if (!confirm('Ta bort träningen permanent? Det går inte att ångra.')) return;
   setSyncStatus('syncing');
   await deleteDoc(doc(db,'sessions',id));
-  toast('Träning permanent borttagen');
+  toast('Träning permanent borttagen ❤️🖤');
 };
 
 window.printSession = function(id) {
@@ -906,11 +907,11 @@ window.printSession = function(id) {
     body{padding:32px;color:#222;line-height:1.45;}
     h1{font-size:28px;margin-bottom:4px;}
     .sub{color:#666;font-size:13px;margin-bottom:18px;}
-    .meta{font-size:13px;color:#444;margin-bottom:18px;border-bottom:2px solid #3d6b4a;padding-bottom:10px;}
+    .meta{font-size:13px;color:#444;margin-bottom:18px;border-bottom:2px solid #C8102E;padding-bottom:10px;}
     .meta span{margin-right:18px;}
     .drill{border:1px solid #ccc;border-radius:6px;padding:12px 14px;margin-bottom:10px;page-break-inside:avoid;}
     .drill-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
-    .num{background:#3d6b4a;color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;}
+    .num{background:#C8102E;color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;}
     .drill h2{font-size:16px;}
     .drill .info{color:#666;font-size:12px;margin-bottom:6px;}
     .drill p{font-size:13px;margin-top:4px;}
@@ -924,16 +925,16 @@ window.printSession = function(id) {
       ${d.desc?`<p>${escapeHtml(d.desc).replace(/\n/g,'<br>')}</p>`:''}
     </div>
   `).join('');
-  const html = `<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8"><title>${escapeHtml(s.name)} – Sandarna</title><style>${css}</style></head><body>
+  const html = `<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8"><title>${escapeHtml(s.name)} – Sandarna P14</title><style>${css}</style></head><body>
     <h1>${escapeHtml(s.name)}</h1>
-    <div class="sub">Sandarna Tränarverktyget</div>
+    <div class="sub">Sandarna P14 – Klubben med hjärtat i Majorna</div>
     <div class="meta">
       <span>Datum: ${dateStr}</span>
       <span>Tid: ${s.totalTime||0} min totalt</span>
       ${s.theme?`<span>Tema: ${escapeHtml(s.theme)}</span>`:''}
     </div>
     ${drillsHtml}
-    <div class="footer">Skapad av ${escapeHtml(s.addedByName||'Okänd')}</div>
+    <div class="footer">Skapad av ${escapeHtml(s.addedByName||'Okänd')} ❤️🖤</div>
   </body></html>`;
   const w = window.open('', '_blank');
   if (!w) { toast('Tillåt popup-fönster för att skriva ut'); return; }
