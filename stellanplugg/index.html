@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stellans Pluggkompis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #fdf6e3;
+    --bg-card: #fffdf5;
+    --ink: #2b2b2b;
+    --ink-soft: #5a5a5a;
+    --accent: #ff6b35;
+    --accent-soft: #ffe5d9;
+    --green: #4caf50;
+    --green-soft: #d6f0d8;
+    --red: #e53935;
+    --red-soft: #ffd6d4;
+    --blue: #2962ff;
+    --blue-soft: #d6e2ff;
+    --yellow: #ffc107;
+    --shadow: 4px 4px 0 #2b2b2b;
+    --shadow-lg: 6px 6px 0 #2b2b2b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,107,53,0.08) 0, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(41,98,255,0.08) 0, transparent 50%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  header { text-align: center; margin: 20px 0 30px; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent); font-style: italic; }
+  .subtitle { color: var(--ink-soft); margin-top: 8px; font-size: 1.05rem; }
+
+  .card {
+    background: var(--bg-card);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    background: var(--accent);
+    color: white;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 14px 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.08s, box-shadow 0.08s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: var(--shadow); }
+  .btn-secondary { background: var(--bg-card); color: var(--ink); }
+  .btn-green { background: var(--green); }
+  .btn-blue { background: var(--blue); }
+  .btn-block { width: 100%; }
+  .btn-big { font-size: 1.3rem; padding: 18px 28px; }
+
+  input[type="text"] {
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 14px;
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    background: white;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  label { font-weight: 700; display: block; margin-bottom: 6px; }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 540px) { .mode-grid { grid-template-columns: 1fr; } }
+  .mode-card {
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--bg-card);
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: var(--shadow);
+  }
+  .mode-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .mode-card .emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+  .mode-card .name { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.3rem; }
+  .mode-card .desc { font-size: 0.9rem; color: var(--ink-soft); margin-top: 4px; }
+
+  .progress-bar {
+    height: 14px;
+    background: var(--bg-card);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    transition: width 0.3s;
+  }
+
+  .question-text { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
+  .instruction { color: var(--ink-soft); margin-bottom: 12px; }
+
+  .feedback {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 3px solid var(--ink);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .feedback.correct { background: var(--green-soft); }
+  .feedback.wrong { background: var(--red-soft); }
+
+  .flashcard {
+    perspective: 1000px;
+    height: 280px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .flashcard-front { background: var(--blue-soft); }
+  .flashcard-back { background: var(--green-soft); transform: rotateY(180deg); }
+  .flashcard-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .flashcard-text { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
+
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .row > * { flex: 1; }
+
+  .badge {
+    display: inline-block;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  .small { font-size: 0.9rem; color: var(--ink-soft); }
+
+  .celebrate { animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* XP BAR */
+  .xp-bar {
+    background: linear-gradient(135deg, #fff8d6 0%, #ffe5a3 100%);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .xp-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .xp-label { font-weight: 800; font-size: 1rem; }
+  .xp-numbers { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.1rem; }
+  .xp-track {
+    height: 16px;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--yellow) 0%, var(--accent) 100%);
+    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .xp-popup {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    pointer-events: none;
+    animation: xpFloat 1.4s forwards;
+  }
+  @keyframes xpFloat {
+    0% { opacity: 0; transform: translate(-50%, 20px) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+    80% { opacity: 1; transform: translate(-50%, -30px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -60px) scale(0.9); }
+  }
+
+  .reward-trophy {
+    font-size: 6rem;
+    line-height: 1;
+    margin-bottom: 10px;
+    animation: bounce 1s infinite alternate;
+    text-align: center;
+  }
+  @keyframes bounce {
+    from { transform: translateY(0) rotate(-5deg); }
+    to { transform: translateY(-10px) rotate(5deg); }
+  }
+  .reward-show-parent {
+    background: linear-gradient(135deg, var(--green) 0%, #6dc170 100%);
+    border: 4px solid var(--ink);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    color: white;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .reward-show-parent h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+
+  .score-big {
+    font-family: 'Fraunces', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+  }
+  .score-label { text-align: center; font-weight: 700; color: var(--ink-soft); margin-bottom: 16px; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Stellans <span class="accent">Pluggkompis</span></h1>
+  <p class="subtitle">📚 Volym och vikt – Kapitel 6</p>
+</header>
+
+<!-- HOME -->
+<div id="home-screen">
+  <div class="xp-bar" onclick="showXpInfo()">
+    <div class="xp-bar-top">
+      <span class="xp-label">⭐ Dina poäng</span>
+      <span class="xp-numbers"><span id="xp-current">0</span> / 300 XP</span>
+    </div>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Vad vill du öva på?</h2>
+    <div class="mode-grid">
+      <div class="mode-card" style="border-color: var(--green); background: var(--green-soft);" onclick="startUnits()">
+        <span class="emoji">📏</span>
+        <div class="name">Enhetsdrill</div>
+        <div class="desc">kg, hg, g, l, dl, cl...</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="startMath()">
+        <span class="emoji">🔢</span>
+        <div class="name">Mattetränare</div>
+        <div class="desc">Textuppgifter</div>
+      </div>
+      <div class="mode-card" onclick="startFlashcards()">
+        <span class="emoji">🃏</span>
+        <div class="name">Flashcards</div>
+        <div class="desc">Enheter och fakta</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="showCheatsheet()">
+        <span class="emoji">📖</span>
+        <div class="name">Fusklapp</div>
+        <div class="desc">Snabb översikt</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="small" style="text-align:center;">💡 Tjäna 300 XP = 1 timme extra skärmtid</p>
+</div>
+
+<!-- UNITS DRILL -->
+<div id="units-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="units-progress">1 / 12</span>
+      <span class="badge" style="background: var(--green-soft);" id="units-score">⭐ 0</span>
+      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="units-bar"></div></div>
+    <div class="question-text" id="units-question"></div>
+    <p class="instruction" id="units-instruction"></p>
+    <input type="text" id="units-answer" autocomplete="off" placeholder="Svar..." />
+    <div id="units-feedback" class="hidden"></div>
+    <button class="btn btn-green btn-block" id="units-submit-btn" style="margin-top: 12px;" onclick="submitUnits()">Svara →</button>
+    <button class="btn btn-block hidden" id="units-next-btn" style="margin-top: 12px;" onclick="nextUnits()">Nästa →</button>
+  </div>
+</div>
+
+<!-- MATH -->
+<div id="math-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="math-progress">1 / 6</span>
+      <span class="badge" style="background: var(--green-soft);" id="math-score">⭐ 0</span>
+      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="math-bar"></div></div>
+    <div class="question-text" id="math-question"></div>
+    <div id="math-hint-box" class="hidden" style="background: var(--accent-soft); border: 2px dashed var(--accent); border-radius: 10px; padding: 12px; margin-bottom: 12px; font-weight: 600;"></div>
+    <label>Ditt svar:</label>
+    <input type="text" id="math-answer" autocomplete="off" placeholder="T.ex. 4,5 liter eller 2 kg 300 g" />
+    <div id="math-feedback" class="hidden"></div>
+    <div class="row" style="margin-top: 12px;">
+      <button class="btn btn-secondary" id="math-hint-btn" onclick="getMathHint()">💡 Hint (-2 XP)</button>
+      <button class="btn btn-blue" id="math-submit-btn" onclick="submitMath()">Svara →</button>
+    </div>
+    <button class="btn btn-block hidden" id="math-next-btn" style="margin-top: 12px;" onclick="nextMath()">Nästa →</button>
+  </div>
+</div>
+
+<!-- FLASHCARDS -->
+<div id="flashcards-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="fc-progress">1 / 12</span>
+      <span class="badge" style="background: var(--yellow);" id="fc-xp-badge">⭐ 0</span>
+      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="fc-bar"></div></div>
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="flashcard-inner">
+        <div class="flashcard-front">
+          <div class="flashcard-label">Fråga</div>
+          <div class="flashcard-text" id="fc-front"></div>
+          <p class="small" style="margin-top: 16px;">👆 Tryck för att se svaret</p>
+        </div>
+        <div class="flashcard-back">
+          <div class="flashcard-label">Svar</div>
+          <div class="flashcard-text" id="fc-back"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn btn-secondary" onclick="prevCard()">← Förra</button>
+      <button class="btn" onclick="nextCard()">Nästa →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHEATSHEET -->
+<div id="cheatsheet-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <h2 style="flex:3;">📖 Fusklapp</h2>
+      <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">⚖️ Vikt</h3>
+    <p style="line-height:1.8;margin-bottom:14px;">
+      <strong>1 kg = 10 hg = 1 000 g</strong><br>
+      <strong>1 hg = 100 g</strong><br>
+      Tänk: kilo → hekto → gram, varje steg är ×10 eller ×100.
+    </p>
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">💧 Volym</h3>
+    <p style="line-height:1.8;margin-bottom:14px;">
+      <strong>1 liter = 10 dl = 100 cl = 1 000 ml</strong><br>
+      <strong>1 dl = 10 cl = 100 ml</strong><br>
+      <strong>1 cl = 10 ml</strong>
+    </p>
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🧠 Knep</h3>
+    <p style="line-height:1.8;">
+      • "Hekto" betyder 100 — så hg är 100 g, hl vore 100 l<br>
+      • "Centi" betyder hundradel — 1 cl är 1/100 liter<br>
+      • "Milli" betyder tusendel — 1 ml är 1/1000 liter<br>
+      • Skriv om svåra tal till samma enhet först (allt i gram, eller allt i ml)
+    </p>
+  </div>
+</div>
+
+<!-- DONE -->
+<div id="done-screen" class="hidden">
+  <div class="card celebrate">
+    <h2 style="text-align:center;">🎉 Klart!</h2>
+    <div class="score-big" id="done-score">0/0</div>
+    <p class="score-label" id="done-message">Bra jobbat!</p>
+    <p style="text-align:center;font-weight:700;color:var(--accent);margin-bottom:12px;" id="done-xp"></p>
+    <div class="row">
+      <button class="btn btn-block" id="done-again">🔁 Kör igen</button>
+      <button class="btn btn-secondary btn-block" onclick="goHome()">🏠 Hem</button>
+    </div>
+  </div>
+</div>
+
+<!-- REWARD -->
+<div id="reward-screen" class="hidden">
+  <div class="card celebrate" style="text-align:center;">
+    <div class="reward-trophy">🏆</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:2.2rem;font-weight:900;color:var(--accent);">DU GJORDE DET!</h2>
+    <p style="font-size:1.2rem;font-weight:700;margin:8px 0 4px;">300 XP uppnått! 🎯</p>
+    <p class="small" style="margin-bottom:8px;">Belöning #<span id="reward-number">1</span></p>
+    <div class="reward-show-parent">
+      <h3>📱 Visa mobilen till mamma eller pappa!</h3>
+      <p style="font-weight:600;">Du har tjänat in <strong>1 timme extra skärmtid</strong> 🎮</p>
+    </div>
+    <p class="small" style="margin-bottom:16px;">Föräldern trycker på knappen för att nollställa.</p>
+    <button class="btn btn-green btn-block btn-big" onclick="claimReward()">✅ Visat — börja om</button>
+    <button class="btn btn-secondary btn-block" style="margin-top:10px;" onclick="goHome()">Inte än</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ==================== STATE ====================
+const XP_KEY = 'stellan_offline_xp';
+const XP_GOAL = 300;
+let xpState = { total: 0, rewardsClaimed: 0 };
+
+const XP_REWARDS = {
+  unitCorrect: 5, unitWrong: 1,
+  mathCorrect: 15, mathWrong: 3, mathHint: -2,
+  flashcardSeen: 3
+};
+
+let units = [];
+let unitsIdx = 0;
+let unitsScore = 0;
+let unitsAnswered = false;
+
+let math = [];
+let mathIdx = 0;
+let mathScore = 0;
+let mathAnswered = false;
+let mathHintUsed = false;
+
+let cards = [];
+let cardIdx = 0;
+let cardsSeen = new Set();
+
+// ==================== DATA ====================
+
+// Flashcards: enhetstabell + viktiga begrepp
+const FLASHCARDS = [
+  { front: "Hur många gram är 1 kg?", back: "1 000 g" },
+  { front: "Hur många gram är 1 hg?", back: "100 g" },
+  { front: "Hur många hg är 1 kg?", back: "10 hg" },
+  { front: "Hur många dl är 1 liter?", back: "10 dl" },
+  { front: "Hur många cl är 1 liter?", back: "100 cl" },
+  { front: "Hur många ml är 1 liter?", back: "1 000 ml" },
+  { front: "Hur många cl är 1 dl?", back: "10 cl" },
+  { front: "Hur många ml är 1 dl?", back: "100 ml" },
+  { front: "Hur många ml är 1 cl?", back: "10 ml" },
+  { front: "Vad betyder 'hekto'?", back: "100 (1 hg = 100 g)" },
+  { front: "Vad betyder 'centi'?", back: "hundradel (1 cl = 1/100 liter)" },
+  { front: "Vad betyder 'milli'?", back: "tusendel (1 ml = 1/1000 liter)" },
+  { front: "Hur skriver man 2,5 kg i gram?", back: "2 500 g" },
+  { front: "Hur skriver man 1,5 liter i deciliter?", back: "15 dl" },
+  { front: "Hur många hg är 500 g?", back: "5 hg" }
+];
+
+// ==================== UNITS DRILL GENERATOR ====================
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateUnits(n) {
+  const generators = [
+    // hg → g
+    () => { const x = rand(1, 12); return { q: `Skriv ${x} hg i gram.`, instr: 'Svara med talet i gram.', ans: x*100, exp: `1 hg = 100 g, så ${x} hg = ${x*100} g` }; },
+    // kg → g
+    () => { const x = rand(1, 8); return { q: `Skriv ${x} kg i gram.`, instr: 'Svara med talet i gram.', ans: x*1000, exp: `1 kg = 1 000 g, så ${x} kg = ${x*1000} g` }; },
+    // kg+g → g
+    () => { const k = rand(1, 5); const g = rand(50, 900); return { q: `Skriv ${k} kg ${g} g i gram.`, instr: 'Svara med talet i gram.', ans: k*1000+g, exp: `${k} kg = ${k*1000} g, plus ${g} g = ${k*1000+g} g` }; },
+    // kg → hg
+    () => { const x = rand(2, 12); return { q: `Skriv ${x} kg i hektogram.`, instr: 'Svara med talet i hg.', ans: x*10, exp: `1 kg = 10 hg, så ${x} kg = ${x*10} hg` }; },
+    // hg → kg+hg
+    () => { const x = rand(15, 95); const k = Math.floor(x/10); const h = x%10; return { q: `Skriv ${x} hg i kilogram och hektogram.`, instr: 'Skriv som "X kg Y hg".', ans: `${k} kg ${h} hg`, exp: `${x} hg = ${k}·10 hg + ${h} hg = ${k} kg ${h} hg` }; },
+    // g → hg+g
+    () => { const x = rand(105, 950); const h = Math.floor(x/100); const g = x%100; return { q: `Skriv ${x} g i hektogram och gram.`, instr: 'Skriv som "X hg Y g" (eller bara "X hg" om jämnt).', ans: g === 0 ? `${h} hg` : `${h} hg ${g} g`, accept: g === 0 ? [`${h} hg`, `${h} hg 0 g`] : [`${h} hg ${g} g`, `${h}hg${g}g`], exp: `${x} g = ${h}·100 + ${g} = ${h} hg ${g} g` }; },
+    // liter → dl
+    () => { const x = rand(2, 9); return { q: `Skriv ${x} liter i deciliter.`, instr: 'Svara med talet i dl.', ans: x*10, exp: `1 liter = 10 dl, så ${x} liter = ${x*10} dl` }; },
+    // l+dl → dl
+    () => { const l = rand(1, 4); const d = rand(1, 9); return { q: `Skriv ${l} liter ${d} dl i deciliter.`, instr: 'Svara med talet i dl.', ans: l*10+d, exp: `${l} liter = ${l*10} dl, plus ${d} dl = ${l*10+d} dl` }; },
+    // dl → cl
+    () => { const x = rand(2, 12); return { q: `Skriv ${x} dl i centiliter.`, instr: 'Svara med talet i cl.', ans: x*10, exp: `1 dl = 10 cl, så ${x} dl = ${x*10} cl` }; },
+    // dl+cl → cl
+    () => { const d = rand(1, 9); const c = rand(1, 9); return { q: `Skriv ${d} dl ${c} cl i centiliter.`, instr: 'Svara med talet i cl.', ans: d*10+c, exp: `${d} dl = ${d*10} cl, plus ${c} cl = ${d*10+c} cl` }; },
+    // cl → ml
+    () => { const x = rand(2, 12); return { q: `Skriv ${x} cl i milliliter.`, instr: 'Svara med talet i ml.', ans: x*10, exp: `1 cl = 10 ml, så ${x} cl = ${x*10} ml` }; },
+    // dl → ml
+    () => { const x = rand(2, 8); return { q: `Skriv ${x} dl i milliliter.`, instr: 'Svara med talet i ml.', ans: x*100, exp: `1 dl = 100 ml, så ${x} dl = ${x*100} ml` }; },
+    // ml → cl+ml
+    () => { const x = rand(15, 95); const c = Math.floor(x/10); const m = x%10; return { q: `Skriv ${x} ml i centiliter och milliliter.`, instr: 'Skriv som "X cl Y ml" (eller "X cl" om jämnt).', ans: m === 0 ? `${c} cl` : `${c} cl ${m} ml`, accept: m === 0 ? [`${c} cl`, `${c} cl 0 ml`] : [`${c} cl ${m} ml`, `${c}cl${m}ml`], exp: `${x} ml = ${c}·10 + ${m} = ${c} cl ${m} ml` }; },
+    // half liter
+    () => { const opts = [[0.5, '½', 5, 50], [1.5, '1½', 15, 150]]; const [_, txt, dl, cl] = pick(opts); return { q: `Skriv ${txt} liter i deciliter.`, instr: 'Svara med talet i dl.', ans: dl, exp: `${txt} liter = ${dl} dl` }; }
+  ];
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    out.push(generators[i % generators.length]());
+  }
+  // shuffle
+  return out.sort(() => Math.random() - 0.5);
+}
+
+// ==================== MATH PROBLEMS ====================
+// Variants of textbook problems — randomized values
+function generateMath(n) {
+  const templates = [
+    () => {
+      const pris = pick([60, 72, 84, 96, 108, 120]);
+      const hg = pick([4, 5, 6, 8]);
+      const kg_pris = (pris / hg) * 10;
+      return {
+        q: `Saida betalar ${pris} kr för ${hg} hektogram ost. Vad kostar osten per kilogram?`,
+        ans: `${kg_pris} kr`,
+        accept: [`${kg_pris}`, `${kg_pris} kr`, `${kg_pris}kr`],
+        hint: `1 kg = 10 hg. Räkna först ut priset per hg.`,
+        sol: `${pris} kr / ${hg} hg = ${pris/hg} kr per hg. 1 kg = 10 hg, så ${pris/hg} × 10 = ${kg_pris} kr/kg.`
+      };
+    },
+    () => {
+      const syskon = pick([2, 4, 5]);
+      const kg = 1;
+      const g = 1000 / syskon;
+      return {
+        q: `${syskon === 2 ? 'Två' : syskon === 4 ? 'Fyra' : 'Fem'} syskon har plockat ${kg} kg blåbär som de delar lika. Hur mycket får var och en?`,
+        ans: `${g} g`,
+        accept: [`${g}`, `${g} g`, `${g}g`, syskon === 4 ? '2,5 hg' : '', syskon === 4 ? '250 gram' : ''].filter(Boolean),
+        hint: `${kg} kg = 1 000 g. Dela med antal syskon.`,
+        sol: `${kg} kg = 1 000 g. 1 000 / ${syskon} = ${g} g per syskon.`
+      };
+    },
+    () => {
+      const lit = pick([6, 7, 8, 10]);
+      const dl_per = pick([4, 5]);
+      const pris = pick([20, 25, 30]);
+      const kartonger = (lit * 10) / dl_per;
+      const totalt = kartonger * pris;
+      return {
+        q: `Enrico och Leo plockade ${lit} liter kantareller. De lade kantarellerna i kartonger med ${dl_per} dl i varje. Kartongerna sålde de för ${pris} kr styck. Hur mycket pengar fick de?`,
+        ans: `${totalt} kr`,
+        accept: [`${totalt}`, `${totalt} kr`],
+        hint: `${lit} liter = ${lit*10} dl. Hur många kartonger blir det?`,
+        sol: `${lit} liter = ${lit*10} dl. ${lit*10} / ${dl_per} = ${kartonger} kartonger. ${kartonger} × ${pris} kr = ${totalt} kr.`
+      };
+    },
+    () => {
+      const lit = pick([6, 8, 10]);
+      const flask = pick([6, 7]);
+      const totalDl = lit * 10;
+      const fulla = Math.floor(totalDl / flask);
+      const sista = totalDl - fulla * flask;
+      return {
+        q: `Maya kokar ${lit} liter saft. Saften häller hon i flaskor som rymmer ${flask} dl vardera. Den sista flaskan blir inte full. Hur mycket saft innehåller den?`,
+        ans: `${sista} dl`,
+        accept: [`${sista}`, `${sista} dl`, `${sista}dl`],
+        hint: `${lit} liter = ${totalDl} dl. Hur många hela flaskor blir det?`,
+        sol: `${lit} liter = ${totalDl} dl. ${totalDl} / ${flask} = ${fulla} hela flaskor med ${sista} dl över.`
+      };
+    },
+    () => {
+      const liter = pick([100, 150, 200, 300]);
+      const sek = liter * 2;
+      const min = Math.floor(sek / 60);
+      const restSek = sek % 60;
+      return {
+        q: `Olivia har en bassäng som rymmer ${liter} liter vatten. Pappa häller i vatten från en slang som ger ½ liter per sekund. Hur lång tid tar det att fylla bassängen? Svara i minuter och sekunder.`,
+        ans: `${min} min ${restSek} s`,
+        accept: [`${min} min ${restSek} s`, `${min}min${restSek}s`, `${min} minuter ${restSek} sekunder`, restSek === 0 ? `${min} min` : ''].filter(Boolean),
+        hint: `½ liter per sekund = 1 liter på 2 sekunder. Räkna ut totala antalet sekunder först.`,
+        sol: `${liter} liter × 2 s = ${sek} s = ${min} min ${restSek} s.`
+      };
+    },
+    () => {
+      const gadda = pick([1200, 1300, 1450, 1600]);
+      const abborre_hg = pick([3, 3.5, 4]);
+      const abborre_g = abborre_hg * 100;
+      const total = gadda + abborre_g;
+      const fattas = 2000 - total;
+      const fattas_g = Math.abs(fattas);
+      return {
+        q: `Farfar fångade en gädda som vägde ${gadda} g och en abborre som vägde ${abborre_hg === 3.5 ? 'tre och ett halvt' : abborre_hg} hektogram. Hur mycket fattas för att fiskarna sammanlagt ska väga 2 kg?`,
+        ans: `${fattas_g} g`,
+        accept: [`${fattas_g}`, `${fattas_g} g`, `${fattas_g/100} hg`],
+        hint: `2 kg = 2 000 g. Lägg ihop båda fiskarna först.`,
+        sol: `Abborre: ${abborre_hg} hg = ${abborre_g} g. Totalt: ${gadda} + ${abborre_g} = ${total} g. 2 000 - ${total} = ${fattas_g} g fattas.`
+      };
+    },
+    () => {
+      const sotis_kg = 2;
+      const sotis_g = pick([800, 850, 900]);
+      const mindre = pick([100, 150, 200]);
+      const misse_total = sotis_kg * 1000 + sotis_g - mindre;
+      const misse_kg = Math.floor(misse_total / 1000);
+      const misse_hg = Math.floor((misse_total % 1000) / 100);
+      const misse_rest = misse_total % 100;
+      return {
+        q: `Katten Sotis väger ${sotis_kg} kg ${sotis_g} g. Misse väger ${mindre} g mindre. Hur mycket väger Misse? Svara i kilogram och hektogram.`,
+        ans: misse_rest === 0 ? `${misse_kg} kg ${misse_hg} hg` : `${misse_total} g`,
+        accept: [`${misse_kg} kg ${misse_hg} hg`, `${misse_total} g`, `${misse_total}g`, `${misse_total/1000} kg`],
+        hint: `Räkna i gram först. 1 kg = 1 000 g, 1 hg = 100 g.`,
+        sol: `Sotis: ${sotis_kg*1000+sotis_g} g. Misse: ${sotis_kg*1000+sotis_g} - ${mindre} = ${misse_total} g = ${misse_kg} kg ${misse_hg} hg.`
+      };
+    },
+    () => {
+      const behov_kg = 1;
+      const behov_g = pick([300, 400, 500, 600]);
+      const har_kg = 1;
+      const fattas_g = behov_g;
+      const fattas_hg = fattas_g / 100;
+      return {
+        q: `Christina behöver ${behov_kg} kg ${behov_g} g socker för att göra klart hallonsylten. Men hon har bara ${har_kg} kg socker. Hur många hektogram socker saknar hon?`,
+        ans: `${fattas_hg} hg`,
+        accept: [`${fattas_hg}`, `${fattas_hg} hg`, `${fattas_hg}hg`, `${fattas_g} g`],
+        hint: `1 hg = 100 g. Hur mycket extra behöver hon?`,
+        sol: `Hon har ${har_kg} kg, behöver ${behov_kg} kg ${behov_g} g. Saknar ${behov_g} g = ${fattas_hg} hg.`
+      };
+    },
+    () => {
+      const fodelse_g = pick([3500, 3650, 3800]);
+      const okning_hg = pick([3, 4, 5]);
+      const okning_g = pick([0, 50, 100]);
+      const total = fodelse_g + okning_hg * 100 + okning_g;
+      return {
+        q: `När Ahmed föddes vägde han ${fodelse_g} g. Efter några veckor hade vikten ökat med ${okning_hg} hg ${okning_g} g. Vad vägde Ahmed då?`,
+        ans: `${total} g`,
+        accept: [`${total}`, `${total} g`, `${total/1000} kg`, `${Math.floor(total/1000)} kg ${total%1000} g`],
+        hint: `Räkna allt i gram. 1 hg = 100 g.`,
+        sol: `${okning_hg} hg ${okning_g} g = ${okning_hg*100+okning_g} g. ${fodelse_g} + ${okning_hg*100+okning_g} = ${total} g.`
+      };
+    },
+    () => {
+      const muggar = pick([4, 5, 6]);
+      const cl = pick([25, 30, 35]);
+      const total_cl = muggar * cl;
+      const dl = Math.floor(total_cl / 10);
+      const rest_cl = total_cl % 10;
+      return {
+        q: `I varje mugg är det ${cl} cl choklad. Hur många deciliter och centiliter choklad finns det i ${muggar} muggar sammanlagt?`,
+        ans: rest_cl === 0 ? `${dl} dl` : `${dl} dl ${rest_cl} cl`,
+        accept: [`${dl} dl ${rest_cl} cl`, `${total_cl} cl`, `${dl}dl${rest_cl}cl`, rest_cl === 0 ? `${dl} dl` : ''].filter(Boolean),
+        hint: `Multiplicera först. 1 dl = 10 cl.`,
+        sol: `${muggar} × ${cl} cl = ${total_cl} cl = ${dl} dl ${rest_cl} cl.`
+      };
+    }
+  ];
+  const out = [];
+  const shuffled = [...templates].sort(() => Math.random() - 0.5);
+  for (let i = 0; i < n; i++) {
+    out.push(shuffled[i % shuffled.length]());
+  }
+  return out;
+}
+
+// ==================== INIT / NAV ====================
+window.addEventListener('load', () => {
+  loadXp();
+  updateXp();
+});
+
+function showScreen(id) {
+  ['home-screen', 'units-screen', 'math-screen', 'flashcards-screen', 'cheatsheet-screen', 'done-screen', 'reward-screen']
+    .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
+}
+
+function goHome() { showScreen('home-screen'); }
+
+// ==================== XP ====================
+function loadXp() {
+  const saved = localStorage.getItem(XP_KEY);
+  if (saved) { try { xpState = JSON.parse(saved); } catch {} }
+}
+function saveXp() { localStorage.setItem(XP_KEY, JSON.stringify(xpState)); }
+function updateXp() {
+  document.getElementById('xp-current').textContent = xpState.total;
+  document.getElementById('xp-fill').style.width = Math.min(100, (xpState.total / XP_GOAL) * 100) + '%';
+  const fcXp = document.getElementById('fc-xp-badge');
+  if (fcXp) fcXp.textContent = `⭐ ${xpState.total} XP`;
+}
+function awardXp(amount, reason) {
+  xpState.total = Math.max(0, xpState.total + amount);
+  saveXp();
+  updateXp();
+  if (amount !== 0) {
+    const popup = document.createElement('div');
+    popup.className = 'xp-popup';
+    popup.textContent = (amount > 0 ? '+' : '') + amount + ' XP' + (reason ? ' · ' + reason : '');
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1500);
+  }
+  if (xpState.total >= XP_GOAL) {
+    setTimeout(() => triggerReward(), 1200);
+  }
+}
+function triggerReward() {
+  document.getElementById('reward-number').textContent = (xpState.rewardsClaimed || 0) + 1;
+  showScreen('reward-screen');
+}
+function claimReward() {
+  xpState.total = Math.max(0, xpState.total - XP_GOAL);
+  xpState.rewardsClaimed = (xpState.rewardsClaimed || 0) + 1;
+  saveXp();
+  updateXp();
+  goHome();
+}
+function showXpInfo() {
+  alert(`⭐ Hur du tjänar XP:
+
+📏 Enhet rätt: +${XP_REWARDS.unitCorrect} XP
+📏 Enhet fel: +${XP_REWARDS.unitWrong} XP
+🔢 Matte rätt: +${XP_REWARDS.mathCorrect} XP
+🔢 Matte fel: +${XP_REWARDS.mathWrong} XP
+💡 Hint: ${XP_REWARDS.mathHint} XP
+🃏 Flashcard: +${XP_REWARDS.flashcardSeen} XP
+
+Vid 300 XP = 1 timme extra skärmtid 📱
+
+Belöningar tjänade: ${xpState.rewardsClaimed || 0}`);
+}
+
+// ==================== ANSWER MATCHING ====================
+function normalizeAns(s) {
+  return String(s).toLowerCase().trim()
+    .replace(/,/g, '.')
+    .replace(/\s+/g, '')
+    .replace(/(\d)(kg|hg|gram|g|liter|l|dl|cl|ml|kr|st|min|s|sek|sekunder|minuter)/g, '$1$2');
+}
+function isCorrect(user, correct, accept = []) {
+  const u = normalizeAns(user);
+  const cands = [correct, ...accept].filter(Boolean);
+  for (const c of cands) {
+    if (normalizeAns(c) === u) return true;
+  }
+  // numeric fallback when correct answer is purely numeric
+  const userNum = parseFloat(String(user).replace(',', '.').replace(/[^\d.]/g, ''));
+  if (!isNaN(userNum)) {
+    for (const c of cands) {
+      const cNum = parseFloat(String(c).replace(',', '.').replace(/[^\d.]/g, ''));
+      if (!isNaN(cNum) && Math.abs(userNum - cNum) < 0.0001) return true;
+    }
+  }
+  return false;
+}
+
+// ==================== UNITS DRILL ====================
+function startUnits() {
+  units = generateUnits(12);
+  unitsIdx = 0;
+  unitsScore = 0;
+  renderUnits();
+  showScreen('units-screen');
+  document.getElementById('done-again').onclick = startUnits;
+}
+function renderUnits() {
+  const u = units[unitsIdx];
+  unitsAnswered = false;
+  document.getElementById('units-question').textContent = u.q;
+  document.getElementById('units-instruction').textContent = u.instr || '';
+  document.getElementById('units-progress').textContent = `${unitsIdx + 1} / ${units.length}`;
+  document.getElementById('units-score').textContent = `⭐ ${unitsScore}`;
+  document.getElementById('units-bar').style.width = ((unitsIdx + 1) / units.length * 100) + '%';
+  document.getElementById('units-answer').value = '';
+  document.getElementById('units-answer').disabled = false;
+  document.getElementById('units-feedback').classList.add('hidden');
+  document.getElementById('units-submit-btn').classList.remove('hidden');
+  document.getElementById('units-next-btn').classList.add('hidden');
+  document.getElementById('units-answer').focus();
+}
+function submitUnits() {
+  if (unitsAnswered) return;
+  const val = document.getElementById('units-answer').value.trim();
+  if (!val) { document.getElementById('units-answer').focus(); return; }
+  unitsAnswered = true;
+  const u = units[unitsIdx];
+  const correct = isCorrect(val, u.ans, u.accept || []);
+  if (correct) { unitsScore++; awardXp(XP_REWARDS.unitCorrect, 'rätt!'); }
+  else { awardXp(XP_REWARDS.unitWrong, 'försök'); }
+
+  const fb = document.getElementById('units-feedback');
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = correct ? `✅ Rätt! ${u.exp || ''}` : `❌ Rätt svar: <strong>${u.ans}</strong><br>${u.exp || ''}`;
+  fb.classList.remove('hidden');
+  document.getElementById('units-answer').disabled = true;
+  document.getElementById('units-submit-btn').classList.add('hidden');
+  document.getElementById('units-score').textContent = `⭐ ${unitsScore}`;
+  const nb = document.getElementById('units-next-btn');
+  nb.classList.remove('hidden');
+  nb.textContent = unitsIdx < units.length - 1 ? 'Nästa →' : 'Se resultat →';
+}
+function nextUnits() {
+  if (unitsIdx < units.length - 1) { unitsIdx++; renderUnits(); }
+  else { showDone(unitsScore, units.length, 'Enhetsdrill', startUnits); }
+}
+
+// ==================== MATH ====================
+function startMath() {
+  math = generateMath(6);
+  mathIdx = 0;
+  mathScore = 0;
+  renderMath();
+  showScreen('math-screen');
+  document.getElementById('done-again').onclick = startMath;
+}
+function renderMath() {
+  const p = math[mathIdx];
+  mathAnswered = false;
+  mathHintUsed = false;
+  document.getElementById('math-question').textContent = p.q;
+  document.getElementById('math-progress').textContent = `${mathIdx + 1} / ${math.length}`;
+  document.getElementById('math-score').textContent = `⭐ ${mathScore}`;
+  document.getElementById('math-bar').style.width = ((mathIdx + 1) / math.length * 100) + '%';
+  document.getElementById('math-answer').value = '';
+  document.getElementById('math-answer').disabled = false;
+  document.getElementById('math-feedback').classList.add('hidden');
+  document.getElementById('math-hint-box').classList.add('hidden');
+  document.getElementById('math-hint-btn').classList.remove('hidden');
+  document.getElementById('math-submit-btn').classList.remove('hidden');
+  document.getElementById('math-next-btn').classList.add('hidden');
+  document.getElementById('math-answer').focus();
+}
+function getMathHint() {
+  if (mathAnswered || mathHintUsed) return;
+  mathHintUsed = true;
+  const box = document.getElementById('math-hint-box');
+  box.textContent = '💡 ' + math[mathIdx].hint;
+  box.classList.remove('hidden');
+  awardXp(XP_REWARDS.mathHint, 'hint');
+  document.getElementById('math-hint-btn').classList.add('hidden');
+}
+function submitMath() {
+  if (mathAnswered) return;
+  const val = document.getElementById('math-answer').value.trim();
+  if (!val) { document.getElementById('math-answer').focus(); return; }
+  mathAnswered = true;
+  const p = math[mathIdx];
+  const correct = isCorrect(val, p.ans, p.accept || []);
+  if (correct) { mathScore++; awardXp(XP_REWARDS.mathCorrect, 'matte rätt!'); }
+  else { awardXp(XP_REWARDS.mathWrong, 'bra försök'); }
+  const fb = document.getElementById('math-feedback');
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = correct ? `✅ Rätt! ${p.sol || ''}` : `❌ Rätt svar: <strong>${p.ans}</strong><br><br>${p.sol || ''}`;
+  fb.classList.remove('hidden');
+  document.getElementById('math-answer').disabled = true;
+  document.getElementById('math-submit-btn').classList.add('hidden');
+  document.getElementById('math-hint-btn').classList.add('hidden');
+  document.getElementById('math-score').textContent = `⭐ ${mathScore}`;
+  const nb = document.getElementById('math-next-btn');
+  nb.classList.remove('hidden');
+  nb.textContent = mathIdx < math.length - 1 ? 'Nästa →' : 'Se resultat →';
+}
+function nextMath() {
+  if (mathIdx < math.length - 1) { mathIdx++; renderMath(); }
+  else { showDone(mathScore, math.length, 'Mattetränare', startMath); }
+}
+
+// ==================== FLASHCARDS ====================
+function startFlashcards() {
+  cards = [...FLASHCARDS].sort(() => Math.random() - 0.5);
+  cardIdx = 0;
+  cardsSeen = new Set();
+  renderCard();
+  showScreen('flashcards-screen');
+}
+function renderCard() {
+  const c = cards[cardIdx];
+  document.getElementById('fc-front').textContent = c.front;
+  document.getElementById('fc-back').textContent = c.back;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('fc-progress').textContent = `${cardIdx + 1} / ${cards.length}`;
+  document.getElementById('fc-bar').style.width = ((cardIdx + 1) / cards.length * 100) + '%';
+}
+function flipCard() {
+  const card = document.getElementById('flashcard');
+  const wasFlipped = card.classList.contains('flipped');
+  card.classList.toggle('flipped');
+  if (!wasFlipped && !cardsSeen.has(cardIdx)) {
+    cardsSeen.add(cardIdx);
+    awardXp(XP_REWARDS.flashcardSeen, 'kort');
+  }
+}
+function nextCard() {
+  if (cardIdx < cards.length - 1) { cardIdx++; renderCard(); }
+  else { goHome(); }
+}
+function prevCard() {
+  if (cardIdx > 0) { cardIdx--; renderCard(); }
+}
+
+// ==================== CHEATSHEET ====================
+function showCheatsheet() { showScreen('cheatsheet-screen'); }
+
+// ==================== DONE SCREEN ====================
+function showDone(score, total, label, againFn) {
+  document.getElementById('done-score').textContent = `${score}/${total}`;
+  const pct = score / total;
+  let msg;
+  if (pct === 1) msg = '🏆 ALLA RÄTT! Mattegeni!';
+  else if (pct >= 0.8) msg = '🌟 Sjukt bra!';
+  else if (pct >= 0.6) msg = '💪 Bra! Fortsätt så.';
+  else msg = '📚 Öva mer, du fixar det!';
+  document.getElementById('done-message').textContent = msg + ' (' + label + ')';
+  document.getElementById('done-xp').textContent = '';
+  document.getElementById('done-again').onclick = againFn;
+  showScreen('done-screen');
+}
+</script>
+</body>
+</html>
