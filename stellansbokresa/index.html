@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Stellans Bokresa 📚</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #1a1530;
+    --bg-card: #2a2347;
+    --bg-card-2: #352d56;
+    --ink: #ffffff;
+    --ink-soft: #b8b3d0;
+    --accent: #ff6b9d;
+    --accent-2: #ffa94d;
+    --purple: #a78bfa;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --gold: #ffd700;
+    --shadow: 0 4px 0 rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.25);
+    --glow: 0 0 30px rgba(255,107,157,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(167,139,250,0.15) 0, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(255,107,157,0.15) 0, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(96,165,250,0.08) 0, transparent 60%);
+    min-height: 100vh;
+    padding: 16px;
+    user-select: none;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+
+  /* HEADER */
+  header { text-align: center; margin: 12px 0 20px; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { color: var(--ink-soft); margin-top: 4px; font-size: 0.9rem; font-weight: 600; }
+
+  /* CARDS */
+  .card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .card.glow { box-shadow: var(--shadow), var(--glow); }
+  .card h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+    transition: transform 0.08s, box-shadow 0.08s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { background: var(--bg-card-2); color: var(--ink); border: 1px solid rgba(255,255,255,0.1); }
+  .btn-green { background: linear-gradient(135deg, var(--green) 0%, #22c55e 100%); }
+  .btn-blue { background: linear-gradient(135deg, var(--blue) 0%, #3b82f6 100%); }
+  .btn-purple { background: linear-gradient(135deg, var(--purple) 0%, #8b5cf6 100%); }
+  .btn-big { font-size: 1.2rem; padding: 18px 24px; }
+
+  /* PROFILE BAR (top) */
+  .profile-bar {
+    background: linear-gradient(135deg, rgba(167,139,250,0.15) 0%, rgba(255,107,157,0.15) 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .level-badge {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--gold) 0%, #ff9500 100%);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(255,215,0,0.4);
+    border: 3px solid rgba(255,255,255,0.2);
+  }
+  .level-badge .lvl-label { font-size: 0.5rem; font-weight: 700; opacity: 0.9; letter-spacing: 0.05em; }
+  .level-badge .lvl-num { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+  .profile-info { flex: 1; min-width: 0; }
+  .profile-name { font-weight: 800; font-size: 1.05rem; }
+  .profile-stats { display: flex; gap: 10px; margin-top: 4px; font-size: 0.8rem; color: var(--ink-soft); flex-wrap: wrap; }
+  .profile-stats span { white-space: nowrap; }
+  .xp-mini-track {
+    height: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .xp-mini-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  /* STREAK */
+  .streak-row { display: flex; gap: 6px; justify-content: space-between; margin-top: 12px; }
+  .streak-day {
+    flex: 1;
+    aspect-ratio: 1;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+  }
+  .streak-day.done { background: linear-gradient(135deg, var(--green) 0%, #22c55e 100%); border-color: var(--green); color: white; }
+  .streak-day.frozen { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); border-color: var(--blue); color: white; }
+  .streak-day.today:not(.done) { border-color: var(--accent); border-style: dashed; animation: pulse 2s infinite; }
+  .streak-day .day-icon { font-size: 1.2rem; line-height: 1; margin-bottom: 2px; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,157,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(255,107,157,0); }
+  }
+
+  /* SESSION OPTIONS */
+  .duration-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .duration-card {
+    background: var(--bg-card-2);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .duration-card:active { transform: scale(0.97); }
+  .duration-card.selected { border-color: var(--accent); background: linear-gradient(135deg, rgba(255,107,157,0.2) 0%, rgba(255,169,77,0.2) 100%); }
+  .duration-card .dur-time { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.6rem; line-height: 1; }
+  .duration-card .dur-label { font-size: 0.75rem; color: var(--ink-soft); margin-top: 4px; }
+  .duration-card .dur-xp { font-size: 0.7rem; color: var(--accent-2); margin-top: 2px; font-weight: 700; }
+
+  /* TIMER */
+  .timer-circle {
+    width: 240px;
+    height: 240px;
+    margin: 16px auto;
+    position: relative;
+  }
+  .timer-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .timer-circle circle { fill: none; stroke-width: 12; }
+  .timer-bg { stroke: rgba(255,255,255,0.1); }
+  .timer-progress { stroke: url(#timerGrad); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .timer-time {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 3.2rem;
+    line-height: 1;
+  }
+  .timer-label { color: var(--ink-soft); font-size: 0.9rem; margin-top: 4px; font-weight: 700; }
+
+  /* PLANT GROW */
+  .plant-stage {
+    text-align: center;
+    font-size: 4rem;
+    line-height: 1;
+    margin: 12px 0;
+    transition: transform 0.5s;
+  }
+  .plant-stage.grow { animation: grow 0.6s ease-out; }
+  @keyframes grow {
+    0% { transform: scale(0.5) rotate(-10deg); }
+    50% { transform: scale(1.3) rotate(5deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  /* BUDDY (body-doubling mascot) */
+  .buddy-bubble {
+    background: var(--bg-card-2);
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent);
+    line-height: 1.4;
+    position: relative;
+  }
+  .buddy-bubble::before {
+    content: '🦊';
+    position: absolute;
+    left: -28px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.6rem;
+  }
+  .buddy-row { display: flex; align-items: flex-start; padding-left: 32px; }
+
+  /* INPUT */
+  input[type="text"], textarea {
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    padding: 12px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    background: rgba(0,0,0,0.2);
+    color: var(--ink);
+    resize: vertical;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { min-height: 80px; }
+  label { font-weight: 700; display: block; margin-bottom: 6px; font-size: 0.9rem; }
+
+  /* BOOK CARDS */
+  .book-card {
+    background: var(--bg-card-2);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .book-card.selected { border-color: var(--accent); }
+  .book-card:active { transform: scale(0.98); }
+  .book-cover {
+    width: 50px; height: 70px;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--accent) 100%);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+  .book-info { flex: 1; min-width: 0; }
+  .book-title { font-weight: 800; font-size: 1rem; line-height: 1.2; margin-bottom: 2px; }
+  .book-author { font-size: 0.8rem; color: var(--ink-soft); }
+  .book-progress {
+    margin-top: 6px;
+    height: 5px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .book-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green) 0%, #22c55e 100%);
+  }
+  .book-status {
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* BADGES */
+  .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .badge-item {
+    aspect-ratio: 1;
+    background: var(--bg-card-2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    border: 2px solid rgba(255,255,255,0.05);
+    position: relative;
+  }
+  .badge-item.unlocked { background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,107,157,0.15) 100%); border-color: var(--gold); box-shadow: 0 0 15px rgba(255,215,0,0.2); }
+  .badge-item.locked { opacity: 0.3; filter: grayscale(1); }
+  .badge-item .badge-name {
+    font-size: 0.6rem;
+    margin-top: 4px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.1;
+    padding: 0 2px;
+  }
+
+  /* LOOTBOX */
+  .lootbox-wrap {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .lootbox {
+    font-size: 6rem;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+    filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
+    animation: shake 2s infinite;
+  }
+  .lootbox.opening { animation: spin 0.6s ease-out; }
+  .lootbox-reward {
+    font-size: 5rem;
+    line-height: 1;
+    animation: rewardPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes shake {
+    0%, 100% { transform: rotate(0); }
+    10%, 30%, 50% { transform: rotate(-5deg); }
+    20%, 40%, 60% { transform: rotate(5deg); }
+    70% { transform: rotate(0); }
+  }
+  @keyframes spin {
+    0% { transform: scale(1) rotate(0); }
+    50% { transform: scale(1.4) rotate(180deg); filter: drop-shadow(0 0 40px var(--gold)); }
+    100% { transform: scale(0) rotate(360deg); }
+  }
+  @keyframes rewardPop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* XP POPUP */
+  .xp-popup {
+    position: fixed;
+    top: 30%; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--accent-2) 100%);
+    color: white;
+    border-radius: 14px;
+    padding: 14px 24px;
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    box-shadow: 0 10px 30px rgba(255,215,0,0.5);
+    z-index: 1000;
+    pointer-events: none;
+    animation: xpFloat 1.6s forwards;
+  }
+  @keyframes xpFloat {
+    0% { opacity: 0; transform: translate(-50%, 30px) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
+    80% { opacity: 1; transform: translate(-50%, -40px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -80px) scale(0.9); }
+  }
+
+  /* CONFETTI */
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 8px; height: 8px;
+    z-index: 999;
+    pointer-events: none;
+    animation: fall 3s linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(120vh) rotate(720deg); }
+  }
+
+  /* MISC */
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .row > * { flex: 1; }
+  .small { font-size: 0.85rem; color: var(--ink-soft); }
+  .center { text-align: center; }
+  .hidden { display: none !important; }
+  .stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.06);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .reward-screen-big {
+    text-align: center;
+    padding: 24px 0;
+  }
+  .reward-trophy-big {
+    font-size: 6rem;
+    animation: bounce 1s infinite alternate;
+  }
+  @keyframes bounce {
+    from { transform: translateY(0) rotate(-5deg); }
+    to { transform: translateY(-12px) rotate(5deg); }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .draw-canvas {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.1);
+    touch-action: none;
+    cursor: crosshair;
+    display: block;
+  }
+
+  .recording-indicator {
+    display: inline-block;
+    width: 12px; height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse-rec 1s infinite;
+  }
+  @keyframes pulse-rec { 50% { opacity: 0.3; } }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 16px;
+    color: var(--ink-soft);
+  }
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 8px; }
+
+  /* SECONDARY NAV */
+  .nav-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    background: rgba(0,0,0,0.2);
+    padding: 4px;
+    border-radius: 12px;
+  }
+  .nav-tab {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    transition: all 0.15s;
+  }
+  .nav-tab.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: white;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Stellans Bokresa</h1>
+  <p class="subtitle">📚 Läs lite. Få belöningar. Bygg din värld.</p>
+</header>
+
+<!-- HOME SCREEN -->
+<div id="home-screen">
+  <!-- Profile bar -->
+  <div class="profile-bar">
+    <div class="level-badge">
+      <span class="lvl-label">NIVÅ</span>
+      <span class="lvl-num" id="level-num">1</span>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Stellan 🦊</div>
+      <div class="profile-stats">
+        <span>⭐ <span id="xp-display">0</span> XP</span>
+        <span>🔥 <span id="streak-display">0</span> dagar</span>
+        <span>📖 <span id="minutes-display">0</span> min totalt</span>
+      </div>
+      <div class="xp-mini-track"><div class="xp-mini-fill" id="xp-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Today's call to action -->
+  <div class="card glow" id="today-card">
+    <div class="buddy-row">
+      <div style="flex:1;">
+        <div class="buddy-bubble" id="buddy-greeting">Tjena! Redo att läsa idag? Även 5 min räknas! 💪</div>
+      </div>
+    </div>
+    <button class="btn btn-big" onclick="startNewSession()">📖 Börja läsa</button>
+  </div>
+
+  <!-- Streak -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2 style="margin:0;">🔥 Streak</h2>
+      <span class="stat-pill" id="freeze-display">❄️ <span id="freeze-count">3</span> freeze</span>
+    </div>
+    <p class="small" style="margin-bottom:8px;">Senaste 7 dagarna</p>
+    <div class="streak-row" id="streak-row"></div>
+    <p class="small" style="margin-top:10px;">💡 Missar du en dag? Använd ❄️ för att rädda streaken!</p>
+  </div>
+
+  <!-- Quick nav -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-section="books" onclick="switchSection('books')">📚 Böcker</div>
+    <div class="nav-tab" data-section="badges" onclick="switchSection('badges')">🏆 Märken</div>
+    <div class="nav-tab" data-section="reflect" onclick="switchSection('reflect')">💭 Tankar</div>
+  </div>
+
+  <!-- BOOKS SECTION -->
+  <div id="section-books">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h2 style="margin:0;">Min bokhylla</h2>
+        <button onclick="openAddBook()" style="background:none;border:none;color:var(--accent);font-size:1.6rem;cursor:pointer;line-height:1;">+</button>
+      </div>
+      <div id="books-list"></div>
+    </div>
+  </div>
+
+  <!-- BADGES SECTION -->
+  <div id="section-badges" class="hidden">
+    <div class="card">
+      <h2>🏆 Märken</h2>
+      <p class="small" style="margin-bottom:12px;">Lås upp genom att läsa!</p>
+      <div class="badge-grid" id="badges-grid"></div>
+    </div>
+  </div>
+
+  <!-- REFLECTIONS SECTION -->
+  <div id="section-reflect" class="hidden">
+    <div class="card">
+      <h2>💭 Mina tankar</h2>
+      <div id="reflections-list"></div>
+    </div>
+  </div>
+
+  <p class="center small" style="margin-top:20px;">⭐ 100 XP = 1 nivå · 🎁 lootbox vid varje ny nivå</p>
+</div>
+
+<!-- SESSION SETUP SCREEN -->
+<div id="setup-screen" class="hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="margin:0;">📖 Nytt läspass</h2>
+      <button class="btn btn-secondary" style="width:auto;padding:8px 14px;font-size:0.85rem;" onclick="showHome()">✕</button>
+    </div>
+
+    <label>Vilken bok?</label>
+    <div id="setup-books-list" style="margin-bottom:16px;"></div>
+
+    <label>Hur länge känner du för?</label>
+    <div class="duration-grid">
+      <div class="duration-card" data-mins="5" onclick="selectDuration(5)">
+        <div class="dur-time">5</div>
+        <div class="dur-label">minuter</div>
+        <div class="dur-xp">+15 XP</div>
+      </div>
+      <div class="duration-card selected" data-mins="10" onclick="selectDuration(10)">
+        <div class="dur-time">10</div>
+        <div class="dur-label">minuter</div>
+        <div class="dur-xp">+35 XP</div>
+      </div>
+      <div class="duration-card" data-mins="15" onclick="selectDuration(15)">
+        <div class="dur-time">15</div>
+        <div class="dur-label">minuter</div>
+        <div class="dur-xp">+60 XP</div>
+      </div>
+      <div class="duration-card" data-mins="20" onclick="selectDuration(20)">
+        <div class="dur-time">20</div>
+        <div class="dur-label">minuter</div>
+        <div class="dur-xp">+90 XP</div>
+      </div>
+    </div>
+
+    <div class="buddy-row">
+      <div style="flex:1;">
+        <div class="buddy-bubble" id="setup-buddy">Välj en längd som känns lagom! Ingen dålig längd finns. 👍</div>
+      </div>
+    </div>
+
+    <button class="btn btn-big" onclick="startTimer()">🚀 Kör!</button>
+  </div>
+</div>
+
+<!-- TIMER SCREEN -->
+<div id="timer-screen" class="hidden">
+  <div class="card">
+    <p class="center small" id="timer-book-title">Läser...</p>
+    <div class="timer-circle">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff6b9d" />
+            <stop offset="100%" stop-color="#ffa94d" />
+          </linearGradient>
+        </defs>
+        <circle class="timer-bg" cx="50" cy="50" r="44"></circle>
+        <circle class="timer-progress" id="timer-progress" cx="50" cy="50" r="44"
+          stroke-dasharray="276.46" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="timer-text">
+        <div class="timer-time" id="timer-time">10:00</div>
+        <div class="timer-label" id="timer-label">Läser...</div>
+      </div>
+    </div>
+
+    <div class="plant-stage" id="plant-stage">🌱</div>
+
+    <div class="buddy-row">
+      <div style="flex:1;">
+        <div class="buddy-bubble" id="timer-buddy">Jag sitter här bredvid dig och läser också. Bara köra! 📖</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn btn-secondary" onclick="pauseTimer()" id="pause-btn">⏸️ Paus</button>
+      <button class="btn btn-secondary" onclick="stopTimerEarly()">✋ Sluta</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE SCREEN -->
+<div id="complete-screen" class="hidden">
+  <div class="card glow center">
+    <div style="font-size:4rem;line-height:1;margin-bottom:8px;" id="complete-emoji">🎉</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:1.8rem;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="complete-title">Bra jobbat!</h2>
+    <p style="margin:6px 0 16px;" id="complete-msg">Du läste i 10 minuter</p>
+
+    <div style="font-family:'Fraunces',serif;font-size:3rem;font-weight:900;color:var(--gold);" id="complete-xp">+35 XP</div>
+    <p class="small" id="complete-xp-detail">+ bonusar nedan</p>
+
+    <div id="bonuses" style="margin:14px 0;"></div>
+
+    <div id="lootbox-container" class="lootbox-wrap hidden">
+      <p class="small" style="margin-bottom:8px;">🎁 Du fick en lootbox! Tryck för att öppna</p>
+      <div class="lootbox" onclick="openLootbox()" id="lootbox">📦</div>
+    </div>
+
+    <div id="reflection-prompt" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
+      <p style="margin-bottom:10px;font-weight:700;">💭 Vill du spara en tanke om det du läst? <span style="color:var(--ink-soft);font-weight:400;">(valfritt, +20 XP)</span></p>
+      <div class="row">
+        <button class="btn btn-secondary" onclick="startReflection('text')">✍️ Skriv</button>
+        <button class="btn btn-secondary" onclick="startReflection('draw')">🎨 Rita</button>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <button class="btn btn-secondary" onclick="startReflection('voice')">🎤 Spela in</button>
+        <button class="btn btn-secondary" onclick="finishSession()">⏭️ Skippa</button>
+      </div>
+    </div>
+
+    <button class="btn btn-big" id="complete-done-btn" onclick="finishSession()" style="margin-top:16px;">✅ Klar</button>
+  </div>
+</div>
+
+<!-- LEVEL UP SCREEN -->
+<div id="levelup-screen" class="hidden">
+  <div class="card glow center reward-screen-big">
+    <div class="reward-trophy-big">🌟</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:2.2rem;background:linear-gradient(135deg,var(--gold) 0%,var(--accent-2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">LEVEL UP!</h2>
+    <p style="font-size:1.4rem;font-weight:800;margin:8px 0;">Nivå <span id="new-level">2</span> 🎉</p>
+    <p class="small" style="margin-bottom:16px;" id="levelup-perk">Du tjänade 1 timme extra skärmtid! 📱</p>
+    <button class="btn btn-big" onclick="closeLevelUp()">Fortsätt 🚀</button>
+  </div>
+</div>
+
+<!-- REFLECTION: TEXT -->
+<div id="reflect-text-screen" class="hidden">
+  <div class="card">
+    <h2>✍️ Skriv en tanke</h2>
+    <p class="small" style="margin-bottom:12px;">Vad hände? Vad tyckte du? En mening räcker!</p>
+    <textarea id="reflect-text" placeholder="T.ex. 'Den läskigaste delen var när...' eller 'Jag gillar huvudpersonen för...'"></textarea>
+    <div class="row" style="margin-top:12px;">
+      <button class="btn btn-secondary" onclick="finishSession()">Skippa</button>
+      <button class="btn" onclick="saveReflection('text')">Spara (+20 XP)</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFLECTION: DRAW -->
+<div id="reflect-draw-screen" class="hidden">
+  <div class="card">
+    <h2>🎨 Rita något</h2>
+    <p class="small" style="margin-bottom:12px;">En karaktär, en scen, vad som helst!</p>
+    <canvas id="draw-canvas" class="draw-canvas"></canvas>
+    <div class="row" style="margin-top:8px;">
+      <button class="btn btn-secondary" onclick="clearCanvas()">🗑️ Rensa</button>
+      <button class="btn btn-secondary" onclick="finishSession()">Skippa</button>
+      <button class="btn" onclick="saveReflection('draw')">Spara (+20 XP)</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFLECTION: VOICE -->
+<div id="reflect-voice-screen" class="hidden">
+  <div class="card center">
+    <h2>🎤 Berätta!</h2>
+    <p class="small" style="margin-bottom:16px;">Spela in vad du läst — som ett röstmemo!</p>
+    <div id="voice-status" style="font-size:1.1rem;font-weight:700;margin-bottom:16px;">Tryck på knappen för att börja</div>
+    <button class="btn btn-big" id="record-btn" onclick="toggleRecording()">🔴 Börja spela in</button>
+    <audio id="voice-playback" controls style="margin-top:16px;width:100%;display:none;"></audio>
+    <div class="row" style="margin-top:12px;">
+      <button class="btn btn-secondary" onclick="finishSession()">Skippa</button>
+      <button class="btn" id="save-voice-btn" onclick="saveReflection('voice')" disabled>Spara (+20 XP)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BOOK MODAL -->
+<div id="add-book-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeAddBook()">
+  <div class="modal">
+    <h2 style="margin-bottom:12px;">➕ Lägg till bok</h2>
+    <label>Titel</label>
+    <input type="text" id="new-book-title" placeholder="T.ex. Vampyrer i Alvik" />
+    <label style="margin-top:10px;">Författare</label>
+    <input type="text" id="new-book-author" placeholder="T.ex. Mårten Sandén" />
+    <label style="margin-top:10px;">Antal sidor (valfritt)</label>
+    <input type="text" id="new-book-pages" placeholder="T.ex. 250" inputmode="numeric" />
+    <label style="margin-top:10px;">Välj omslags-emoji</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="emoji-picker">
+      <span class="cover-pick selected" data-emoji="📖" onclick="pickEmoji(this)">📖</span>
+      <span class="cover-pick" data-emoji="🐉" onclick="pickEmoji(this)">🐉</span>
+      <span class="cover-pick" data-emoji="🧙" onclick="pickEmoji(this)">🧙</span>
+      <span class="cover-pick" data-emoji="⚔️" onclick="pickEmoji(this)">⚔️</span>
+      <span class="cover-pick" data-emoji="🚀" onclick="pickEmoji(this)">🚀</span>
+      <span class="cover-pick" data-emoji="🦖" onclick="pickEmoji(this)">🦖</span>
+      <span class="cover-pick" data-emoji="🕵️" onclick="pickEmoji(this)">🕵️</span>
+      <span class="cover-pick" data-emoji="🏰" onclick="pickEmoji(this)">🏰</span>
+      <span class="cover-pick" data-emoji="👻" onclick="pickEmoji(this)">👻</span>
+      <span class="cover-pick" data-emoji="🦸" onclick="pickEmoji(this)">🦸</span>
+      <span class="cover-pick" data-emoji="🐺" onclick="pickEmoji(this)">🐺</span>
+      <span class="cover-pick" data-emoji="⚽" onclick="pickEmoji(this)">⚽</span>
+    </div>
+    <div class="row" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeAddBook()">Avbryt</button>
+      <button class="btn" onclick="saveNewBook()">Lägg till</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.cover-pick { font-size: 1.6rem; padding: 6px 8px; background: var(--bg-card-2); border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+.cover-pick.selected { border-color: var(--accent); background: rgba(255,107,157,0.15); }
+</style>
+
+</div>
+
+<script>
+// ==================== STORAGE ====================
+const KEY = 'stellan_reading_v1';
+let state = {
+  xp: 0,
+  totalXp: 0,
+  streakDays: [], // array of YYYY-MM-DD strings (read days)
+  freezeUsed: [], // array of YYYY-MM-DD where freeze was used
+  freezeTokens: 3,
+  totalMinutes: 0,
+  totalSessions: 0,
+  badges: [],
+  books: [],
+  reflections: [],
+  lastLootboxLevel: 0
+};
+
+const XP_BY_DURATION = { 5: 15, 10: 35, 15: 60, 20: 90 };
+
+const BUDDY_GREETINGS = [
+  "Tjena! Redo att läsa idag? Även 5 min räknas! 💪",
+  "Hej kompis! En liten stund med boken? 📚",
+  "Yo! Boken väntar 👀",
+  "Hej Stellan! Hjärnan älskar läsning. Kör vi? 🧠",
+  "Tjena! Fem minuter, sen är du done. Räcker fint! ⚡",
+  "Ey! Lite läsning + jag vid din sida = perfekt 🦊"
+];
+
+const BUDDY_TIMER = [
+  "Jag sitter här bredvid dig och läser också. Bara köra! 📖",
+  "Du och jag, kompis. Vi gör det tillsammans 💪",
+  "Andas, fokusera, läs. Du fixar det! 🌟",
+  "Jag är supermysig här. Du läser, jag lyssnar 🦊",
+  "Ingen stress! Ta din tid 😎"
+];
+
+const BUDDY_SETUP = [
+  "Välj en längd som känns lagom! Ingen dålig längd finns. 👍",
+  "Tips: Om hjärnan är trött, kör 5 min. Om du är pepp, kör 20! 🚀",
+  "Kort pass är ALLTID bättre än inget pass 💯",
+  "Vad känner du för idag? 🤔"
+];
+
+const COMPLETE_MSGS = [
+  { emoji: "🎉", title: "Grymt jobbat!" },
+  { emoji: "🌟", title: "Du är en stjärna!" },
+  { emoji: "🚀", title: "Astronaut-läsning!" },
+  { emoji: "💪", title: "Stark prestation!" },
+  { emoji: "🦊", title: "Smart räv!" },
+  { emoji: "⚡", title: "Eldfärgs-läsning!" },
+  { emoji: "🏆", title: "Vinnare!" }
+];
+
+const BADGES = [
+  { id: 'first', emoji: '🌱', name: 'Första passet', check: s => s.totalSessions >= 1 },
+  { id: 'three', emoji: '🌿', name: '3 pass', check: s => s.totalSessions >= 3 },
+  { id: 'ten', emoji: '🌳', name: '10 pass', check: s => s.totalSessions >= 10 },
+  { id: 'thirty', emoji: '🌲', name: '30 pass', check: s => s.totalSessions >= 30 },
+  { id: 'streak3', emoji: '🔥', name: '3 dagar i rad', check: s => calcStreak(s) >= 3 },
+  { id: 'streak7', emoji: '🔥🔥', name: 'Vecka i rad', check: s => calcStreak(s) >= 7 },
+  { id: 'streak30', emoji: '🌋', name: 'Månad i rad', check: s => calcStreak(s) >= 30 },
+  { id: 'min30', emoji: '📖', name: '30 min totalt', check: s => s.totalMinutes >= 30 },
+  { id: 'min120', emoji: '📚', name: '2 timmar totalt', check: s => s.totalMinutes >= 120 },
+  { id: 'min500', emoji: '🎓', name: '500 min!', check: s => s.totalMinutes >= 500 },
+  { id: 'lvl5', emoji: '⭐', name: 'Nivå 5', check: s => calcLevel(s.totalXp) >= 5 },
+  { id: 'lvl10', emoji: '🌟', name: 'Nivå 10', check: s => calcLevel(s.totalXp) >= 10 },
+  { id: 'finish', emoji: '✅', name: 'Klar med bok', check: s => s.books.some(b => b.status === 'done') },
+  { id: 'reflect5', emoji: '💭', name: '5 reflektioner', check: s => s.reflections.length >= 5 },
+  { id: 'long', emoji: '🐢', name: 'Läst 20 min på en gång', check: s => s.longestSession >= 20 },
+  { id: 'early', emoji: '🌅', name: 'Tidig fågel (innan 9)', check: s => s.earlyReader }
+];
+
+const LOOTBOX_REWARDS = [
+  { emoji: '🍬', name: 'Godissmak', xp: 5 },
+  { emoji: '🎁', name: 'Mysterie-bonus', xp: 15 },
+  { emoji: '💎', name: 'Diamant!', xp: 30 },
+  { emoji: '🌟', name: 'Stjärnstoft', xp: 10 },
+  { emoji: '🎲', name: 'Tursnurr', xp: 8 },
+  { emoji: '❄️', name: 'Freeze-token!', xp: 0, freeze: 1 },
+  { emoji: '🍕', name: 'Pizza-poäng', xp: 12 },
+  { emoji: '🎮', name: 'Power-up', xp: 20 },
+  { emoji: '🦄', name: 'Enhörning! (sällsynt)', xp: 50 },
+  { emoji: '🎈', name: 'Ballong', xp: 7 }
+];
+
+// ==================== INIT ====================
+function load() {
+  const saved = localStorage.getItem(KEY);
+  if (saved) {
+    try { state = { ...state, ...JSON.parse(saved) }; } catch {}
+  }
+  if (!state.books || !state.books.length) {
+    state.books = [{ id: 'sample', title: 'Min första bok', author: '', emoji: '📖', pages: 0, pagesRead: 0, status: 'reading', addedAt: Date.now() }];
+  }
+  if (state.longestSession === undefined) state.longestSession = 0;
+}
+
+function save() {
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+window.addEventListener('load', () => {
+  load();
+  renderAll();
+  // Random buddy greeting
+  document.getElementById('buddy-greeting').textContent = pick(BUDDY_GREETINGS);
+});
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ==================== HELPERS ====================
+function todayStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
+function dateNDaysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+function calcStreak(s) {
+  // Walk back from today; counted days = read OR freeze
+  let count = 0;
+  for (let i = 0; i < 365; i++) {
+    const day = dateNDaysAgo(i);
+    const read = s.streakDays.includes(day);
+    const frozen = s.freezeUsed.includes(day);
+    // If today and not read yet, don't break the streak
+    if (i === 0 && !read && !frozen) continue;
+    if (read || frozen) count++;
+    else break;
+  }
+  return count;
+}
+
+function calcLevel(totalXp) {
+  return Math.floor(totalXp / 100) + 1;
+}
+
+function xpToNextLevel(totalXp) {
+  const lvl = calcLevel(totalXp);
+  return lvl * 100 - totalXp;
+}
+
+function xpProgressInLevel(totalXp) {
+  return totalXp % 100;
+}
+
+// ==================== RENDER ====================
+function renderAll() {
+  renderProfile();
+  renderStreak();
+  renderBooks();
+  renderBadges();
+  renderReflections();
+  renderSetupBooks();
+}
+
+function renderProfile() {
+  document.getElementById('xp-display').textContent = state.totalXp;
+  document.getElementById('streak-display').textContent = calcStreak(state);
+  document.getElementById('minutes-display').textContent = state.totalMinutes;
+  document.getElementById('level-num').textContent = calcLevel(state.totalXp);
+  const pct = xpProgressInLevel(state.totalXp);
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('freeze-count').textContent = state.freezeTokens;
+}
+
+function renderStreak() {
+  const row = document.getElementById('streak-row');
+  row.innerHTML = '';
+  const today = todayStr();
+  for (let i = 6; i >= 0; i--) {
+    const day = dateNDaysAgo(i);
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dayName = ['S','M','T','O','T','F','L'][d.getDay()];
+    const isDone = state.streakDays.includes(day);
+    const isFrozen = state.freezeUsed.includes(day);
+    const isToday = day === today;
+    const div = document.createElement('div');
+    div.className = 'streak-day' + (isDone ? ' done' : '') + (isFrozen ? ' frozen' : '') + (isToday ? ' today' : '');
+    const icon = isDone ? '🔥' : (isFrozen ? '❄️' : (isToday ? '✨' : '·'));
+    div.innerHTML = `<span class="day-icon">${icon}</span>${dayName}`;
+    if (!isDone && !isFrozen && !isToday && state.freezeTokens > 0 && i > 0 && i < 7) {
+      // Allow using a freeze token on missed days (only past, not today)
+      div.style.cursor = 'pointer';
+      div.title = 'Använd ❄️ freeze';
+      div.onclick = () => useFreezeToken(day);
+    }
+    row.appendChild(div);
+  }
+}
+
+function renderBooks() {
+  const list = document.getElementById('books-list');
+  list.innerHTML = '';
+  if (!state.books.length) {
+    list.innerHTML = '<div class="empty-state"><div class="emoji">📚</div><p>Inga böcker än.<br>Tryck + för att lägga till!</p></div>';
+    return;
+  }
+  state.books.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'book-card';
+    const pct = b.pages > 0 ? Math.min(100, (b.pagesRead / b.pages) * 100) : 0;
+    const minutes = b.minutesRead || 0;
+    div.innerHTML = `
+      <div class="book-cover">${b.emoji}</div>
+      <div class="book-info">
+        <div class="book-title">${escapeHtml(b.title)}</div>
+        ${b.author ? `<div class="book-author">${escapeHtml(b.author)}</div>` : ''}
+        <div class="book-progress"><div class="book-progress-fill" style="width:${pct}%"></div></div>
+        <div class="book-status">
+          <span>${b.status === 'done' ? '✅ Klar!' : (b.pages ? `${b.pagesRead}/${b.pages} sidor` : 'Pågår')}</span>
+          <span>${minutes} min lästa</span>
+        </div>
+      </div>
+    `;
+    div.onclick = () => openBookActions(b.id);
+    list.appendChild(div);
+  });
+}
+
+function renderSetupBooks() {
+  const list = document.getElementById('setup-books-list');
+  list.innerHTML = '';
+  if (!state.books.length) {
+    list.innerHTML = '<p class="small">Lägg till en bok först på hemskärmen!</p>';
+    return;
+  }
+  const reading = state.books.filter(b => b.status !== 'done');
+  if (!reading.length) {
+    list.innerHTML = '<p class="small">Alla böcker är klara! Lägg till en ny.</p>';
+    return;
+  }
+  reading.forEach((b, i) => {
+    const div = document.createElement('div');
+    div.className = 'book-card' + (i === 0 ? ' selected' : '');
+    div.dataset.bookId = b.id;
+    div.innerHTML = `
+      <div class="book-cover">${b.emoji}</div>
+      <div class="book-info">
+        <div class="book-title">${escapeHtml(b.title)}</div>
+        ${b.author ? `<div class="book-author">${escapeHtml(b.author)}</div>` : ''}
+      </div>
+    `;
+    div.onclick = () => {
+      list.querySelectorAll('.book-card').forEach(c => c.classList.remove('selected'));
+      div.classList.add('selected');
+    };
+    list.appendChild(div);
+  });
+}
+
+function renderBadges() {
+  const grid = document.getElementById('badges-grid');
+  grid.innerHTML = '';
+  BADGES.forEach(b => {
+    const unlocked = state.badges.includes(b.id);
+    const div = document.createElement('div');
+    div.className = 'badge-item ' + (unlocked ? 'unlocked' : 'locked');
+    div.innerHTML = `<div>${b.emoji}</div><div class="badge-name">${b.name}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function renderReflections() {
+  const list = document.getElementById('reflections-list');
+  list.innerHTML = '';
+  if (!state.reflections.length) {
+    list.innerHTML = '<div class="empty-state"><div class="emoji">💭</div><p>Inga tankar sparade än.<br>Reflektera efter ett läspass!</p></div>';
+    return;
+  }
+  [...state.reflections].reverse().forEach(r => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--bg-card-2);border-radius:12px;padding:12px;margin-bottom:8px;';
+    const date = new Date(r.timestamp).toLocaleDateString('sv-SE');
+    const book = state.books.find(b => b.id === r.bookId);
+    let content = '';
+    if (r.type === 'text') content = `<p style="margin-top:6px;">${escapeHtml(r.text)}</p>`;
+    else if (r.type === 'draw') content = `<img src="${r.imageData}" style="max-width:100%;margin-top:6px;border-radius:8px;" />`;
+    else if (r.type === 'voice') content = `<audio controls src="${r.audioData}" style="width:100%;margin-top:6px;"></audio>`;
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;color:var(--ink-soft);">
+        <span>${book ? escapeHtml(book.title) : 'Bok borttagen'}</span>
+        <span>${date}</span>
+      </div>
+      ${content}
+    `;
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ==================== NAV ====================
+function showScreen(id) {
+  ['home-screen', 'setup-screen', 'timer-screen', 'complete-screen', 'levelup-screen', 'reflect-text-screen', 'reflect-draw-screen', 'reflect-voice-screen']
+    .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
+  window.scrollTo(0, 0);
+}
+
+function showHome() { showScreen('home-screen'); renderAll(); }
+
+function switchSection(name) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.section === name));
+  ['books', 'badges', 'reflect'].forEach(s => {
+    document.getElementById('section-' + s).classList.toggle('hidden', s !== name);
+  });
+}
+
+// ==================== ADD BOOK ====================
+let pickedEmoji = '📖';
+
+function pickEmoji(el) {
+  document.querySelectorAll('.cover-pick').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  pickedEmoji = el.dataset.emoji;
+}
+
+function openAddBook() {
+  document.getElementById('new-book-title').value = '';
+  document.getElementById('new-book-author').value = '';
+  document.getElementById('new-book-pages').value = '';
+  document.getElementById('add-book-modal').classList.remove('hidden');
+}
+
+function closeAddBook() {
+  document.getElementById('add-book-modal').classList.add('hidden');
+}
+
+function saveNewBook() {
+  const title = document.getElementById('new-book-title').value.trim();
+  if (!title) { alert('Skriv en titel!'); return; }
+  const book = {
+    id: 'b_' + Date.now(),
+    title,
+    author: document.getElementById('new-book-author').value.trim(),
+    pages: parseInt(document.getElementById('new-book-pages').value) || 0,
+    pagesRead: 0,
+    minutesRead: 0,
+    emoji: pickedEmoji,
+    status: 'reading',
+    addedAt: Date.now()
+  };
+  state.books.unshift(book);
+  save();
+  renderBooks();
+  renderSetupBooks();
+  closeAddBook();
+}
+
+function openBookActions(id) {
+  const b = state.books.find(x => x.id === id);
+  if (!b) return;
+  const action = prompt(`"${b.title}"\n\nVad vill du göra?\n1 = Markera klar\n2 = Uppdatera sidor lästa\n3 = Ta bort\n\nSkriv 1, 2 eller 3 (eller avbryt):`);
+  if (action === '1') {
+    b.status = 'done';
+    b.completedAt = Date.now();
+    save();
+    awardXp(50, 'Bok klar!');
+    confetti();
+    checkBadges();
+    renderBooks();
+  } else if (action === '2') {
+    const p = parseInt(prompt(`Sidor lästa hittills (av ${b.pages || '?'}):`, b.pagesRead));
+    if (!isNaN(p)) {
+      b.pagesRead = p;
+      if (b.pages && p >= b.pages) {
+        b.status = 'done';
+        b.completedAt = Date.now();
+        awardXp(50, 'Bok klar!');
+        confetti();
+      }
+      save();
+      renderBooks();
+      checkBadges();
+    }
+  } else if (action === '3') {
+    if (confirm(`Ta bort "${b.title}"?`)) {
+      state.books = state.books.filter(x => x.id !== id);
+      save();
+      renderBooks();
+      renderSetupBooks();
+    }
+  }
+}
+
+// ==================== SESSION ====================
+let session = { duration: 10, bookId: null, startedAt: 0, elapsed: 0 };
+let timerInterval = null;
+let timerPaused = false;
+
+function startNewSession() {
+  if (!state.books.filter(b => b.status !== 'done').length) {
+    alert('Lägg till en bok först! 📚');
+    return;
+  }
+  document.getElementById('setup-buddy').textContent = pick(BUDDY_SETUP);
+  showScreen('setup-screen');
+}
+
+function selectDuration(mins) {
+  session.duration = mins;
+  document.querySelectorAll('.duration-card').forEach(c => {
+    c.classList.toggle('selected', parseInt(c.dataset.mins) === mins);
+  });
+}
+
+function startTimer() {
+  const selectedBook = document.querySelector('#setup-books-list .book-card.selected');
+  if (!selectedBook) { alert('Välj en bok!'); return; }
+  session.bookId = selectedBook.dataset.bookId;
+  session.startedAt = Date.now();
+  session.elapsed = 0;
+  timerPaused = false;
+
+  const book = state.books.find(b => b.id === session.bookId);
+  document.getElementById('timer-book-title').textContent = `📖 ${book.title}`;
+  document.getElementById('timer-buddy').textContent = pick(BUDDY_TIMER);
+
+  showScreen('timer-screen');
+  updateTimerDisplay();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (timerPaused) return;
+  session.elapsed++;
+  updateTimerDisplay();
+  // Plant grows
+  const totalSeconds = session.duration * 60;
+  const pct = session.elapsed / totalSeconds;
+  const stages = ['🌱', '🌿', '🌷', '🌳', '🌳✨'];
+  const stageIdx = Math.min(stages.length - 1, Math.floor(pct * stages.length));
+  const plant = document.getElementById('plant-stage');
+  if (plant.dataset.stage !== String(stageIdx)) {
+    plant.dataset.stage = stageIdx;
+    plant.textContent = stages[stageIdx];
+    plant.classList.remove('grow');
+    void plant.offsetWidth;
+    plant.classList.add('grow');
+  }
+  if (session.elapsed >= totalSeconds) {
+    completeSession(true);
+  }
+}
+
+function updateTimerDisplay() {
+  const total = session.duration * 60;
+  const remaining = Math.max(0, total - session.elapsed);
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  document.getElementById('timer-time').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+  const pct = session.elapsed / total;
+  const dashOffset = 276.46 * (1 - pct);
+  document.getElementById('timer-progress').style.strokeDashoffset = dashOffset;
+}
+
+function pauseTimer() {
+  timerPaused = !timerPaused;
+  document.getElementById('pause-btn').textContent = timerPaused ? '▶️ Fortsätt' : '⏸️ Paus';
+  document.getElementById('timer-label').textContent = timerPaused ? 'Pausad' : 'Läser...';
+}
+
+function stopTimerEarly() {
+  if (session.elapsed < 60) {
+    if (!confirm('Du har bara läst ' + session.elapsed + ' sekunder. Avsluta ändå?')) return;
+  }
+  completeSession(false);
+}
+
+function completeSession(reachedGoal) {
+  clearInterval(timerInterval);
+  const minutesRead = Math.max(1, Math.round(session.elapsed / 60));
+
+  // Base XP
+  let xp = reachedGoal ? XP_BY_DURATION[session.duration] : Math.round(minutesRead * 3);
+  let bonuses = [];
+
+  // Streak bonus
+  const streak = calcStreak(state);
+  if (streak >= 3) { xp += 5; bonuses.push(`🔥 Streak ${streak}: +5 XP`); }
+  if (streak >= 7) { xp += 10; bonuses.push(`🔥🔥 Veckostreak: +10 XP`); }
+
+  // Variable reward (50% chance)
+  if (Math.random() < 0.5) {
+    const bonus = pick([5, 10, 15, 20]);
+    xp += bonus;
+    bonuses.push(`🎲 Tursnurr: +${bonus} XP`);
+  }
+
+  // Mark today as a read day
+  const today = todayStr();
+  if (!state.streakDays.includes(today)) {
+    state.streakDays.push(today);
+  }
+
+  // Update book
+  const book = state.books.find(b => b.id === session.bookId);
+  if (book) {
+    book.minutesRead = (book.minutesRead || 0) + minutesRead;
+  }
+
+  // Update totals
+  state.totalMinutes += minutesRead;
+  state.totalSessions += 1;
+  if (minutesRead > (state.longestSession || 0)) state.longestSession = minutesRead;
+  if (new Date().getHours() < 9) state.earlyReader = true;
+
+  const oldLevel = calcLevel(state.totalXp);
+  state.totalXp += xp;
+  state.xp = state.totalXp;
+  const newLevel = calcLevel(state.totalXp);
+  const leveledUp = newLevel > oldLevel;
+
+  // Lootbox: every 2nd session OR on level-up
+  const shouldGiveLootbox = leveledUp || state.totalSessions % 2 === 0;
+
+  save();
+  checkBadges();
+
+  // Show complete screen
+  const msg = pick(COMPLETE_MSGS);
+  document.getElementById('complete-emoji').textContent = msg.emoji;
+  document.getElementById('complete-title').textContent = msg.title;
+  document.getElementById('complete-msg').textContent = `Du läste i ${minutesRead} minut${minutesRead === 1 ? '' : 'er'} 📖`;
+  document.getElementById('complete-xp').textContent = `+${xp} XP`;
+
+  const bonusEl = document.getElementById('bonuses');
+  bonusEl.innerHTML = bonuses.map(b => `<div style="background:rgba(255,215,0,0.1);border-radius:8px;padding:6px 10px;margin:4px 0;font-size:0.9rem;">${b}</div>`).join('');
+
+  document.getElementById('lootbox-container').classList.toggle('hidden', !shouldGiveLootbox);
+  if (shouldGiveLootbox) {
+    document.getElementById('lootbox').textContent = '📦';
+    document.getElementById('lootbox').classList.remove('opening');
+  }
+
+  document.getElementById('reflection-prompt').classList.remove('hidden');
+  document.getElementById('complete-done-btn').classList.add('hidden');
+
+  showScreen('complete-screen');
+  fireXpPopup('+' + xp + ' XP');
+
+  // Pending level-up handled when finishSession or after lootbox
+  pendingLevelUp = leveledUp ? newLevel : 0;
+}
+
+let pendingLevelUp = 0;
+
+function openLootbox() {
+  const box = document.getElementById('lootbox');
+  if (box.classList.contains('opening')) return;
+  box.classList.add('opening');
+  setTimeout(() => {
+    const reward = pick(LOOTBOX_REWARDS);
+    box.classList.remove('opening');
+    box.innerHTML = `<div class="lootbox-reward">${reward.emoji}</div>`;
+    box.style.animation = 'none';
+    if (reward.xp) {
+      state.totalXp += reward.xp;
+      state.xp = state.totalXp;
+      fireXpPopup('+' + reward.xp + ' XP · ' + reward.name);
+    }
+    if (reward.freeze) {
+      state.freezeTokens += reward.freeze;
+      fireXpPopup('+' + reward.freeze + ' ❄️ freeze!');
+    }
+    save();
+    confetti();
+    // Show reward name
+    setTimeout(() => {
+      document.getElementById('complete-done-btn').classList.remove('hidden');
+    }, 800);
+  }, 600);
+}
+
+function finishSession() {
+  showScreen('home-screen');
+  if (pendingLevelUp) {
+    setTimeout(() => {
+      document.getElementById('new-level').textContent = pendingLevelUp;
+      document.getElementById('levelup-perk').textContent = `Du tjänade 1 timme extra skärmtid! 📱 (Visa mobilen till mamma/pappa)`;
+      showScreen('levelup-screen');
+      confetti();
+      pendingLevelUp = 0;
+    }, 200);
+  }
+  renderAll();
+}
+
+function closeLevelUp() {
+  showHome();
+}
+
+// ==================== REFLECTION ====================
+let currentReflectType = null;
+
+function startReflection(type) {
+  currentReflectType = type;
+  if (type === 'text') {
+    document.getElementById('reflect-text').value = '';
+    showScreen('reflect-text-screen');
+  } else if (type === 'draw') {
+    showScreen('reflect-draw-screen');
+    setTimeout(setupCanvas, 100);
+  } else if (type === 'voice') {
+    showScreen('reflect-voice-screen');
+    document.getElementById('voice-status').textContent = 'Tryck på knappen för att börja';
+    document.getElementById('voice-playback').style.display = 'none';
+    document.getElementById('save-voice-btn').disabled = true;
+  }
+}
+
+function saveReflection(type) {
+  const r = {
+    id: 'r_' + Date.now(),
+    bookId: session.bookId,
+    timestamp: Date.now(),
+    type
+  };
+  if (type === 'text') {
+    const txt = document.getElementById('reflect-text').value.trim();
+    if (!txt) { alert('Skriv något först!'); return; }
+    r.text = txt;
+  } else if (type === 'draw') {
+    const canvas = document.getElementById('draw-canvas');
+    r.imageData = canvas.toDataURL('image/png');
+  } else if (type === 'voice') {
+    if (!recordedAudio) { alert('Spela in något först!'); return; }
+    r.audioData = recordedAudio;
+  }
+  state.reflections.push(r);
+  state.totalXp += 20;
+  state.xp = state.totalXp;
+  save();
+  fireXpPopup('+20 XP · Tanke sparad!');
+  checkBadges();
+  finishSession();
+}
+
+// CANVAS
+let canvasCtx, isDrawing = false, lastX = 0, lastY = 0;
+function setupCanvas() {
+  const canvas = document.getElementById('draw-canvas');
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  canvasCtx = canvas.getContext('2d');
+  canvasCtx.scale(2, 2);
+  canvasCtx.fillStyle = 'white';
+  canvasCtx.fillRect(0, 0, rect.width, rect.height);
+  canvasCtx.strokeStyle = '#1a1530';
+  canvasCtx.lineWidth = 3;
+  canvasCtx.lineCap = 'round';
+  canvasCtx.lineJoin = 'round';
+
+  const getPos = e => {
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return [(t.clientX - r.left), (t.clientY - r.top)];
+  };
+  const start = e => { e.preventDefault(); isDrawing = true; [lastX, lastY] = getPos(e); };
+  const move = e => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const [x, y] = getPos(e);
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(lastX, lastY);
+    canvasCtx.lineTo(x, y);
+    canvasCtx.stroke();
+    [lastX, lastY] = [x, y];
+  };
+  const end = () => { isDrawing = false; };
+  canvas.onmousedown = start; canvas.onmousemove = move; canvas.onmouseup = end; canvas.onmouseleave = end;
+  canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+}
+function clearCanvas() {
+  if (!canvasCtx) return;
+  const canvas = document.getElementById('draw-canvas');
+  canvasCtx.fillStyle = 'white';
+  canvasCtx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+}
+
+// VOICE
+let mediaRecorder, audioChunks = [], recordedAudio = null, isRecording = false;
+async function toggleRecording() {
+  const btn = document.getElementById('record-btn');
+  const status = document.getElementById('voice-status');
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          recordedAudio = reader.result;
+          const playback = document.getElementById('voice-playback');
+          playback.src = recordedAudio;
+          playback.style.display = 'block';
+          document.getElementById('save-voice-btn').disabled = false;
+          status.textContent = 'Klar! Lyssna och spara om du gillar.';
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      btn.textContent = '⏹️ Stoppa inspelning';
+      status.innerHTML = '<span class="recording-indicator"></span>Spelar in...';
+    } catch (err) {
+      alert('Kunde inte få tillgång till mikrofonen: ' + err.message);
+    }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    btn.textContent = '🔴 Spela in igen';
+  }
+}
+
+// ==================== STREAK / FREEZE ====================
+function useFreezeToken(day) {
+  if (state.freezeTokens <= 0) {
+    alert('Du har inga freeze-tokens! ❄️\n\nDu får nya genom lootboxes.');
+    return;
+  }
+  if (!confirm(`Använd ❄️ freeze på ${day}?\n\nDet räddar din streak men kostar 1 token.`)) return;
+  state.freezeTokens--;
+  state.freezeUsed.push(day);
+  save();
+  renderProfile();
+  renderStreak();
+  fireXpPopup('Streak räddad! 🔥');
+}
+
+// ==================== BADGES ====================
+function checkBadges() {
+  let newBadges = [];
+  BADGES.forEach(b => {
+    if (!state.badges.includes(b.id) && b.check(state)) {
+      state.badges.push(b.id);
+      newBadges.push(b);
+    }
+  });
+  if (newBadges.length) {
+    save();
+    setTimeout(() => {
+      newBadges.forEach((b, i) => {
+        setTimeout(() => fireXpPopup(`${b.emoji} ${b.name}!`), i * 800);
+      });
+    }, 500);
+  }
+}
+
+// ==================== EFFECTS ====================
+function awardXp(amount, reason) {
+  state.totalXp += amount;
+  state.xp = state.totalXp;
+  save();
+  fireXpPopup('+' + amount + ' XP' + (reason ? ' · ' + reason : ''));
+}
+
+function fireXpPopup(text) {
+  const el = document.createElement('div');
+  el.className = 'xp-popup';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function confetti() {
+  const colors = ['#ff6b9d', '#ffa94d', '#a78bfa', '#4ade80', '#60a5fa', '#fbbf24'];
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + '%';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    if (Math.random() > 0.5) c.style.borderRadius = '50%';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+</script>
+</body>
+</html>
