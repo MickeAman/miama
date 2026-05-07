@@ -297,6 +297,35 @@
   .score-label { text-align: center; font-weight: 700; color: var(--ink-soft); margin-bottom: 16px; }
 
   .hidden { display: none !important; }
+
+  textarea {
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 12px;
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    background: white;
+    resize: vertical;
+    min-height: 180px;
+    line-height: 1.5;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+
+  .assignment-body {
+    background: var(--bg);
+    border: 2px dashed var(--ink);
+    border-radius: 10px;
+    padding: 14px;
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    min-height: 80px;
+  }
+  .assignment-empty { color: var(--ink-soft); font-style: italic; }
+  .assignment-meta { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -339,6 +368,11 @@
         <span class="emoji">📖</span>
         <div class="name">Fusklapp</div>
         <div class="desc">Snabb översikt</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6; grid-column: 1 / -1;" onclick="showAssignment()">
+        <span class="emoji">📝</span>
+        <div class="name">Aktuell uppgift</div>
+        <div class="desc" id="assignment-card-desc">Klistra in nytt område / läxa</div>
       </div>
     </div>
   </div>
@@ -441,6 +475,35 @@
       • "Milli" betyder tusendel — 1 ml är 1/1000 liter<br>
       • Skriv om svåra tal till samma enhet först (allt i gram, eller allt i ml)
     </p>
+  </div>
+</div>
+
+<!-- ASSIGNMENT -->
+<div id="assignment-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <h2 style="flex:3;">📝 Aktuell uppgift</h2>
+      <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div id="assignment-view">
+      <h3 id="assignment-view-title" style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:6px;"></h3>
+      <p class="assignment-meta" id="assignment-view-meta"></p>
+      <div class="assignment-body" id="assignment-view-body"></div>
+      <div class="row">
+        <button class="btn btn-blue btn-block" onclick="editAssignment()">✏️ Redigera</button>
+        <button class="btn btn-secondary btn-block" id="assignment-clear-btn" onclick="clearAssignment()">🗑️ Rensa</button>
+      </div>
+    </div>
+    <div id="assignment-edit" class="hidden">
+      <label for="assignment-title">Område / kapitel:</label>
+      <input type="text" id="assignment-title" placeholder="T.ex. Geometri – Kapitel 7" style="margin-bottom: 12px;" />
+      <label for="assignment-content">Uppgiftstext (klistra in här):</label>
+      <textarea id="assignment-content" placeholder="Klistra in läxan, instruktioner, formler eller text från läroboken..."></textarea>
+      <div class="row" style="margin-top: 12px;">
+        <button class="btn btn-secondary btn-block" onclick="cancelAssignment()">Avbryt</button>
+        <button class="btn btn-green btn-block" onclick="saveAssignment()">💾 Spara</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -722,10 +785,12 @@ function generateMath(n) {
 window.addEventListener('load', () => {
   loadXp();
   updateXp();
+  loadAssignment();
+  applyAssignmentToHome();
 });
 
 function showScreen(id) {
-  ['home-screen', 'units-screen', 'math-screen', 'flashcards-screen', 'cheatsheet-screen', 'done-screen', 'reward-screen']
+  ['home-screen', 'units-screen', 'math-screen', 'flashcards-screen', 'cheatsheet-screen', 'assignment-screen', 'done-screen', 'reward-screen']
     .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
@@ -954,6 +1019,89 @@ function prevCard() {
 
 // ==================== CHEATSHEET ====================
 function showCheatsheet() { showScreen('cheatsheet-screen'); }
+
+// ==================== ASSIGNMENT ====================
+const ASSIGNMENT_KEY = 'stellan_assignment';
+let assignment = { title: '', content: '', updatedAt: 0 };
+
+function loadAssignment() {
+  const saved = localStorage.getItem(ASSIGNMENT_KEY);
+  if (saved) { try { assignment = JSON.parse(saved); } catch {} }
+}
+function saveAssignmentState() {
+  localStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(assignment));
+}
+function applyAssignmentToHome() {
+  const subtitle = document.querySelector('header .subtitle');
+  if (assignment.title) {
+    subtitle.textContent = '📚 ' + assignment.title;
+  } else {
+    subtitle.textContent = '📚 Volym och vikt – Kapitel 6';
+  }
+  const desc = document.getElementById('assignment-card-desc');
+  if (desc) {
+    desc.textContent = assignment.content
+      ? 'Sparad ' + formatAssignmentDate(assignment.updatedAt)
+      : 'Klistra in nytt område / läxa';
+  }
+}
+function formatAssignmentDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString('sv-SE') + ' ' + d.toTimeString().slice(0, 5);
+}
+function showAssignment() {
+  renderAssignmentView();
+  showScreen('assignment-screen');
+}
+function renderAssignmentView() {
+  const view = document.getElementById('assignment-view');
+  const edit = document.getElementById('assignment-edit');
+  view.classList.remove('hidden');
+  edit.classList.add('hidden');
+  const titleEl = document.getElementById('assignment-view-title');
+  const metaEl = document.getElementById('assignment-view-meta');
+  const bodyEl = document.getElementById('assignment-view-body');
+  const clearBtn = document.getElementById('assignment-clear-btn');
+  if (assignment.content || assignment.title) {
+    titleEl.textContent = assignment.title || '(utan titel)';
+    metaEl.textContent = assignment.updatedAt ? 'Sparad ' + formatAssignmentDate(assignment.updatedAt) : '';
+    bodyEl.textContent = assignment.content || '';
+    bodyEl.classList.remove('assignment-empty');
+    clearBtn.classList.remove('hidden');
+  } else {
+    titleEl.textContent = 'Ingen uppgift sparad';
+    metaEl.textContent = '';
+    bodyEl.textContent = 'Tryck på "Redigera" och klistra in den nya uppgiften eller läxan här.';
+    bodyEl.classList.add('assignment-empty');
+    clearBtn.classList.add('hidden');
+  }
+}
+function editAssignment() {
+  document.getElementById('assignment-view').classList.add('hidden');
+  document.getElementById('assignment-edit').classList.remove('hidden');
+  document.getElementById('assignment-title').value = assignment.title || '';
+  document.getElementById('assignment-content').value = assignment.content || '';
+  document.getElementById('assignment-content').focus();
+}
+function cancelAssignment() {
+  renderAssignmentView();
+}
+function saveAssignment() {
+  const title = document.getElementById('assignment-title').value.trim();
+  const content = document.getElementById('assignment-content').value.trim();
+  assignment = { title, content, updatedAt: Date.now() };
+  saveAssignmentState();
+  applyAssignmentToHome();
+  renderAssignmentView();
+}
+function clearAssignment() {
+  if (!confirm('Vill du verkligen rensa uppgiften?')) return;
+  assignment = { title: '', content: '', updatedAt: 0 };
+  saveAssignmentState();
+  applyAssignmentToHome();
+  renderAssignmentView();
+}
 
 // ==================== DONE SCREEN ====================
 function showDone(score, total, label, againFn) {
