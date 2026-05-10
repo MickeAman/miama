@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Stickräknare</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <meta name="theme-color" content="#f4f1ec">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Stickräknare">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <!-- React + Babel -->
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Firebase compat -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f1ec;
+      --surface:   #fdfcfa;
+      --surface-2: #f9f6f1;
+      --border:    #e2ddd6;
+      --border2:   #c8c0b5;
+      --ink:       #18120e;
+      --ink2:      #3d3028;
+      --muted:     #5e5048;
+      --soft:      #8a7d74;
+      --accent:    #a0390f;
+      --accent-bg: #fdf0eb;
+      --green:     #166534;
+      --warm:      #c47a4b;
+      --shadow:    0 1px 2px rgba(24,18,14,.05), 0 3px 10px rgba(24,18,14,.07);
+      --shadow-lg: 0 4px 20px rgba(24,18,14,.11);
+      --shadow-xl: 0 10px 40px rgba(24,18,14,.18);
+      --r:   14px;
+      --rsm:  9px;
+    }
+
+    /* dark theme for low-light knitting */
+    body.dark {
+      --bg:        #14110e;
+      --surface:   #1d1916;
+      --surface-2: #24201c;
+      --border:    #2e2924;
+      --border2:   #443d36;
+      --ink:       #f1ede5;
+      --ink2:      #d6cfc3;
+      --muted:     #9a8f83;
+      --soft:      #6b6158;
+      --accent:    #d97a4e;
+      --accent-bg: #2a1a12;
+      --warm:      #e89a6b;
+    }
+
+    html, body { height: 100%; overscroll-behavior-y: none; }
+    body {
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1.5;
+      transition: background .2s, color .2s;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    }
+    #root { min-height: 100vh; }
+    .app  { min-height: 100vh; max-width: 480px; margin: 0 auto; padding-bottom: calc(72px + env(safe-area-inset-bottom)); position: relative; }
+
+    button { font-family: inherit; color: inherit; }
+
+    /* ── login screen ── */
+    .login-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; text-align:center; }
+    .login-logo   { font-size:52px; margin-bottom:20px; }
+    .login-title  { font-family:'Fraunces', serif; font-weight:600; font-size:30px; color:var(--ink); margin-bottom:8px; letter-spacing:-0.02em; }
+    .login-sub    { font-size:15px; color:var(--muted); margin-bottom:32px; max-width:280px; }
+    .login-form   { width:100%; max-width:320px; display:flex; flex-direction:column; gap:10px; }
+    .login-error  { font-size:13px; color:#b91c1c; background:#fef2f2; border:1px solid #fca5a5; border-radius:var(--rsm); padding:10px 13px; text-align:left; }
+    .login-divider { display:flex; align-items:center; gap:10px; color:var(--soft); font-size:12px; margin:4px 0; }
+    .login-divider::before, .login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+    .btn-anon     { width:100%; padding:12px 20px; background:transparent; border:1.5px solid var(--border2); border-radius:var(--rsm); font-size:14px; font-weight:500; color:var(--muted); cursor:pointer; transition:all .15s; }
+    .btn-anon:hover { background:var(--border); color:var(--ink); }
+    .login-toggle { font-size:13px; color:var(--muted); margin-top:8px; }
+    .login-toggle button { background:none; border:0; color:var(--ink); font-weight:600; cursor:pointer; text-decoration:underline; font-size:13px; }
+    .login-footer { margin-top:40px; font-size:12px; color:var(--soft); }
+
+    /* ── topbar ── */
+    .topbar { position:sticky; top:0; z-index:30; background:var(--bg); border-bottom:1px solid var(--border); padding:12px 18px 10px; display:flex; align-items:center; justify-content:space-between; gap:12px; backdrop-filter: blur(8px); }
+    .topbar-left  { display:flex; flex-direction:column; }
+    .topbar-title { font-family:'Fraunces', serif; font-weight:600; font-size:22px; color:var(--ink); letter-spacing:-0.01em; }
+    .topbar-sub   { font-size:11px; color:var(--muted); }
+    .topbar-right { display:flex; align-items:center; gap:8px; }
+
+    .lang-wrap   { position:relative; display:flex; align-items:center; }
+    .lang-select { appearance:none; -webkit-appearance:none; background:var(--surface); border:1px solid var(--border2); border-radius:var(--rsm); padding:7px 26px 7px 28px; font-size:13px; font-weight:500; color:var(--ink2); cursor:pointer; }
+    .lang-select:focus { outline:2px solid var(--ink); outline-offset:1px; }
+    .lang-globe  { position:absolute; left:8px; pointer-events:none; color:var(--muted); }
+    .lang-chev   { position:absolute; right:7px; pointer-events:none; color:var(--muted); }
+
+    .avatar-btn { width:34px; height:34px; border-radius:50%; border:1.5px solid var(--border2); background:var(--surface); overflow:hidden; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--muted); transition:border-color .15s; flex-shrink:0; }
+    .avatar-btn:hover { border-color:var(--ink); }
+    .avatar-btn img { width:100%; height:100%; object-fit:cover; }
+
+    /* user menu */
+    .user-menu { position:absolute; top:56px; right:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow-lg); padding:8px; min-width:220px; z-index:50; animation:fadeIn .15s; }
+    .user-menu-name { padding:8px 12px 4px; font-size:13px; font-weight:600; color:var(--ink); }
+    .user-menu-email { padding:0 12px 10px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border); margin-bottom:6px; }
+    .user-menu-btn { width:100%; padding:9px 12px; background:none; border:0; border-radius:var(--rsm); text-align:left; font-size:14px; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:10px; transition:all .15s; }
+    .user-menu-btn:hover { background:var(--bg); color:var(--ink); }
+    .user-menu-btn.danger:hover { background:#fef2f2; color:#b91c1c; }
+
+    /* ── bottom tabs ── */
+    .tabbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; z-index:30; background:var(--surface); border-top:1px solid var(--border); display:flex; padding-bottom: env(safe-area-inset-bottom); }
+    .tab-btn { flex:1; padding:10px 0 12px; background:none; border:0; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--soft); transition:color .15s; }
+    .tab-btn.active { color:var(--ink); }
+    .tab-lbl  { font-size:10px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; }
+
+    /* section header */
+    .sec-hdr { padding:20px 18px 10px; display:flex; align-items:center; justify-content:space-between; }
+    .sec-lbl  { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+
+    /* fab */
+    .fab { width:44px; height:44px; border-radius:50%; background:var(--ink); color:var(--bg); border:0; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-lg); flex-shrink:0; transition:transform .15s, background .15s; }
+    .fab:hover  { background:var(--ink2); transform:scale(1.06); }
+    .fab:active { transform:scale(.95); }
+
+    /* project list */
+    .proj-list { padding:0 14px; display:flex; flex-direction:column; gap:10px; }
+    .proj-card { background:var(--surface); border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden; cursor:pointer; display:flex; align-items:stretch; transition:transform .15s, box-shadow .15s; }
+    .proj-card:hover  { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+    .proj-card:active { transform:scale(.99); }
+    .proj-swatch { width:6px; background: var(--swatch, var(--warm)); flex-shrink:0; }
+    .proj-body { padding:14px 16px; display:flex; flex-direction:column; justify-content:center; gap:5px; flex:1; min-width: 0; }
+    .proj-name { font-weight:600; font-size:15px; color:var(--ink); }
+    .proj-meta { font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .proj-progress { display:flex; align-items:center; gap:8px; margin-top:6px; }
+    .proj-progress-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+    .proj-progress-fill { height:100%; background:var(--swatch, var(--warm)); border-radius:2px; transition:width .3s; }
+    .proj-progress-pct { font-size:11px; font-weight:600; color:var(--muted); min-width: 32px; text-align: right; }
+
+    /* empty */
+    .empty       { text-align:center; padding:56px 20px; }
+    .empty-icon  { margin-bottom:14px; opacity:.4; display:flex; justify-content:center; }
+    .empty-title { font-family:'Fraunces', serif; font-weight:600; font-size:22px; color:var(--ink); margin-bottom:6px; letter-spacing:-0.01em; }
+    .empty-sub   { font-size:14px; color:var(--muted); }
+
+    /* modal */
+    .overlay { position:fixed; inset:0; z-index:100; background:rgba(24,18,14,.55); display:flex; align-items:flex-end; justify-content:center; animation:fadeIn .15s; backdrop-filter: blur(4px); }
+    .sheet   { background:var(--surface); border-radius:20px 20px 0 0; padding:20px 18px calc(32px + env(safe-area-inset-bottom)); width:100%; max-width:480px; animation:slideUp .2s ease; max-height:90vh; overflow-y:auto; }
+    .sheet-handle { width:36px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 18px; }
+    .sheet-title  { font-family:'Fraunces', serif; font-weight:600; font-size:22px; color:var(--ink); margin-bottom:14px; letter-spacing:-0.01em; }
+
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes slideUp { from{transform:translateY(32px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes pop { 0% { transform: scale(1); } 30% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    @keyframes ringFade { from { opacity: 0.6; transform: scale(1); } to { opacity: 0; transform: scale(1.8); } }
+    @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.96); } }
+
+    /* field */
+    .field { width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:var(--rsm); background:var(--bg); font-family:inherit; font-size:15px; color:var(--ink); transition:border-color .15s; }
+    .field:focus { outline:none; border-color:var(--ink); }
+    .field::placeholder { color:var(--soft); }
+    textarea.field { resize:vertical; min-height:72px; }
+
+    /* swatch picker */
+    .swatch-picker { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; position:relative; }
+    .swatch-chip { width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:transform .15s, border-color .15s; padding:0; background-clip:padding-box; display:flex; align-items:center; justify-content:center; }
+    .swatch-chip:hover { transform:scale(1.1); }
+    .swatch-chip.active { border-color:var(--ink); transform:scale(1.1); }
+    .swatch-chip-custom { position:relative; }
+    .swatch-chip-plus { font-size:18px; font-weight:300; color:#fff; line-height:1; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+
+    /* buttons */
+    .btn-dark   { width:100%; padding:13px; background:var(--ink); color:var(--bg); border:0; border-radius:var(--rsm); font-size:15px; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .btn-dark:hover  { background:var(--ink2); }
+    .btn-dark:active { transform:scale(.99); }
+    .btn-ghost  { background:none; border:0; color:var(--muted); font-size:14px; padding:10px; width:100%; cursor:pointer; }
+    .btn-ghost:hover { color:var(--ink); }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       KNIT MODE — the main event
+       Optimized for: hands busy, glanceable, big tap targets, low accidental
+       ═══════════════════════════════════════════════════════════════════════ */
+
+    .knit { display:flex; flex-direction:column; min-height: 100vh; }
+
+    .knit-bar { position:sticky; top:0; z-index:20; background:var(--bg); padding:10px 14px; display:flex; align-items:center; gap:8px; }
+    .knit-bar-title { flex:1; min-width:0; display:flex; flex-direction:column; }
+    .knit-bar-name { font-family:'Fraunces', serif; font-weight:600; font-size:17px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.01em; }
+    .knit-bar-sub { font-size:11px; color:var(--muted); }
+    .back-btn    { background:none; border:0; display:flex; align-items:center; gap:4px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap; padding:8px 4px; transition:color .15s; }
+    .back-btn:hover { color:var(--ink); }
+    .icon-btn    { width:38px; height:38px; border-radius:50%; flex-shrink:0; border:1.5px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); transition:all .15s; }
+    .icon-btn:hover  { background:var(--border); color:var(--ink); }
+    .icon-btn:active { transform:scale(.92); }
+    .icon-btn.active { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+    /* counter switcher tabs — sits below the tap zone (thumb-reachable) */
+    .ctr-tabs { display:flex; gap:6px; padding: 10px 14px 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .ctr-tabs::-webkit-scrollbar { display: none; }
+    .ctr-tab { padding:7px 12px; background:var(--surface); border:1.5px solid var(--border); border-radius:999px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .15s; display:flex; align-items:center; gap:6px; user-select:none; -webkit-user-select:none; }
+    .ctr-tab.active { background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:600; padding-right: 6px; }
+    .ctr-tab.editing { padding: 4px 8px; background:var(--surface); border-color:var(--ink); }
+    .ctr-tab-name { max-width: 140px; overflow:hidden; text-overflow:ellipsis; }
+    .ctr-tab-count { font-variant-numeric: tabular-nums; opacity:.7; font-size:11px; font-weight:600; }
+    .ctr-tab.active .ctr-tab-count { opacity:1; }
+    .ctr-tab-edit, .ctr-tab-del {
+      width:20px; height:20px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      opacity:0.55; transition: opacity .15s, background .15s;
+      margin-left: 2px;
+    }
+    .ctr-tab-edit:hover, .ctr-tab-del:hover { opacity:1; background: rgba(255,255,255,0.12); }
+    .ctr-tab-del:hover { background: rgba(252,165,165,0.25); color:#fca5a5; }
+    .ctr-tab-input {
+      background:transparent; border:0; outline:none;
+      font-family:inherit; font-size:13px; font-weight:600; color:var(--ink);
+      width: 140px; padding: 3px 2px;
+      border-bottom: 1.5px solid var(--ink);
+    }
+    .ctr-tab-add {
+      padding:7px 12px; background:transparent;
+      border:1.5px dashed var(--border2); border-radius:999px;
+      font-size:13px; color:var(--muted); cursor:pointer;
+      display:flex; align-items:center; gap:5px; flex-shrink:0;
+      font-family:inherit; font-weight:500;
+      transition:all .15s;
+    }
+    .ctr-tab-add:hover { border-color:var(--ink); color:var(--ink); background:var(--surface-2); }
+    .ctr-tab-add:active { transform:scale(.96); }
+
+    /* THE BIG TAP AREA */
+    .tap-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      padding: 20px;
+      min-height: 360px;
+      touch-action: manipulation;
+    }
+    .tap-zone::before {
+      content: '';
+      position: absolute;
+      inset: 14px;
+      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: background .15s, transform .1s;
+    }
+    .tap-zone:active::before { background: var(--surface-2); transform: scale(0.995); }
+
+    .tap-content { position: relative; z-index: 1; text-align: center; width: 100%; }
+    .tap-counter-name { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.02em; }
+    .tap-number {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(120px, 32vw, 180px);
+      line-height: 0.9;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.04em;
+      transition: transform .15s;
+    }
+    .tap-number.popping { animation: pop .25s ease; }
+    .tap-unit { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--muted); margin-top: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* ripple on tap */
+    .ripple { position: absolute; border-radius: 50%; background: var(--ink); pointer-events: none; animation: ringFade .5s ease-out forwards; z-index: 0; }
+
+    /* repeat progress */
+    .repeat-bar { margin-top: 22px; width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
+    .repeat-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+    .repeat-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .repeat-fill { height: 100%; background: var(--warm); border-radius: 3px; transition: width .3s ease; }
+    .repeat-dots { display: flex; gap: 4px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+    .repeat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background .2s; }
+    .repeat-dot.done { background: var(--warm); }
+
+    /* hint when not yet tapped */
+    .tap-hint { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 12px; color: var(--soft); z-index: 1; pointer-events: none; animation: bounce 2s ease-in-out infinite; }
+
+    /* action row below tap zone */
+    .knit-actions { display: flex; gap: 10px; padding: 12px 14px 4px; }
+    .knit-action-btn {
+      flex: 1;
+      padding: 14px 8px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--rsm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all .15s;
+      min-height: 48px;
+    }
+    .knit-action-btn:hover { background: var(--border); color: var(--ink); }
+    .knit-action-btn:active { transform: scale(.97); }
+    .knit-action-btn.minus { font-weight: 600; }
+
+    /* notes panel */
+    .notes-panel { padding: 10px 14px 0; }
+    .notes-toggle { background:none; border:0; font-size:12px; font-weight:600; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 0; letter-spacing:0.04em; text-transform:uppercase; }
+    .notes-toggle:hover { color:var(--ink); }
+    .notes-content { margin-top:8px; }
+
+    /* add counter button */
+    .add-ctr-btn { width:calc(100% - 28px); margin:10px 14px 4px; padding:12px; background:none; border:1.5px dashed var(--border2); border-radius:var(--rsm); color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all .15s; }
+    .add-ctr-btn:hover { border-color:var(--ink); color:var(--ink); background:var(--surface-2); }
+
+    /* amazon affiliate banner */
+    .amz-banner {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin:12px 14px; padding:12px 14px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--r); box-shadow:var(--shadow);
+      text-decoration:none; color:inherit;
+      transition:box-shadow .15s, transform .15s;
+    }
+    .amz-banner:hover { box-shadow:var(--shadow-lg); transform:translateY(-1px); }
+    .amz-banner:active { transform:scale(.99); }
+    .amz-banner-left { display:flex; align-items:center; gap:10px; min-width:0; }
+    .amz-banner-icon { flex-shrink:0; color:var(--accent); }
+    .amz-banner-text { font-size:13px; font-weight:600; color:var(--ink); }
+    .amz-banner-sub  { font-size:11px; color:var(--muted); margin-top:1px; }
+    .amz-banner-cta  { font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap; display:flex; align-items:center; gap:4px; flex-shrink:0; }
+
+    /* delete confirm */
+    .del-row   { display:flex; gap:8px; padding:12px 14px 0; }
+    .btn-danger { flex:1; padding:11px 16px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:var(--rsm); color:#b91c1c; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .btn-danger:hover  { background:#fee2e2; }
+    .btn-cancel { flex:1; padding:11px; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--rsm); font-size:13px; font-weight:500; color:var(--ink2); cursor:pointer; transition:all .15s; }
+    .btn-cancel:hover { background:var(--border); }
+
+    /* saving indicator */
+    .saving { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--soft); }
+    .saving-dot { width:6px; height:6px; border-radius:50%; background:var(--soft); animation:pulse 1.2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* toast */
+    .toast { position:fixed; bottom:calc(80px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:999px; font-size:13px; font-weight:500; z-index:200; white-space:nowrap; animation:toastIn .2s ease; pointer-events:none; display:flex; align-items:center; gap:6px; box-shadow:var(--shadow-xl); }
+    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(6px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+    /* about page */
+    .about      { padding:0 14px 32px; }
+    .about-hero { background:var(--ink); border-radius:var(--r); margin:14px 0; padding:28px 22px; text-align:center; position:relative; overflow:hidden; color: var(--bg); }
+    .about-hero::before { content:'🧶'; position:absolute; font-size:120px; opacity:.07; right:-16px; bottom:-16px; line-height:1; }
+    .about-hero-title { font-family:'Fraunces', serif; font-weight:600; font-size:24px; color:var(--bg); margin-bottom:5px; letter-spacing:-0.01em; }
+    .about-hero-sub   { font-size:13px; opacity:0.7; }
+    .about-cards { display:flex; flex-direction:column; gap:12px; }
+    .acard      { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:18px; box-shadow:var(--shadow); }
+    .acard-text { font-size:14px; color:var(--muted); line-height:1.65; }
+    .acard-text strong { color: var(--ink); font-weight: 600; }
+    .swish-card { background:var(--accent-bg); border:1.5px solid var(--warm); border-radius:var(--r); padding:20px; box-shadow:var(--shadow); }
+    body.dark .swish-card { border-color: var(--border2); }
+    .swish-hdr  { display:flex; align-items:flex-start; gap:10px; margin-bottom:14px; }
+    .swish-icon { color:var(--accent); flex-shrink:0; }
+    .swish-title { font-weight:700; font-size:15px; color:var(--ink); }
+    .swish-sub   { font-size:13px; color:var(--muted); margin-top:2px; }
+    .swish-num-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--rsm); padding:12px 14px; margin-bottom:12px; }
+    .swish-num-lbl { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--muted); }
+    .swish-num-val { font-family:ui-monospace,'Courier New',monospace; font-size:20px; font-weight:600; color:var(--ink); margin-top:2px; }
+    .swish-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .swish-copy  { padding:11px; background:var(--ink); color:var(--bg); border:0; border-radius:var(--rsm); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .swish-copy:hover { background:var(--ink2); }
+    .swish-copy.done  { background:var(--green); }
+    .swish-share { padding:11px; background:var(--surface); border:1.5px solid var(--border2); border-radius:var(--rsm); font-size:13px; font-weight:600; color:var(--ink2); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+    .swish-share:hover { background:var(--bg); }
+    .about-footer { text-align:center; padding:24px 0 0; font-size:11px; color:var(--soft); }
+
+    /* release notes */
+    .release-card { padding: 18px 20px; }
+    .release-hdr { margin-bottom: 12px; }
+    .release-title { font-family:'Fraunces', serif; font-weight:600; font-size:16px; color:var(--ink); letter-spacing:-0.01em; }
+    .release-entry { padding-top: 4px; }
+    .release-entry + .release-entry { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .release-meta { display:flex; align-items:baseline; gap:8px; margin-bottom:8px; }
+    .release-version { font-size:12px; font-weight:700; color:var(--ink); background:var(--bg); border:1px solid var(--border); padding:2px 8px; border-radius:999px; letter-spacing:0.02em; }
+    .release-date { font-size:11px; color:var(--soft); text-transform:lowercase; }
+    .release-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .release-list li { font-size:13px; color:var(--muted); line-height:1.5; padding-left:18px; position:relative; }
+    .release-list li::before {
+      content:'';
+      position:absolute; left:4px; top:8px;
+      width:6px; height:6px; border-radius:50%;
+      background: var(--warm);
+    }
+
+    .sp   { height:14px; }
+    .sp8  { height:8px; }
+    .sp20 { height:20px; }
+
+    /* project settings sheet */
+    .setting-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+    .setting-row:last-child { border-bottom:0; }
+    .setting-lbl { font-size:14px; color:var(--ink2); font-weight:500; }
+    .setting-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+    .num-input { width:64px; padding:8px 10px; border:1.5px solid var(--border); border-radius:var(--rsm); background:var(--bg); font-size:14px; color:var(--ink); text-align:center; font-variant-numeric:tabular-nums; }
+
+    /* switch */
+    .switch { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; inset:0; background:var(--border2); transition:.2s; border-radius:24px; }
+    .slider::before { position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:var(--surface); border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .switch input:checked + .slider { background:var(--ink); }
+    .switch input:checked + .slider::before { transform:translateX(20px); }
+  </style>
+
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react,env">
+    const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+    // ── Firebase init ────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCG1e3KNFDqORVL64-tKjHnIA6b0FZXvDw",
+      authDomain:        "stickraknare3.firebaseapp.com",
+      projectId:         "stickraknare3",
+      storageBucket:     "stickraknare3.firebasestorage.app",
+      messagingSenderId: "411052324712",
+      appId:             "1:411052324712:web:917f52b1ec23ccf51b88dd",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+    const uid  = () => `${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    const SWISH = "0704095845";
+
+    // yarn-inspired colors for project swatches
+    const SWATCHES = ["#c47a4b","#7d8471","#a8526b","#4a6b7c","#b89770","#6b5b73","#8a5a3b","#5a7a5a"];
+
+    const makeCounter = (index, lang="sv") => ({
+      id: uid(),
+      name: ({sv:`Räknare ${index}`,no:`Teller ${index}`,da:`Tæller ${index}`,en:`Counter ${index}`})[lang] || `Counter ${index}`,
+      count: 0,
+      repeatLength: 0,   // 0 = disabled
+      targetCount: 0,    // 0 = no target
+    });
+
+    const makeProject = (name, lang="sv") => ({
+      id: uid(), name, notes: "",
+      swatch: SWATCHES[Math.floor(Math.random()*SWATCHES.length)],
+      counters: [makeCounter(1, lang)],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    });
+
+    // ── SCHEMA NORMALIZATION ─────────────────────────────────────────────────
+    // Handles data created by older versions of the app.
+    // Returns a fully-populated project with all expected fields.
+    // Used everywhere we READ a project, so the UI never sees undefined fields.
+    const normalizeProject = (p) => {
+      if (!p) return p;
+      const counters = Array.isArray(p.counters) && p.counters.length > 0
+        ? p.counters.map((c, i) => ({
+            id: c.id || uid(),
+            name: c.name || `Räknare ${i+1}`,
+            count: typeof c.count === "number" ? c.count : 0,
+            repeatLength: typeof c.repeatLength === "number" ? c.repeatLength : 0,
+            targetCount: typeof c.targetCount === "number" ? c.targetCount : 0,
+          }))
+        : [makeCounter(1)];
+      // Deterministic swatch fallback based on id so old projects keep a stable colour
+      const swatchFallback = SWATCHES[(p.id || "").split("").reduce((s,ch)=>s+ch.charCodeAt(0),0) % SWATCHES.length];
+      return {
+        ...p,
+        name: p.name || "—",
+        notes: p.notes || "",
+        swatch: p.swatch || swatchFallback,
+        counters,
+        createdAt: p.createdAt || Date.now(),
+        updatedAt: p.updatedAt || p.createdAt || Date.now(),
+      };
+    };
+
+    // Detect whether a project needs its schema upgraded in Firestore
+    const needsBackfill = (p) => {
+      if (!p.swatch) return true;
+      if (!Array.isArray(p.counters)) return true;
+      return p.counters.some(c =>
+        typeof c.repeatLength !== "number" || typeof c.targetCount !== "number"
+      );
+    };
+
+    const timeAgo = (ts, lang) => {
+      const d=Date.now()-ts, m=Math.floor(d/60000), h=Math.floor(d/3600000), days=Math.floor(d/86400000);
+      if(lang==="sv"){if(m<2)return"nyss";if(m<60)return`${m} min`;if(h<24)return`${h} tim`;return`${days}d`;}
+      if(lang==="no"){if(m<2)return"nå";if(m<60)return`${m} min`;if(h<24)return`${h} t`;return`${days}d`;}
+      if(lang==="da"){if(m<2)return"nu";if(m<60)return`${m} min`;if(h<24)return`${h} t`;return`${days}d`;}
+      if(m<2)return"now";if(m<60)return`${m}m`;if(h<24)return`${h}h`;return`${days}d`;
+    };
+
+    // haptic feedback
+    const haptic = (ms=10) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch(_){} };
+
+    // ── i18n ─────────────────────────────────────────────────────────────────
+    const T = {
+      sv: {
+        appTitle:"Stickräknare", appSub:"Projekt och varv, enkelt",
+        signInAnon:"Fortsätt utan konto",
+        signInSub:"Logga in för att synka projekt mellan enheter",
+        email:"E-post", password:"Lösenord", signIn:"Logga in", signUp:"Skapa konto",
+        noAccount:"Inget konto?", hasAccount:"Har redan konto?",
+        emailPlaceholder:"din@email.com", passwordPlaceholder:"Minst 6 tecken",
+        authError:"Fel e-post eller lösenord", authErrorEmail:"E-postadressen används redan",
+        or:"eller",
+        newProject:"Nytt projekt", myProjects:"Mina projekt",
+        noProjects:"Inga projekt ännu", noProjectsSub:"Tryck på + för att skapa ditt första",
+        addCounter:"Lägg till räknare", addRound:"Lägg till varv", tapToAdd:"Tryck var som helst för +1",
+        undo:"-1", reset:"Nollställ", remove:"Ta bort",
+        share:"Dela projekt", shareLink:"Länk kopierad!",
+        projectName:"Projektnamn", notes:"Anteckningar",
+        notesPlaceholder:"Garntyp, färg, nålstorlek, mönster…",
+        notesShow:"Visa anteckningar", notesHide:"Dölj anteckningar",
+        back:"Tillbaka", deleteProject:"Ta bort projekt",
+        yes:"Ja, ta bort", no:"Avbryt",
+        counters:"räknare", rounds:"varv",
+        tabProjects:"Projekt", tabAbout:"Om",
+        langLabel:"Språk", saving:"Sparar…", saved:"Sparat",
+        signOut:"Logga ut", darkMode:"Mörkt läge", anonUser:"Anonym användare",
+        founderTitle:"Om appen", founderSub:"För min fru och stickklubben Sticka & Dricka",
+        founderP1:"Stickräknaren byggde jag till min fru och hennes stickklubb Sticka & Dricka — ett gäng kvinnor som älskar att sticka ihop, skåla i bubbel och prata om livet. De behövde något enklare än krångliga appar och papperslappar som försvinner.",
+        founderP2:"Allt jag ville var en sak: en knapp stor nog att trycka på medan ena handen håller i stickorna och andra i champagneglaset. Resten är bonus.",
+        founderP3:"Appen är <strong>gratis</strong> och kommer alltid vara det. Om du gillar den får du gärna dela med dig till andra stickare — det betyder allt. En liten Swish är också alltid uppskattad 🥂",
+        swishTitle:"Swisha ett glas bubbel", swishDesc:"Valfritt belopp, helt frivilligt. Tack!",
+        swishNumber:"Swish-nummer", copyNumber:"Kopiera", copied:"Kopierat!",
+        shareSwish:"Dela", footer:"gjord med ♥ i sverige",
+        amzProject:"Köp garn till projektet", amzProjectSub:"Hitta garn, stickor & tillbehör",
+        amzList:"Behöver du mer garn?", amzListSub:"Handla stickmaterial på Amazon",
+        amzCta:"Se utbud",
+        keepAwake:"Skärm på", keepAwakeOn:"Skärm förblir på",
+        settings:"Inställningar", color:"Färg", repeat:"Mönsterrapport", target:"Mål", rowsToGoal:"varv till mål",
+        repeatOf:"rapport", repeatLength:"Varv per rapport", targetRows:"Mål (antal varv)", repeatHint:"T.ex. 8 för en 8-varvs rapport",
+        counterName:"Räknarens namn", done:"Klart!", goalReached:"Mål uppnått!",
+        confirmReset:"Nollställa räknaren?",
+        whatsNew:"Nyheter i senaste versionen",
+        releaseNotes: [
+          { v:"2.0", date:"april 2026", items:[
+            "Helt ny räknarvy — tryck var som helst på skärmen för +1",
+            "Flera räknare per projekt, byt namn genom att långtrycka",
+            "Mönsterrapport: se vilken rad du är på i din rapport",
+            "Mål per räknare med progress och liten festlig notis när du når målet",
+            "Mörkt läge för kvällsstickningen",
+            "Projekt får egna färger så du enkelt skiljer dem åt",
+            "Skärm-på-knapp så telefonen inte slocknar mitt i varvet",
+            "Norska tillagt som språk"
+          ]}
+        ],
+      },
+      no: {
+        appTitle:"Pinnteller", appSub:"Prosjekter og omganger, enkelt",
+        signInAnon:"Fortsett uten konto",
+        signInSub:"Logg inn for å synke prosjekter mellom enheter",
+        email:"E-post", password:"Passord", signIn:"Logg inn", signUp:"Opprett konto",
+        noAccount:"Ingen konto?", hasAccount:"Har allerede konto?",
+        emailPlaceholder:"din@epost.no", passwordPlaceholder:"Minst 6 tegn",
+        authError:"Feil e-post eller passord", authErrorEmail:"E-postadressen er allerede i bruk",
+        or:"eller",
+        newProject:"Nytt prosjekt", myProjects:"Mine prosjekter",
+        noProjects:"Ingen prosjekter ennå", noProjectsSub:"Trykk på + for å lage ditt første",
+        addCounter:"Legg til teller", addRound:"Legg til omgang", tapToAdd:"Trykk hvor som helst for +1",
+        undo:"-1", reset:"Nullstill", remove:"Fjern",
+        share:"Del prosjekt", shareLink:"Lenke kopiert!",
+        projectName:"Prosjektnavn", notes:"Notater",
+        notesPlaceholder:"Garntype, farge, pinnestørrelse, mønster…",
+        notesShow:"Vis notater", notesHide:"Skjul notater",
+        back:"Tilbake", deleteProject:"Slett prosjekt",
+        yes:"Ja, slett", no:"Avbryt",
+        counters:"tellere", rounds:"omganger",
+        tabProjects:"Prosjekter", tabAbout:"Om",
+        langLabel:"Språk", saving:"Lagrer…", saved:"Lagret",
+        signOut:"Logg ut", darkMode:"Mørk modus", anonUser:"Anonym bruker",
+        founderTitle:"Om appen", founderSub:"Til kona mi og strikkeklubben Sticka & Dricka",
+        founderP1:"Pinntelleren har jeg laget til kona mi og strikkeklubben hennes Sticka & Dricka — en gjeng kvinner som elsker å strikke sammen, skåle i bobler og prate om livet. De trengte noe enklere enn kronglete apper og papirlapper som forsvinner.",
+        founderP2:"Alt jeg ville var én ting: en knapp stor nok til å trykke på mens én hånd holder pinnene og den andre champagneglasset. Resten er bonus.",
+        founderP3:"Appen er <strong>gratis</strong> og kommer alltid til å være det. Hvis du liker den, del den gjerne med andre strikkere — det betyr alt. En liten Swish er også alltid satt pris på 🥂",
+        swishTitle:"Swish et glass bobler", swishDesc:"Valgfritt beløp, helt frivillig. Takk!",
+        swishNumber:"Swish-nummer", copyNumber:"Kopier", copied:"Kopiert!",
+        shareSwish:"Del", footer:"laget med ♥ i sverige",
+        amzProject:"Kjøp garn til prosjektet", amzProjectSub:"Finn garn, pinner & tilbehør",
+        amzList:"Trenger du mer garn?", amzListSub:"Kjøp strikkeutstyr på Amazon",
+        amzCta:"Se utvalg",
+        keepAwake:"Skjerm på", keepAwakeOn:"Skjermen forblir på",
+        settings:"Innstillinger", color:"Farge", repeat:"Mønsterrapport", target:"Mål", rowsToGoal:"omganger til mål",
+        repeatOf:"rapport", repeatLength:"Omganger per rapport", targetRows:"Mål (antall omganger)", repeatHint:"F.eks. 8 for en 8-omgangs rapport",
+        counterName:"Tellerens navn", done:"Ferdig!", goalReached:"Mål nådd!",
+        confirmReset:"Nullstille telleren?",
+        whatsNew:"Nyheter i siste versjon",
+        releaseNotes: [
+          { v:"2.0", date:"april 2026", items:[
+            "Helt ny tellervisning — trykk hvor som helst på skjermen for +1",
+            "Flere tellere per prosjekt, endre navn ved å holde inne",
+            "Mønsterrapport: se hvilken rad du er på i rapporten",
+            "Mål per teller med fremdrift og en liten festlig varsel når du når målet",
+            "Mørk modus for kveldsstrikking",
+            "Prosjekter får egne farger så du enkelt skiller dem",
+            "Skjerm-på-knapp så telefonen ikke slukner midt i omgangen",
+            "Norsk lagt til som språk"
+          ]}
+        ],
+      },
+      da: {
+        appTitle:"Pindetæller", appSub:"Projekter og omgange, enkelt",
+        signInAnon:"Fortsæt uden konto",
+        signInSub:"Log ind for at synkronisere projekter på tværs af enheder",
+        email:"E-mail", password:"Adgangskode", signIn:"Log ind", signUp:"Opret konto",
+        noAccount:"Ingen konto?", hasAccount:"Har allerede konto?",
+        emailPlaceholder:"din@email.com", passwordPlaceholder:"Mindst 6 tegn",
+        authError:"Forkert e-mail eller adgangskode", authErrorEmail:"E-mailadressen bruges allerede",
+        or:"eller",
+        newProject:"Nyt projekt", myProjects:"Mine projekter",
+        noProjects:"Ingen projekter endnu", noProjectsSub:"Tryk + for at oprette dit første",
+        addCounter:"Tilføj tæller", addRound:"Tilføj omgang", tapToAdd:"Tryk hvor som helst for +1",
+        undo:"-1", reset:"Nulstil", remove:"Fjern",
+        share:"Del projekt", shareLink:"Link kopieret!",
+        projectName:"Projektnavn", notes:"Notater",
+        notesPlaceholder:"Garntype, farve, pindenummer, mønster…",
+        notesShow:"Vis noter", notesHide:"Skjul noter",
+        back:"Tilbage", deleteProject:"Slet projekt",
+        yes:"Ja, slet", no:"Annuller",
+        counters:"tællere", rounds:"omgange",
+        tabProjects:"Projekter", tabAbout:"Om",
+        langLabel:"Sprog", saving:"Gemmer…", saved:"Gemt",
+        signOut:"Log ud", darkMode:"Mørk tilstand", anonUser:"Anonym bruger",
+        founderTitle:"Om appen", founderSub:"Til min kone og strikkeklubben Sticka & Dricka",
+        founderP1:"Pindetælleren har jeg bygget til min kone og hendes strikkeklub Sticka & Dricka — en flok kvinder, der elsker at strikke sammen, skåle i bobler og snakke om livet. De havde brug for noget enklere end besværlige apps og papirlapper, der bliver væk.",
+        founderP2:"Alt jeg ville var én ting: en knap stor nok til at trykke på, mens den ene hånd holder pindene og den anden champagneglasset. Resten er bonus.",
+        founderP3:"Appen er <strong>gratis</strong> og vil altid være det. Hvis du kan lide den, del den gerne med andre strikkere — det betyder alt. En lille Swish er også altid værdsat 🥂",
+        swishTitle:"Swish et glas bobler", swishDesc:"Valgfrit beløb, helt frivilligt. Tak!",
+        swishNumber:"Swish-nummer", copyNumber:"Kopiér", copied:"Kopieret!",
+        shareSwish:"Del", footer:"lavet med ♥ i sverige",
+        amzProject:"Køb garn til projektet", amzProjectSub:"Find garn, pinde & tilbehør",
+        amzList:"Har du brug for mere garn?", amzListSub:"Køb strikmaterialer på Amazon",
+        amzCta:"Se udvalg",
+        keepAwake:"Skærm tændt", keepAwakeOn:"Skærmen forbliver tændt",
+        settings:"Indstillinger", color:"Farve", repeat:"Mønsterrapport", target:"Mål", rowsToGoal:"omgange til mål",
+        repeatOf:"rapport", repeatLength:"Omgange pr. rapport", targetRows:"Mål (antal omgange)", repeatHint:"F.eks. 8 for en 8-omgangs rapport",
+        counterName:"Tællerens navn", done:"Færdig!", goalReached:"Mål nået!",
+        confirmReset:"Nulstille tælleren?",
+        whatsNew:"Nyheder i seneste version",
+        releaseNotes: [
+          { v:"2.0", date:"april 2026", items:[
+            "Helt ny tællervisning — tryk hvor som helst på skærmen for +1",
+            "Flere tællere pr. projekt, omdøb ved at holde nede",
+            "Mønsterrapport: se hvilken række du er på i rapporten",
+            "Mål pr. tæller med fremgang og en lille festlig besked når du når målet",
+            "Mørk tilstand til aftenstrikningen",
+            "Projekter får egne farver så du nemt skelner dem",
+            "Skærm-til-knap så telefonen ikke går i dvale midt i omgangen",
+            "Norsk tilføjet som sprog"
+          ]}
+        ],
+      },
+      en: {
+        appTitle:"Row Counter", appSub:"Projects and rounds, simply",
+        signInAnon:"Continue without account",
+        signInSub:"Sign in to sync projects across devices",
+        email:"Email", password:"Password", signIn:"Sign in", signUp:"Create account",
+        noAccount:"No account?", hasAccount:"Already have an account?",
+        emailPlaceholder:"you@email.com", passwordPlaceholder:"At least 6 characters",
+        authError:"Incorrect email or password", authErrorEmail:"Email already in use",
+        or:"or",
+        newProject:"New project", myProjects:"My projects",
+        noProjects:"No projects yet", noProjectsSub:"Tap + to create your first one",
+        addCounter:"Add counter", addRound:"Add round", tapToAdd:"Tap anywhere to add +1",
+        undo:"-1", reset:"Reset", remove:"Remove",
+        share:"Share project", shareLink:"Link copied!",
+        projectName:"Project name", notes:"Notes",
+        notesPlaceholder:"Yarn, colour, needle size, pattern notes…",
+        notesShow:"Show notes", notesHide:"Hide notes",
+        back:"Back", deleteProject:"Delete project",
+        yes:"Yes, delete", no:"Cancel",
+        counters:"counters", rounds:"rounds",
+        tabProjects:"Projects", tabAbout:"About",
+        langLabel:"Language", saving:"Saving…", saved:"Saved",
+        signOut:"Sign out", darkMode:"Dark mode", anonUser:"Anonymous user",
+        founderTitle:"About", founderSub:"For my wife and her knitting club Sticka & Dricka",
+        founderP1:"I built Row Counter for my wife and her knitting club Sticka & Dricka — a group of women who love to knit together, clink their champagne glasses, and talk about life. They needed something simpler than fiddly apps and paper notes that go missing.",
+        founderP2:"All I wanted was one thing: a button big enough to tap while one hand holds the needles and the other a glass of bubbly. Everything else is a bonus.",
+        founderP3:"The app is <strong>free</strong> and always will be. If you enjoy it, please share it with other knitters — it means the world. A small Swish donation is also always appreciated 🥂",
+        swishTitle:"Buy me a glass of bubbly (Swish)", swishDesc:"Any amount, totally optional. Thank you!",
+        swishNumber:"Swish number", copyNumber:"Copy", copied:"Copied!",
+        shareSwish:"Share", footer:"made with ♥ in sweden",
+        amzProject:"Buy yarn for this project", amzProjectSub:"Find yarn, needles & accessories",
+        amzList:"Need more yarn?", amzListSub:"Shop knitting supplies on Amazon",
+        amzCta:"Browse",
+        keepAwake:"Screen on", keepAwakeOn:"Screen stays on",
+        settings:"Settings", color:"Colour", repeat:"Pattern repeat", target:"Goal", rowsToGoal:"rows to goal",
+        repeatOf:"repeat", repeatLength:"Rows per repeat", targetRows:"Goal (total rows)", repeatHint:"e.g. 8 for an 8-row repeat",
+        counterName:"Counter name", done:"Done!", goalReached:"Goal reached!",
+        confirmReset:"Reset counter?",
+        whatsNew:"What's new in the latest version",
+        releaseNotes: [
+          { v:"2.0", date:"April 2026", items:[
+            "All-new counter view — tap anywhere on the screen for +1",
+            "Multiple counters per project, long-press a tab to rename",
+            "Pattern repeat tracking — see which row you're on in the repeat",
+            "Per-counter goals with progress and a small celebration when you hit it",
+            "Dark mode for evening knitting",
+            "Projects get their own colour tag so you can tell them apart",
+            "Keep-screen-on button so your phone doesn't lock mid-row",
+            "Norwegian added as a language"
+          ]}
+        ],
+      },
+    };
+    const LANG_NAMES = { sv:"Svenska", no:"Norsk", da:"Dansk", en:"English" };
+
+    // ── SVG icons ────────────────────────────────────────────────────────────
+    const Icon = ({ d, size=16, ...p }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
+        {[].concat(d).map((path,i) => <path key={i} d={path}/>)}
+      </svg>
+    );
+    const icons = {
+      plus:      "M12 5v14M5 12h14",
+      arrowLeft: "M19 12H5M12 19l-7-7 7-7",
+      share:     ["M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8","M16 6l-4-4-4 4","M12 2v13"],
+      trash:     ["M3 6h18","M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6","M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"],
+      minus:     "M5 12h14",
+      undo:      ["M3 7v6h6","M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"],
+      x:         "M18 6L6 18M6 6l12 12",
+      folder:    "M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z",
+      heart:     "M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z",
+      copy:      ["M20 9H11a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-9a2 2 0 00-2-2z","M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"],
+      check:     "M20 6L9 17l-5-5",
+      globe:     ["M12 2a10 10 0 100 20A10 10 0 0012 2z","M2 12h20","M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"],
+      chevDown:  "M6 9l6 6 6-6",
+      book:      ["M4 19.5A2.5 2.5 0 016.5 17H20","M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"],
+      user:      ["M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2","M12 3a4 4 0 100 8 4 4 0 000-8z"],
+      logOut:    ["M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4","M16 17l5-5-5-5","M21 12H9"],
+      bag:       ["M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z","M3 6h18","M16 10a4 4 0 01-8 0"],
+      extLink:   ["M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6","M15 3h6v6","M10 14L21 3"],
+      sun:       ["M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42","M12 17a5 5 0 100-10 5 5 0 000 10z"],
+      moon:      "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z",
+      settings:  ["M12 15a3 3 0 100-6 3 3 0 000 6z","M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"],
+      edit:      ["M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7","M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"],
+      target:    ["M12 2a10 10 0 100 20 10 10 0 000-20z","M12 6a6 6 0 100 12 6 6 0 000-12z","M12 10a2 2 0 100 4 2 2 0 000-4z"],
+      repeat:    ["M17 1l4 4-4 4","M3 11V9a4 4 0 014-4h14","M7 23l-4-4 4-4","M21 13v2a4 4 0 01-4 4H3"],
+      chevDown2: "M6 9l6 6 6-6",
+      chevUp:    "M18 15l-6-6-6 6",
+    };
+    const Ic = ({ name, size=16, ...p }) => <Icon d={icons[name]} size={size} {...p} />;
+
+    // ── Firestore helpers ────────────────────────────────────────────────────
+    const projectsRef = (userId) => db.collection("users").doc(userId).collection("projects");
+
+    // ── SWATCH PICKER ────────────────────────────────────────────────────────
+    // Presets + a "custom" chip that opens the native colour picker for full
+    // freedom. Custom colours are persisted per-project just like presets.
+    function SwatchPicker({ value, onChange }) {
+      const [customOpen, setCustomOpen] = useState(false);
+      const inputRef = useRef();
+      const isPreset = SWATCHES.includes(value);
+      const customValue = isPreset ? "#b89770" : value;
+
+      const openPicker = () => {
+        // Open native colour picker via hidden input
+        setTimeout(() => inputRef.current?.click(), 0);
+      };
+
+      return (
+        <div className="swatch-picker">
+          {SWATCHES.map(c => (
+            <button key={c} type="button"
+              className={`swatch-chip ${value===c?"active":""}`}
+              style={{background:c}}
+              aria-label={`Color ${c}`}
+              onClick={()=>onChange(c)} />
+          ))}
+          {/* Custom colour chip — shows current custom colour, or a
+              rainbow conic gradient when no custom colour is chosen yet */}
+          <button type="button"
+            className={`swatch-chip swatch-chip-custom ${!isPreset?"active":""}`}
+            style={{
+              background: !isPreset
+                ? value
+                : "conic-gradient(from 0deg, #ef4444, #f59e0b, #eab308, #22c55e, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444)"
+            }}
+            aria-label="Pick custom color"
+            onClick={openPicker}>
+            {isPreset && <span className="swatch-chip-plus">+</span>}
+          </button>
+          <input
+            ref={inputRef}
+            type="color"
+            value={customValue}
+            onChange={(e)=>onChange(e.target.value)}
+            style={{position:'absolute', opacity:0, width:1, height:1, pointerEvents:'none'}}
+            aria-hidden="true"
+          />
+        </div>
+      );
+    }
+
+    // ── COUNTER TAB ──────────────────────────────────────────────────────────
+    // Long-press (or double-click) to rename inline.
+    // When active, shows small edit/remove icons.
+    function CounterTab({ counter, active, canRemove, onSelect, onRename, onRemove }) {
+      const [editing, setEditing] = useState(false);
+      const [name, setName] = useState(counter.name);
+      const inputRef = useRef();
+      const pressTimer = useRef();
+
+      useEffect(() => setName(counter.name), [counter.name]);
+      useEffect(() => { if (editing) setTimeout(()=>inputRef.current?.select(), 30); }, [editing]);
+
+      const startPress = () => {
+        clearTimeout(pressTimer.current);
+        pressTimer.current = setTimeout(() => { haptic(20); setEditing(true); }, 500);
+      };
+      const cancelPress = () => clearTimeout(pressTimer.current);
+
+      const commit = () => {
+        const n = name.trim() || counter.name;
+        setName(n); onRename(n); setEditing(false);
+      };
+      const cancel = () => { setName(counter.name); setEditing(false); };
+
+      if (editing) {
+        return (
+          <div className={`ctr-tab ${active?"active":""} editing`}>
+            <input ref={inputRef} className="ctr-tab-input" value={name}
+              onChange={e=>setName(e.target.value)}
+              onBlur={commit}
+              onKeyDown={e=>{ if(e.key==="Enter") commit(); else if(e.key==="Escape") cancel(); }}
+              maxLength={24}
+            />
+          </div>
+        );
+      }
+
+      return (
+        <button
+          className={`ctr-tab ${active?"active":""}`}
+          onClick={onSelect}
+          onDoubleClick={()=>setEditing(true)}
+          onTouchStart={startPress}
+          onTouchEnd={cancelPress}
+          onTouchMove={cancelPress}
+          onMouseDown={startPress}
+          onMouseUp={cancelPress}
+          onMouseLeave={cancelPress}
+        >
+          <span className="ctr-tab-name">{counter.name}</span>
+          <span className="ctr-tab-count">{counter.count}</span>
+          {active && (
+            <>
+              <span className="ctr-tab-edit" onClick={(e)=>{ e.stopPropagation(); setEditing(true); }} title="Rename">
+                <Ic name="edit" size={11}/>
+              </span>
+              {canRemove && (
+                <span className="ctr-tab-del" onClick={(e)=>{ e.stopPropagation(); if(confirm(`${counter.name}?`)) onRemove(); }} title="Remove">
+                  <Ic name="x" size={11}/>
+                </span>
+              )}
+            </>
+          )}
+        </button>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // KNIT VIEW — the redesigned project detail view
+    // ═══════════════════════════════════════════════════════════════════════
+    function KnitView({ project, userId, onBack, onDelete, lang, t, dark, setDark }) {
+      const [localProject, setLocalProject] = useState(project);
+      const [activeCtrId, setActiveCtrId] = useState(project.counters[0]?.id);
+      const [saving, setSaving] = useState(false);
+      const [toast, setToast] = useState(null);
+      const [showSettings, setShowSettings] = useState(false);
+      const [showNotes, setShowNotes] = useState(false);
+      const [confirmDelete, setConfirmDelete] = useState(false);
+      const [popping, setPopping] = useState(false);
+      const saveTimer = useRef(null);
+
+      // wake lock
+      const [keepAwake, setKeepAwake] = useState(false);
+      const wakeLockRef = useRef(null);
+
+      useEffect(() => {
+        setLocalProject(project);
+        if (!project.counters.find(c => c.id === activeCtrId)) {
+          setActiveCtrId(project.counters[0]?.id);
+        }
+      }, [project.id]);
+
+      // wake lock
+      const enableWakeLock = async () => {
+        try { if ("wakeLock" in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request("screen");
+          wakeLockRef.current.addEventListener("release", () => setKeepAwake(false));
+        }} catch(_) { setKeepAwake(false); }
+      };
+      const disableWakeLock = async () => {
+        try { if (wakeLockRef.current) { await wakeLockRef.current.release(); wakeLockRef.current = null; } } catch(_){}
+      };
+      const toggleAwake = async (on) => {
+        setKeepAwake(on); if (on) await enableWakeLock(); else await disableWakeLock();
+        showToast(on ? t.keepAwakeOn : null);
+      };
+      useEffect(() => {
+        const onVis = async () => { if (document.visibilityState==="visible" && keepAwake) await enableWakeLock(); };
+        document.addEventListener("visibilitychange", onVis);
+        return () => { document.removeEventListener("visibilitychange", onVis); disableWakeLock(); };
+      }, [keepAwake]);
+
+      const showToast = msg => { if (!msg) return; setToast(msg); setTimeout(()=>setToast(null), 1800); };
+
+      const saveToFirestore = useCallback((patch) => {
+        setSaving(true);
+        clearTimeout(saveTimer.current);
+        saveTimer.current = setTimeout(async () => {
+          try { await projectsRef(userId).doc(project.id).update({...patch, updatedAt: Date.now()}); } catch(e) { console.error(e); }
+          setSaving(false);
+        }, 600);
+      }, [userId, project.id]);
+
+      const update = (patch) => {
+        const updated = {...localProject, ...patch};
+        setLocalProject(updated);
+        saveToFirestore(patch);
+      };
+
+      const updCtr = (id, p) => update({ counters: localProject.counters.map(c=>c.id===id?{...c,...p}:c) });
+      const addCtr = () => {
+        const newCtr = makeCounter(localProject.counters.length+1, lang);
+        update({ counters: [...localProject.counters, newCtr] });
+        setActiveCtrId(newCtr.id);
+      };
+      const delCtr = id => {
+        const remaining = localProject.counters.filter(c=>c.id!==id);
+        update({ counters: remaining });
+        if (activeCtrId === id) setActiveCtrId(remaining[0]?.id);
+      };
+
+      const activeCtr = localProject.counters.find(c=>c.id===activeCtrId) || localProject.counters[0];
+
+      // ── TAP HANDLERS ──
+      const tapZoneRef = useRef();
+      const [ripples, setRipples] = useState([]);
+
+      const doIncrement = (clientX, clientY) => {
+        if (!activeCtr) return;
+        // haptic + ripple + pop
+        haptic(10);
+        setPopping(true); setTimeout(()=>setPopping(false), 250);
+        if (tapZoneRef.current && clientX!=null) {
+          const rect = tapZoneRef.current.getBoundingClientRect();
+          const id = Math.random();
+          setRipples(r => [...r, { id, x: clientX-rect.left, y: clientY-rect.top }]);
+          setTimeout(() => setRipples(r => r.filter(rp => rp.id !== id)), 500);
+        }
+        const newCount = activeCtr.count + 1;
+        updCtr(activeCtr.id, { count: newCount });
+
+        // goal reached toast
+        if (activeCtr.targetCount > 0 && newCount === activeCtr.targetCount) {
+          haptic([40, 30, 40]);
+          setTimeout(() => showToast(`🎉 ${t.goalReached}`), 100);
+        }
+      };
+
+      const doDecrement = () => {
+        if (!activeCtr || activeCtr.count <= 0) return;
+        haptic(8);
+        updCtr(activeCtr.id, { count: Math.max(0, activeCtr.count - 1) });
+      };
+
+      const doReset = () => {
+        if (!activeCtr || activeCtr.count === 0) return;
+        if (confirm(t.confirmReset)) {
+          haptic(15);
+          updCtr(activeCtr.id, { count: 0 });
+        }
+      };
+
+      // volume keys (bonus: works on some browsers)
+      useEffect(() => {
+        const onKey = (e) => {
+          if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+          if (e.key === " " || e.key === "Enter" || e.key === "ArrowUp" || e.key === "+") { e.preventDefault(); doIncrement(); }
+          else if (e.key === "ArrowDown" || e.key === "-") { e.preventDefault(); doDecrement(); }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+      }, [activeCtr?.count, activeCtr?.id]);
+
+      // ── Pattern repeat math ──
+      const repeatInfo = useMemo(() => {
+        if (!activeCtr || !activeCtr.repeatLength || activeCtr.repeatLength <= 0) return null;
+        const rowInRepeat = (activeCtr.count % activeCtr.repeatLength) + 1;
+        const repeatNum = Math.floor(activeCtr.count / activeCtr.repeatLength) + 1;
+        return { rowInRepeat, repeatNum, length: activeCtr.repeatLength };
+      }, [activeCtr?.count, activeCtr?.repeatLength]);
+
+      const targetPct = activeCtr?.targetCount > 0
+        ? Math.min(100, Math.round((activeCtr.count / activeCtr.targetCount) * 100))
+        : 0;
+
+      const handleShare = async () => {
+        const url = `https://stickraknare.se/p/${project.id.slice(0,8)}`;
+        try { if(navigator.share){ await navigator.share({title:localProject.name,url}); return; } } catch(_){}
+        try { await navigator.clipboard.writeText(url); } catch(_){}
+        showToast(t.shareLink);
+      };
+
+      if (!activeCtr) return null;
+
+      return (
+        <div className="knit">
+          {/* Top bar */}
+          <div className="knit-bar" style={{"--swatch": localProject.swatch}}>
+            <button className="back-btn" onClick={onBack}><Ic name="arrowLeft" size={16}/></button>
+            <div className="knit-bar-title">
+              <div className="knit-bar-name">{localProject.name}</div>
+              <div className="knit-bar-sub">
+                {localProject.counters.length} {t.counters}
+                {saving && <> · <span className="saving"><span className="saving-dot"/>{t.saving}</span></>}
+              </div>
+            </div>
+            <button className={`icon-btn ${keepAwake?"active":""}`} onClick={()=>toggleAwake(!keepAwake)} title={t.keepAwake}>
+              <Ic name="sun" size={15}/>
+            </button>
+            <button className="icon-btn" onClick={()=>setShowSettings(true)} title={t.settings}>
+              <Ic name="settings" size={15}/>
+            </button>
+          </div>
+
+          {/* THE BIG TAP ZONE */}
+          <div
+            ref={tapZoneRef}
+            className="tap-zone"
+            onClick={(e)=>doIncrement(e.clientX, e.clientY)}
+            role="button"
+            aria-label={t.addRound}
+          >
+            {ripples.map(r => (
+              <span key={r.id} className="ripple" style={{ left:r.x-40, top:r.y-40, width:80, height:80, opacity:0.1 }}/>
+            ))}
+            <div className="tap-content">
+              <div className="tap-counter-name">{activeCtr.name}</div>
+              <div className={`tap-number ${popping?"popping":""}`}>{activeCtr.count}</div>
+              <div className="tap-unit">{t.rounds}</div>
+
+              {repeatInfo && (
+                <div className="repeat-bar">
+                  <div className="repeat-label">
+                    <span>{t.repeatOf} {repeatInfo.repeatNum}</span>
+                    <span>{repeatInfo.rowInRepeat} / {repeatInfo.length}</span>
+                  </div>
+                  <div className="repeat-dots">
+                    {Array.from({length: repeatInfo.length}).map((_, i) => (
+                      <div key={i} className={`repeat-dot ${i < repeatInfo.rowInRepeat ? "done" : ""}`}/>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeCtr.targetCount > 0 && (
+                <div className="repeat-bar" style={{marginTop: 14}}>
+                  <div className="repeat-label">
+                    <span>{t.target}</span>
+                    <span>{activeCtr.count} / {activeCtr.targetCount} ({targetPct}%)</span>
+                  </div>
+                  <div className="repeat-track">
+                    <div className="repeat-fill" style={{width: `${targetPct}%`, background: localProject.swatch}}/>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {activeCtr.count === 0 && !repeatInfo && activeCtr.targetCount === 0 && (
+              <div className="tap-hint">↑ {t.tapToAdd}</div>
+            )}
+          </div>
+
+          {/* Counter tabs — placed directly below the tap zone for thumb reach.
+              Long-press (or double-click) to rename inline. × to remove. */}
+          {localProject.counters.length > 1 && (
+            <div className="ctr-tabs">
+              {localProject.counters.map(c => (
+                <CounterTab key={c.id}
+                  counter={c}
+                  active={c.id===activeCtrId}
+                  canRemove={localProject.counters.length > 1}
+                  onSelect={()=>{ setActiveCtrId(c.id); haptic(5); }}
+                  onRename={(newName)=>updCtr(c.id, { name: newName })}
+                  onRemove={()=>delCtr(c.id)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Action row: undo / reset */}
+          <div className="knit-actions">
+            <button className="knit-action-btn minus" onClick={doDecrement} disabled={activeCtr.count === 0} style={{opacity: activeCtr.count === 0 ? 0.4 : 1}}>
+              <Ic name="minus" size={14}/> {t.undo}
+            </button>
+            <button className="knit-action-btn" onClick={doReset} disabled={activeCtr.count === 0} style={{opacity: activeCtr.count === 0 ? 0.4 : 1}}>
+              <Ic name="undo" size={14}/> {t.reset}
+            </button>
+          </div>
+
+          {/* Add counter — placed here (below the tap zone) so it's within
+              thumb reach on the bottom of the phone. */}
+          <button className="add-ctr-btn" onClick={addCtr}>
+            <Ic name="plus" size={15}/> {t.addCounter}
+          </button>
+
+          {/* Notes (collapsed by default) */}
+          <div className="notes-panel">
+            <button className="notes-toggle" onClick={()=>setShowNotes(s=>!s)}>
+              <Ic name={showNotes?"chevUp":"chevDown2"} size={13}/>
+              {showNotes ? t.notesHide : (localProject.notes ? t.notes : t.notesShow)}
+              {!showNotes && localProject.notes && ` · ${localProject.notes.slice(0,40)}${localProject.notes.length>40?"…":""}`}
+            </button>
+            {showNotes && (
+              <div className="notes-content">
+                <textarea className="field" placeholder={t.notesPlaceholder} value={localProject.notes||""}
+                  onChange={e=>setLocalProject({...localProject, notes: e.target.value})}
+                  onBlur={()=>update({notes: localProject.notes})} />
+              </div>
+            )}
+          </div>
+
+          {/* Amazon affiliate banner */}
+          <a href="https://www.amazon.se/s?k=garn&tag=miama38-21" target="_blank" rel="noopener noreferrer" className="amz-banner">
+            <div className="amz-banner-left">
+              <div className="amz-banner-icon"><Ic name="bag" size={20}/></div>
+              <div>
+                <div className="amz-banner-text">{t.amzProject}</div>
+                <div className="amz-banner-sub">{t.amzProjectSub}</div>
+              </div>
+            </div>
+            <div className="amz-banner-cta">{t.amzCta} <Ic name="extLink" size={12}/></div>
+          </a>
+
+          {/* Settings sheet */}
+          {showSettings && (
+            <SettingsSheet
+              project={localProject}
+              activeCtr={activeCtr}
+              t={t}
+              dark={dark} setDark={setDark}
+              onClose={()=>setShowSettings(false)}
+              onUpdateProject={update}
+              onUpdateCounter={(p) => updCtr(activeCtr.id, p)}
+              onShare={handleShare}
+              onDeleteProject={()=>setConfirmDelete(true)}
+            />
+          )}
+
+          {confirmDelete && (
+            <div className="overlay" onClick={()=>setConfirmDelete(false)}>
+              <div className="sheet" onClick={e=>e.stopPropagation()}>
+                <div className="sheet-handle"/>
+                <div className="sheet-title">{t.deleteProject}?</div>
+                <div style={{fontSize:14, color:'var(--muted)', marginBottom:16}}>{localProject.name}</div>
+                <div className="del-row" style={{padding: 0}}>
+                  <button className="btn-danger" onClick={async()=>{ await projectsRef(userId).doc(project.id).delete(); onDelete(); setConfirmDelete(false); }}>
+                    <Ic name="trash" size={14}/> {t.yes}
+                  </button>
+                  <button className="btn-cancel" onClick={()=>setConfirmDelete(false)}>{t.no}</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {toast && <div className="toast"><Ic name="check" size={14}/>{toast}</div>}
+        </div>
+      );
+    }
+
+    // ── SETTINGS SHEET ───────────────────────────────────────────────────────
+    // Note: counter renaming and removal live inline in the counter tabs
+    // (tap the active tab's edit icon, or long-press any tab). Settings
+    // only covers project-wide config + per-counter pattern/target numbers.
+    function SettingsSheet({ project, activeCtr, t, dark, setDark, onClose, onUpdateProject, onUpdateCounter, onShare, onDeleteProject }) {
+      const [projName, setProjName] = useState(project.name);
+      const [repeat, setRepeat]     = useState(activeCtr.repeatLength || 0);
+      const [target, setTarget]     = useState(activeCtr.targetCount || 0);
+
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="sheet" onClick={e=>e.stopPropagation()}>
+            <div className="sheet-handle"/>
+            <div className="sheet-title">{t.settings}</div>
+
+            {/* Project name */}
+            <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:6}}>{t.projectName}</div>
+            <input className="field" value={projName} onChange={e=>setProjName(e.target.value)}
+              onBlur={()=>onUpdateProject({name: projName.trim() || project.name})} />
+
+            <div className="sp"/>
+
+            {/* Swatch color */}
+            <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:8}}>{t.color}</div>
+            <SwatchPicker value={project.swatch} onChange={(c)=>onUpdateProject({swatch: c})} />
+
+            <div className="sp"/>
+
+            {/* Per-counter: repeat & target (for active counter) */}
+            <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:4}}>
+              {activeCtr.name}
+            </div>
+            <div className="setting-row">
+              <div>
+                <div className="setting-lbl">{t.repeatLength}</div>
+                <div className="setting-sub">{t.repeatHint}</div>
+              </div>
+              <input type="number" min="0" max="200" className="num-input" value={repeat}
+                onChange={e=>setRepeat(parseInt(e.target.value)||0)}
+                onBlur={()=>onUpdateCounter({repeatLength: repeat})} />
+            </div>
+            <div className="setting-row">
+              <div>
+                <div className="setting-lbl">{t.targetRows}</div>
+                <div className="setting-sub">0 = {t.no.toLowerCase()}</div>
+              </div>
+              <input type="number" min="0" max="9999" className="num-input" value={target}
+                onChange={e=>setTarget(parseInt(e.target.value)||0)}
+                onBlur={()=>onUpdateCounter({targetCount: target})} />
+            </div>
+
+            {/* Theme */}
+            <div className="setting-row">
+              <div>
+                <div className="setting-lbl">{t.darkMode}</div>
+              </div>
+              <label className="switch">
+                <input type="checkbox" checked={dark} onChange={e=>setDark(e.target.checked)} />
+                <span className="slider"/>
+              </label>
+            </div>
+
+            <div className="sp"/>
+            <button className="btn-dark" onClick={()=>{ onShare(); onClose(); }} style={{marginBottom:8}}>
+              <Ic name="share" size={15}/> {t.share}
+            </button>
+            <button className="btn-ghost" style={{color:'#b91c1c'}} onClick={()=>{ onDeleteProject(); onClose(); }}>
+              {t.deleteProject}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── PROJECT LIST ─────────────────────────────────────────────────────────
+    function ProjectList({ projects, onOpen, onCreate, t, lang }) {
+      const sorted = [...projects].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+      return (
+        <div>
+          <div className="sec-hdr">
+            <span className="sec-lbl">{t.myProjects}</span>
+            <button className="fab" onClick={onCreate} aria-label={t.newProject}><Ic name="plus" size={20}/></button>
+          </div>
+          {sorted.length===0
+            ? <div className="empty">
+                <div className="empty-icon"><Ic name="book" size={44}/></div>
+                <div className="empty-title">{t.noProjects}</div>
+                <div className="empty-sub">{t.noProjectsSub}</div>
+              </div>
+            : <div className="proj-list">
+                {sorted.map(p=>{
+                  const totalRows = (p.counters||[]).reduce((s,c)=>s+c.count,0);
+                  const firstCtr = p.counters?.[0];
+                  const pct = firstCtr?.targetCount > 0 ? Math.min(100, Math.round((firstCtr.count / firstCtr.targetCount) * 100)) : 0;
+                  return (
+                    <div key={p.id} className="proj-card" onClick={()=>onOpen(p.id)} style={{"--swatch": p.swatch || "#c47a4b"}}>
+                      <div className="proj-swatch"/>
+                      <div className="proj-body">
+                        <div className="proj-name">{p.name}</div>
+                        <div className="proj-meta">
+                          <span>{totalRows} {t.rounds}</span>
+                          {p.counters?.length > 1 && <><span style={{width:3,height:3,borderRadius:'50%',background:'var(--border2)'}}/><span>{p.counters.length} {t.counters}</span></>}
+                          <span style={{width:3,height:3,borderRadius:'50%',background:'var(--border2)'}}/>
+                          <span>{timeAgo(p.updatedAt||p.createdAt||0, lang)}</span>
+                        </div>
+                        {firstCtr?.targetCount > 0 && (
+                          <div className="proj-progress">
+                            <div className="proj-progress-bar">
+                              <div className="proj-progress-fill" style={{width: `${pct}%`}}/>
+                            </div>
+                            <div className="proj-progress-pct">{pct}%</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <a href="https://www.amazon.se/s?k=garn&tag=miama38-21" target="_blank" rel="noopener noreferrer" className="amz-banner" style={{marginTop:2, marginLeft:0, marginRight:0}}>
+                  <div className="amz-banner-left">
+                    <div className="amz-banner-icon"><Ic name="bag" size={20}/></div>
+                    <div>
+                      <div className="amz-banner-text">{t.amzList}</div>
+                      <div className="amz-banner-sub">{t.amzListSub}</div>
+                    </div>
+                  </div>
+                  <div className="amz-banner-cta">{t.amzCta} <Ic name="extLink" size={12}/></div>
+                </a>
+              </div>
+          }
+        </div>
+      );
+    }
+
+    // ── NEW PROJECT MODAL ────────────────────────────────────────────────────
+    function NewModal({ t, onClose, onCreate }) {
+      const [name, setName] = useState("");
+      const [swatch, setSwatch] = useState(SWATCHES[Math.floor(Math.random()*SWATCHES.length)]);
+      const ref = useRef();
+      useEffect(()=>{ setTimeout(()=>ref.current?.focus(),80); },[]);
+      const submit = () => { const n=name.trim(); if(!n) return; onCreate(n, swatch); onClose(); };
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="sheet" onClick={e=>e.stopPropagation()}>
+            <div className="sheet-handle"/>
+            <div className="sheet-title">{t.newProject}</div>
+            <input ref={ref} className="field" placeholder={t.projectName} value={name}
+              onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}
+              style={{marginBottom:14}} />
+            <div className="sub-lbl" style={{fontSize:11, fontWeight:700, letterSpacing:'.8px', textTransform:'uppercase', color:'var(--muted)', marginBottom:8}}>{t.color}</div>
+            <SwatchPicker value={swatch} onChange={setSwatch} />
+            <button className="btn-dark" onClick={submit}><Ic name="plus" size={16}/>{t.newProject}</button>
+            <button className="btn-ghost" onClick={onClose}>{t.no}</button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── ABOUT PAGE ───────────────────────────────────────────────────────────
+    function AboutPage({ t }) {
+      const [copied, setCopied] = useState(false);
+      const copy = async () => {
+        try { await navigator.clipboard.writeText(SWISH); } catch(_){}
+        setCopied(true); setTimeout(()=>setCopied(false),1800);
+      };
+      const share = async () => {
+        try { if(navigator.share) await navigator.share({text:`${t.swishTitle}\n${t.swishNumber}: ${SWISH}`}); } catch(_){}
+      };
+      return (
+        <div className="about">
+          <div className="about-hero">
+            <div className="about-hero-title">{t.founderTitle}</div>
+            <div className="about-hero-sub">{t.founderSub}</div>
+          </div>
+          <div className="about-cards">
+            <div className="acard"><div className="acard-text">{t.founderP1}</div></div>
+            <div className="acard"><div className="acard-text">{t.founderP2}</div></div>
+            <div className="acard"><div className="acard-text" dangerouslySetInnerHTML={{__html: t.founderP3}}/></div>
+            <div className="swish-card">
+              <div className="swish-hdr">
+                <div className="swish-icon"><Ic name="heart" size={20}/></div>
+                <div>
+                  <div className="swish-title">{t.swishTitle}</div>
+                  <div className="swish-sub">{t.swishDesc}</div>
+                </div>
+              </div>
+              <div className="swish-num-row">
+                <div className="swish-num-lbl">{t.swishNumber}</div>
+                <div className="swish-num-val">{SWISH}</div>
+              </div>
+              <div className="swish-btns">
+                <button className={`swish-copy${copied?" done":""}`} onClick={copy}>
+                  {copied ? <><Ic name="check" size={14}/> {t.copied}</> : <><Ic name="copy" size={14}/> {t.copyNumber}</>}
+                </button>
+                <button className="swish-share" onClick={share}><Ic name="share" size={14}/> {t.shareSwish}</button>
+              </div>
+            </div>
+
+            {/* Release notes */}
+            {Array.isArray(t.releaseNotes) && t.releaseNotes.length > 0 && (
+              <div className="acard release-card">
+                <div className="release-hdr">
+                  <div className="release-title">{t.whatsNew}</div>
+                </div>
+                {t.releaseNotes.map((r, i) => (
+                  <div key={i} className="release-entry">
+                    <div className="release-meta">
+                      <span className="release-version">v{r.v}</span>
+                      <span className="release-date">{r.date}</span>
+                    </div>
+                    <ul className="release-list">
+                      {r.items.map((item, j) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="about-footer">{t.footer}</div>
+        </div>
+      );
+    }
+
+    // ── LOGIN SCREEN ─────────────────────────────────────────────────────────
+    function LoginScreen({ t, onAnon }) {
+      const [isSignUp, setIsSignUp] = useState(false);
+      const [email, setEmail]       = useState("");
+      const [password, setPassword] = useState("");
+      const [error, setError]       = useState("");
+      const [loading, setLoading]   = useState(false);
+
+      const submit = async () => {
+        setError(""); setLoading(true);
+        try {
+          if (isSignUp) await auth.createUserWithEmailAndPassword(email, password);
+          else await auth.signInWithEmailAndPassword(email, password);
+        } catch(e) {
+          if (e.code === "auth/email-already-in-use") setError(t.authErrorEmail);
+          else setError(t.authError);
+        }
+        setLoading(false);
+      };
+
+      return (
+        <div className="login-screen">
+          <div className="login-logo">🧶</div>
+          <div className="login-title">{t.appTitle}</div>
+          <div className="login-sub">{t.signInSub}</div>
+          <div className="login-form">
+            {error && <div className="login-error">{error}</div>}
+            <input className="field" type="email" placeholder={t.emailPlaceholder}
+              value={email} onChange={e=>{setEmail(e.target.value);setError("");}}
+              onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete="email" />
+            <input className="field" type="password" placeholder={t.passwordPlaceholder}
+              value={password} onChange={e=>{setPassword(e.target.value);setError("");}}
+              onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete={isSignUp?"new-password":"current-password"} />
+            <button className="btn-dark" onClick={submit} disabled={loading||!email||!password}
+              style={{opacity:(loading||!email||!password)?0.6:1}}>
+              {isSignUp ? t.signUp : t.signIn}
+            </button>
+            <div className="login-divider">{t.or}</div>
+            <button className="btn-anon" onClick={onAnon}>{t.signInAnon}</button>
+            <div className="login-toggle">
+              {isSignUp ? t.hasAccount : t.noAccount}{" "}
+              <button onClick={()=>{setIsSignUp(s=>!s);setError("");}}>
+                {isSignUp ? t.signIn : t.signUp}
+              </button>
+            </div>
+          </div>
+          <div className="login-footer">{t.footer}</div>
+        </div>
+      );
+    }
+
+    // ── USER MENU ────────────────────────────────────────────────────────────
+    function UserMenu({ user, t, dark, setDark, onClose, onSignOut }) {
+      const ref = useRef();
+      useEffect(() => {
+        const handler = e => { if(ref.current && !ref.current.contains(e.target)) onClose(); };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+      }, []);
+      return (
+        <div className="user-menu" ref={ref}>
+          <div className="user-menu-name">{user.isAnonymous ? t.anonUser : (user.displayName||"")}</div>
+          {!user.isAnonymous && user.email && <div className="user-menu-email">{user.email}</div>}
+          <button className="user-menu-btn" onClick={()=>setDark(!dark)}>
+            <Ic name={dark?"sun":"moon"} size={14}/>{t.darkMode}
+            <span style={{marginLeft:'auto', fontSize:11, color: dark ? 'var(--ink)' : 'var(--soft)'}}>{dark ? "ON" : "OFF"}</span>
+          </button>
+          <button className="user-menu-btn danger" onClick={onSignOut}><Ic name="logOut" size={14}/>{t.signOut}</button>
+        </div>
+      );
+    }
+
+    // ── APP ROOT ─────────────────────────────────────────────────────────────
+    function App() {
+      const [lang, setLang] = useState(()=>{
+        const saved = localStorage.getItem("sticka-lang");
+        return (saved && T[saved]) ? saved : "sv";
+      });
+      const [dark, setDark] = useState(()=>localStorage.getItem("sticka-dark")==="1");
+      const [tab, setTab]   = useState("projects");
+      const [user, setUser] = useState(undefined);
+      const [projects, setProjects] = useState([]);
+      const [activeId, setActiveId] = useState(null);
+      const [showNew, setShowNew]   = useState(false);
+      const [showMenu, setShowMenu] = useState(false);
+      const t = T[lang]||T.sv;
+
+      useEffect(()=>localStorage.setItem("sticka-lang",lang),[lang]);
+      useEffect(()=>{
+        localStorage.setItem("sticka-dark", dark?"1":"0");
+        document.body.classList.toggle("dark", dark);
+      }, [dark]);
+
+      const migrateFromLocalStorage = async (userId) => {
+        const migrated = localStorage.getItem("sticka-migrated");
+        if (migrated) return;
+        const count1 = parseInt(localStorage.getItem("stick-count1")||"0", 10);
+        const count2 = parseInt(localStorage.getItem("stick-count2")||"0", 10);
+        const name1  = localStorage.getItem("stick-name1");
+        const name2  = localStorage.getItem("stick-name2");
+        const showSecond = localStorage.getItem("stick-hide-2") !== "true";
+        let extraCounters = [];
+        try { const raw = localStorage.getItem("stick-extra"); if (raw) extraCounters = JSON.parse(raw)||[]; } catch(_){}
+        const hasOldData = count1 > 0 || count2 > 0 || extraCounters.some(c=>c.count>0);
+        if (!hasOldData) { localStorage.setItem("sticka-migrated","1"); return; }
+        const mkCtr = (name, count) => ({ id:uid(), name, count: count||0, repeatLength:0, targetCount:0 });
+        const counters = [mkCtr(name1||"Räknare 1", count1)];
+        if (showSecond) counters.push(mkCtr(name2||"Räknare 2", count2));
+        extraCounters.forEach(c => counters.push(mkCtr(c.name||"Räknare", c.count||0)));
+        const project = {
+          id: uid(), name: "Mina räknare", notes: "",
+          swatch: SWATCHES[0], counters,
+          createdAt: Date.now(), updatedAt: Date.now(),
+        };
+        try { await projectsRef(userId).doc(project.id).set(project); localStorage.setItem("sticka-migrated", "1"); } catch(e) { console.error(e); }
+      };
+
+      useEffect(()=>{
+        return auth.onAuthStateChanged(async u => {
+          setUser(u||null);
+          if (u) await migrateFromLocalStorage(u.uid);
+        });
+      },[]);
+
+      // Firestore listener — normalize every project on read so the UI never
+      // sees old-schema data. Also silently backfill old docs so future writes
+      // don't accidentally drop the new fields via a partial update().
+      useEffect(()=>{
+        if(!user) return;
+        const backfilled = new Set(); // per-session guard so we only backfill once per doc
+        const unsub = projectsRef(user.uid).orderBy("updatedAt","desc").onSnapshot(snap=>{
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          setProjects(docs.map(normalizeProject));
+
+          // Background backfill: find any docs missing new fields, write them back.
+          // Safe because normalizeProject preserves every existing field and only
+          // fills in defaults. Skip the currently-open project to avoid racing
+          // with the user's own writes (counter increments etc.).
+          docs.forEach(raw => {
+            if (backfilled.has(raw.id)) return;
+            if (raw.id === activeId) return; // don't fight the active editor
+            if (!needsBackfill(raw)) { backfilled.add(raw.id); return; }
+            backfilled.add(raw.id);
+            const n = normalizeProject(raw);
+            projectsRef(user.uid).doc(raw.id).update({
+              swatch: n.swatch,
+              counters: n.counters,
+            }).catch(e => console.warn("Backfill failed for", raw.id, e));
+          });
+        }, err=>console.error(err));
+        return ()=>unsub();
+      },[user, activeId]);
+
+      const signInAnon = async () => { try { await auth.signInAnonymously(); } catch(e){ console.error(e); } };
+      const signOut = async () => { setShowMenu(false); setActiveId(null); setProjects([]); await auth.signOut(); };
+
+      const createProject = async (name, swatch) => {
+        if(!user) return;
+        const p = makeProject(name, lang);
+        if (swatch) p.swatch = swatch;
+        try { await projectsRef(user.uid).doc(p.id).set(p); setActiveId(p.id); } catch(e){ console.error(e); }
+      };
+
+      const activeProject = projects.find(p=>p.id===activeId);
+
+      if(user===undefined) return (
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}>
+          <div style={{fontSize:32}}>🧶</div>
+        </div>
+      );
+
+      if(user===null) return <LoginScreen t={t} onAnon={signInAnon}/>;
+
+      // Knit view: full-screen, no tabs
+      if (activeProject) {
+        return (
+          <div className="app">
+            <KnitView project={activeProject} userId={user.uid} onBack={()=>setActiveId(null)} onDelete={()=>setActiveId(null)} lang={lang} t={t} dark={dark} setDark={setDark}/>
+          </div>
+        );
+      }
+
+      return (
+        <div className="app">
+          <div className="topbar">
+            <div className="topbar-left">
+              <div className="topbar-title">{t.appTitle}</div>
+              <div className="topbar-sub">{t.appSub}</div>
+            </div>
+            <div className="topbar-right">
+              <div className="lang-wrap">
+                <Ic name="globe" size={13} className="lang-globe" style={{position:"absolute",left:8,pointerEvents:"none",color:"var(--muted)"}}/>
+                <select className="lang-select" value={lang} onChange={e=>setLang(e.target.value)} aria-label={t.langLabel}>
+                  {Object.entries(LANG_NAMES).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+                </select>
+                <Ic name="chevDown" size={11} style={{position:"absolute",right:7,pointerEvents:"none",color:"var(--muted)"}}/>
+              </div>
+              <div style={{position:"relative"}}>
+                <button className="avatar-btn" onClick={()=>setShowMenu(m=>!m)}>
+                  {user.photoURL ? <img src={user.photoURL} alt="avatar"/> : <Ic name="user" size={16}/>}
+                </button>
+                {showMenu && <UserMenu user={user} t={t} dark={dark} setDark={setDark} onClose={()=>setShowMenu(false)} onSignOut={signOut}/>}
+              </div>
+            </div>
+          </div>
+
+          {tab==="projects"
+            ? <ProjectList projects={projects} onOpen={setActiveId} onCreate={()=>setShowNew(true)} t={t} lang={lang}/>
+            : <AboutPage t={t}/>
+          }
+
+          <nav className="tabbar">
+            <button className={`tab-btn${tab==="projects"?" active":""}`} onClick={()=>setTab("projects")}>
+              <Ic name="folder" size={20}/><span className="tab-lbl">{t.tabProjects}</span>
+            </button>
+            <button className={`tab-btn${tab==="about"?" active":""}`} onClick={()=>setTab("about")}>
+              <Ic name="heart" size={20}/><span className="tab-lbl">{t.tabAbout}</span>
+            </button>
+          </nav>
+
+          {showNew && <NewModal t={t} onClose={()=>setShowNew(false)} onCreate={createProject}/>}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+  </script>
+
+</body>
+</html>
