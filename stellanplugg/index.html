@@ -134,7 +134,7 @@
     transition: width 0.3s;
   }
 
-  .question-text { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
+  .question-text { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 18px; line-height: 1.5; }
   .instruction { color: var(--ink-soft); margin-bottom: 12px; }
 
   .feedback {
@@ -326,6 +326,84 @@
   }
   .assignment-empty { color: var(--ink-soft); font-style: italic; }
   .assignment-meta { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 12px; }
+
+  /* WORD BANK + GAP */
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--accent-soft);
+    border: 2px dashed var(--accent);
+    border-radius: 10px;
+  }
+  .word-chip {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.08s;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .word-chip:hover { transform: translate(-1px, -1px); }
+  .word-chip:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  .word-chip.used { opacity: 0.35; cursor: default; }
+  .gap {
+    display: inline-block;
+    min-width: 110px;
+    border-bottom: 3px solid var(--ink);
+    padding: 2px 8px;
+    margin: 0 2px;
+    font-weight: 800;
+    color: var(--accent);
+    cursor: pointer;
+    line-height: 1.6;
+  }
+  .gap.empty { color: var(--ink-soft); font-weight: 500; font-style: italic; }
+  .gap.correct { background: var(--green-soft); border-bottom-color: var(--green); color: var(--ink); }
+  .gap.wrong { background: var(--red-soft); border-bottom-color: var(--red); color: var(--ink); }
+  .gap.active { background: var(--yellow); }
+
+  .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .option-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    background: var(--bg-card);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: var(--shadow);
+    transition: transform 0.08s;
+  }
+  .option-btn:hover { transform: translate(-1px, -1px); }
+  .option-btn.correct { background: var(--green-soft); }
+  .option-btn.wrong { background: var(--red-soft); }
+  .option-btn:disabled { cursor: default; }
+
+  .tf-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tf-btn {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 22px 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.08s;
+  }
+  .tf-btn:hover { transform: translate(-2px, -2px); }
+  .tf-btn.true { background: var(--green-soft); color: var(--ink); }
+  .tf-btn.false { background: var(--red-soft); color: var(--ink); }
+  .tf-btn:disabled { cursor: default; opacity: 0.6; }
 </style>
 </head>
 <body>
@@ -333,7 +411,7 @@
 
 <header>
   <h1>Stellans <span class="accent">Pluggkompis</span></h1>
-  <p class="subtitle">📚 Volym och vikt – Kapitel 6</p>
+  <p class="subtitle">🇸🇪 Vi bor i Sverige – SO</p>
 </header>
 
 <!-- HOME -->
@@ -349,28 +427,33 @@
   <div class="card">
     <h2>🎯 Vad vill du öva på?</h2>
     <div class="mode-grid">
-      <div class="mode-card" style="border-color: var(--green); background: var(--green-soft);" onclick="startUnits()">
-        <span class="emoji">📏</span>
-        <div class="name">Enhetsdrill</div>
-        <div class="desc">kg, hg, g, l, dl, cl...</div>
-      </div>
-      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="startMath()">
-        <span class="emoji">🔢</span>
-        <div class="name">Mattetränare</div>
-        <div class="desc">Textuppgifter</div>
-      </div>
-      <div class="mode-card" onclick="startFlashcards()">
+      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="startFlashcards()">
         <span class="emoji">🃏</span>
-        <div class="name">Flashcards</div>
-        <div class="desc">Enheter och fakta</div>
+        <div class="name">Begrepp</div>
+        <div class="desc">Ordlistan – flashcards</div>
       </div>
-      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="showCheatsheet()">
+      <div class="mode-card" style="border-color: var(--green); background: var(--green-soft);" onclick="startLucktext()">
+        <span class="emoji">📝</span>
+        <div class="name">Lucktext</div>
+        <div class="desc">Fyll i orden</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="startTrueFalse()">
+        <span class="emoji">✅</span>
+        <div class="name">Sant / Falskt</div>
+        <div class="desc">Stämmer det?</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6;" onclick="startMatch()">
+        <span class="emoji">🧩</span>
+        <div class="name">Matcha</div>
+        <div class="desc">Län, kommun, landskap...</div>
+      </div>
+      <div class="mode-card" onclick="showCheatsheet()">
         <span class="emoji">📖</span>
         <div class="name">Fusklapp</div>
-        <div class="desc">Snabb översikt</div>
+        <div class="desc">Tankekarta inför provet</div>
       </div>
-      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6; grid-column: 1 / -1;" onclick="showAssignment()">
-        <span class="emoji">📝</span>
+      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6;" onclick="showAssignment()">
+        <span class="emoji">📋</span>
         <div class="name">Aktuell uppgift</div>
         <div class="desc" id="assignment-card-desc">Klistra in nytt område / läxa</div>
       </div>
@@ -380,43 +463,59 @@
   <p class="small" style="text-align:center;">💡 Tjäna 300 XP = 1 timme extra skärmtid</p>
 </div>
 
-<!-- UNITS DRILL -->
-<div id="units-screen" class="hidden">
+<!-- LUCKTEXT -->
+<div id="lucktext-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
-      <span class="badge" id="units-progress">1 / 12</span>
-      <span class="badge" style="background: var(--green-soft);" id="units-score">⭐ 0</span>
+      <span class="badge" id="lt-progress">1 / 12</span>
+      <span class="badge" style="background: var(--green-soft);" id="lt-score">⭐ 0</span>
       <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="units-bar"></div></div>
-    <div class="question-text" id="units-question"></div>
-    <p class="instruction" id="units-instruction"></p>
-    <input type="text" id="units-answer" autocomplete="off" placeholder="Svar..." />
-    <div id="units-feedback" class="hidden"></div>
-    <button class="btn btn-green btn-block" id="units-submit-btn" style="margin-top: 12px;" onclick="submitUnits()">Svara →</button>
-    <button class="btn btn-block hidden" id="units-next-btn" style="margin-top: 12px;" onclick="nextUnits()">Nästa →</button>
+    <div class="progress-bar"><div class="progress-fill" id="lt-bar"></div></div>
+    <p class="instruction">Tryck på ett ord nedan och sedan på luckan där det hör hemma. Eller skriv in i fältet längst ner.</p>
+    <div class="word-bank" id="lt-bank"></div>
+    <div class="question-text" id="lt-question"></div>
+    <div id="lt-feedback" class="hidden"></div>
+    <label style="margin-top:12px;">Eller skriv ditt svar:</label>
+    <input type="text" id="lt-answer" autocomplete="off" placeholder="Svar..." />
+    <button class="btn btn-green btn-block" id="lt-submit-btn" style="margin-top: 12px;" onclick="submitLucktext()">Kolla →</button>
+    <button class="btn btn-block hidden" id="lt-next-btn" style="margin-top: 12px;" onclick="nextLucktext()">Nästa →</button>
   </div>
 </div>
 
-<!-- MATH -->
-<div id="math-screen" class="hidden">
+<!-- TRUE/FALSE -->
+<div id="tf-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
-      <span class="badge" id="math-progress">1 / 6</span>
-      <span class="badge" style="background: var(--green-soft);" id="math-score">⭐ 0</span>
+      <span class="badge" id="tf-progress">1 / 10</span>
+      <span class="badge" style="background: var(--green-soft);" id="tf-score">⭐ 0</span>
       <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="math-bar"></div></div>
-    <div class="question-text" id="math-question"></div>
-    <div id="math-hint-box" class="hidden" style="background: var(--accent-soft); border: 2px dashed var(--accent); border-radius: 10px; padding: 12px; margin-bottom: 12px; font-weight: 600;"></div>
-    <label>Ditt svar:</label>
-    <input type="text" id="math-answer" autocomplete="off" placeholder="T.ex. 4,5 liter eller 2 kg 300 g" />
-    <div id="math-feedback" class="hidden"></div>
-    <div class="row" style="margin-top: 12px;">
-      <button class="btn btn-secondary" id="math-hint-btn" onclick="getMathHint()">💡 Hint (-2 XP)</button>
-      <button class="btn btn-blue" id="math-submit-btn" onclick="submitMath()">Svara →</button>
+    <div class="progress-bar"><div class="progress-fill" id="tf-bar"></div></div>
+    <div class="question-text" id="tf-question"></div>
+    <div class="tf-buttons">
+      <button class="tf-btn true" id="tf-true" onclick="answerTrueFalse(true)">✅ Stämmer</button>
+      <button class="tf-btn false" id="tf-false" onclick="answerTrueFalse(false)">❌ Stämmer inte</button>
     </div>
-    <button class="btn btn-block hidden" id="math-next-btn" style="margin-top: 12px;" onclick="nextMath()">Nästa →</button>
+    <div id="tf-feedback" class="hidden"></div>
+    <button class="btn btn-block hidden" id="tf-next-btn" style="margin-top: 12px;" onclick="nextTrueFalse()">Nästa →</button>
+  </div>
+</div>
+
+<!-- MATCH -->
+<div id="match-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="mt-progress">1 / 8</span>
+      <span class="badge" style="background: var(--green-soft);" id="mt-score">⭐ 0</span>
+      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="mt-bar"></div></div>
+    <p class="instruction">Vilket begrepp passar beskrivningen?</p>
+    <div class="question-text" id="mt-question"></div>
+    <div class="options-grid" id="mt-options"></div>
+    <div id="mt-feedback" class="hidden"></div>
+    <button class="btn btn-block hidden" id="mt-next-btn" style="margin-top: 12px;" onclick="nextMatch()">Nästa →</button>
   </div>
 </div>
 
@@ -432,12 +531,12 @@
     <div class="flashcard" id="flashcard" onclick="flipCard()">
       <div class="flashcard-inner">
         <div class="flashcard-front">
-          <div class="flashcard-label">Fråga</div>
+          <div class="flashcard-label">Begrepp</div>
           <div class="flashcard-text" id="fc-front"></div>
           <p class="small" style="margin-top: 16px;">👆 Tryck för att se svaret</p>
         </div>
         <div class="flashcard-back">
-          <div class="flashcard-label">Svar</div>
+          <div class="flashcard-label">Förklaring</div>
           <div class="flashcard-text" id="fc-back"></div>
         </div>
       </div>
@@ -453,27 +552,58 @@
 <div id="cheatsheet-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
-      <h2 style="flex:3;">📖 Fusklapp</h2>
+      <h2 style="flex:3;">📖 Fusklapp – Sverige</h2>
       <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
     </div>
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">⚖️ Vikt</h3>
+
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🌍 Sverige på kartan</h3>
     <p style="line-height:1.8;margin-bottom:14px;">
-      <strong>1 kg = 10 hg = 1 000 g</strong><br>
-      <strong>1 hg = 100 g</strong><br>
-      Tänk: kilo → hekto → gram, varje steg är ×10 eller ×100.
+      • Sverige ligger i världsdelen <strong>Europa</strong>.<br>
+      • Sverige ligger på det <strong>norra halvklotet</strong>.<br>
+      • <strong>Ekvatorn</strong> delar jorden i två halvklot.<br>
+      • <strong>Nordpolen</strong> = nordligaste punkten, <strong>Sydpolen</strong> = sydligaste.<br>
+      • <strong>Norden</strong>: Sverige, Norge, Finland, Danmark, Island.
     </p>
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">💧 Volym</h3>
+
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🏛️ Huvudstäder</h3>
     <p style="line-height:1.8;margin-bottom:14px;">
-      <strong>1 liter = 10 dl = 100 cl = 1 000 ml</strong><br>
-      <strong>1 dl = 10 cl = 100 ml</strong><br>
-      <strong>1 cl = 10 ml</strong>
+      Sverige → <strong>Stockholm</strong> &nbsp;·&nbsp;
+      Norge → <strong>Oslo</strong> &nbsp;·&nbsp;
+      Danmark → <strong>Köpenhamn</strong> &nbsp;·&nbsp;
+      Finland → <strong>Helsingfors</strong> &nbsp;·&nbsp;
+      Island → <strong>Reykjavik</strong>.
     </p>
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🧠 Knep</h3>
+
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🗺️ Tre landsdelar</h3>
+    <p style="line-height:1.8;margin-bottom:14px;">
+      Sverige delas i tre landsdelar – uppifrån och ner:<br>
+      1. <strong>Norrland</strong> (störst, glest befolkat)<br>
+      2. <strong>Svealand</strong> (mitten, Stockholm)<br>
+      3. <strong>Götaland</strong> (söder, Göteborg och Malmö)
+    </p>
+
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🧩 Indelningar att kunna</h3>
+    <p style="line-height:1.8;margin-bottom:14px;">
+      • <strong>Län</strong> – 21 st, regeringens "områden" (styrs av länsstyrelse).<br>
+      • <strong>Landskap</strong> – gammal indelning, mest kulturell idag.<br>
+      • <strong>Kommun</strong> – sköter skola, äldrevård, vatten, bibliotek.<br>
+      • <strong>Region</strong> – sköter sjukvård och kollektivtrafik.
+    </p>
+
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">👥 Befolkning</h3>
+    <p style="line-height:1.8;margin-bottom:14px;">
+      • Flest människor bor vid <strong>kusterna</strong> och i <strong>södra Sverige</strong>.<br>
+      • <strong>Glesbygd</strong> = få bor där &nbsp;·&nbsp; <strong>tätort</strong> = många bor där.<br>
+      • Tre största städer: <strong>Stockholm, Göteborg, Malmö</strong>.<br>
+      • inv/km² = invånare per kvadratkilometer (hur tätt det bor).
+    </p>
+
+    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🏛️ Hur Sverige styrs</h3>
     <p style="line-height:1.8;">
-      • "Hekto" betyder 100 — så hg är 100 g, hl vore 100 l<br>
-      • "Centi" betyder hundradel — 1 cl är 1/100 liter<br>
-      • "Milli" betyder tusendel — 1 ml är 1/1000 liter<br>
-      • Skriv om svåra tal till samma enhet först (allt i gram, eller allt i ml)
+      • <strong>Riksdagen</strong> – folkets valda representanter, stiftar lagar.<br>
+      • <strong>Regeringen</strong> – styr landet, bestämmer politiken.<br>
+      • <strong>Länsstyrelsen</strong> – regeringens företrädare i ett län.<br>
+      • <strong>Dialekt</strong> – sätt att tala ett språk i en del av landet.
     </p>
   </div>
 </div>
@@ -482,7 +612,7 @@
 <div id="assignment-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
-      <h2 style="flex:3;">📝 Aktuell uppgift</h2>
+      <h2 style="flex:3;">📋 Aktuell uppgift</h2>
       <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
     </div>
     <div id="assignment-view">
@@ -496,7 +626,7 @@
     </div>
     <div id="assignment-edit" class="hidden">
       <label for="assignment-title">Område / kapitel:</label>
-      <input type="text" id="assignment-title" placeholder="T.ex. Geometri – Kapitel 7" style="margin-bottom: 12px;" />
+      <input type="text" id="assignment-title" placeholder="T.ex. Vi bor i Sverige – SO" style="margin-bottom: 12px;" />
       <label for="assignment-content">Uppgiftstext (klistra in här):</label>
       <textarea id="assignment-content" placeholder="Klistra in läxan, instruktioner, formler eller text från läroboken..."></textarea>
       <div class="row" style="margin-top: 12px;">
@@ -547,239 +677,137 @@ const XP_GOAL = 300;
 let xpState = { total: 0, rewardsClaimed: 0 };
 
 const XP_REWARDS = {
-  unitCorrect: 5, unitWrong: 1,
-  mathCorrect: 15, mathWrong: 3, mathHint: -2,
-  flashcardSeen: 3
+  lucktextCorrect: 8, lucktextWrong: 2,
+  tfCorrect: 6, tfWrong: 1,
+  matchCorrect: 10, matchWrong: 2,
+  flashcardSeen: 4
 };
 
-let units = [];
-let unitsIdx = 0;
-let unitsScore = 0;
-let unitsAnswered = false;
-
-let math = [];
-let mathIdx = 0;
-let mathScore = 0;
-let mathAnswered = false;
-let mathHintUsed = false;
-
-let cards = [];
-let cardIdx = 0;
-let cardsSeen = new Set();
-
-// ==================== DATA ====================
-
-// Flashcards: enhetstabell + viktiga begrepp
+// ==================== DATA: BEGREPP (FLASHCARDS) ====================
 const FLASHCARDS = [
-  { front: "Hur många gram är 1 kg?", back: "1 000 g" },
-  { front: "Hur många gram är 1 hg?", back: "100 g" },
-  { front: "Hur många hg är 1 kg?", back: "10 hg" },
-  { front: "Hur många dl är 1 liter?", back: "10 dl" },
-  { front: "Hur många cl är 1 liter?", back: "100 cl" },
-  { front: "Hur många ml är 1 liter?", back: "1 000 ml" },
-  { front: "Hur många cl är 1 dl?", back: "10 cl" },
-  { front: "Hur många ml är 1 dl?", back: "100 ml" },
-  { front: "Hur många ml är 1 cl?", back: "10 ml" },
-  { front: "Vad betyder 'hekto'?", back: "100 (1 hg = 100 g)" },
-  { front: "Vad betyder 'centi'?", back: "hundradel (1 cl = 1/100 liter)" },
-  { front: "Vad betyder 'milli'?", back: "tusendel (1 ml = 1/1000 liter)" },
-  { front: "Hur skriver man 2,5 kg i gram?", back: "2 500 g" },
-  { front: "Hur skriver man 1,5 liter i deciliter?", back: "15 dl" },
-  { front: "Hur många hg är 500 g?", back: "5 hg" }
+  { front: "Nordpolen", back: "Den nordligaste punkten på jorden." },
+  { front: "Sydpolen", back: "Den sydligaste punkten på jorden." },
+  { front: "Ekvatorn", back: "En tänkt cirkel runt jordens mitt – delar jorden i två halvklot." },
+  { front: "Halvklot", back: "Hälften av ett klot. Sverige ligger på det norra halvklotet." },
+  { front: "Världsdel", back: "En stor avgränsad del av jordklotets landmassor. Sverige ligger i Europa." },
+  { front: "Norden", back: "Länderna Sverige, Norge, Finland, Danmark och Island." },
+  { front: "Huvudstad", back: "Den ort i ett land där de som styr finns. Sveriges huvudstad är Stockholm." },
+  { front: "Dialekt", back: "Sätt att tala ett språk på i en del av ett land." },
+  { front: "Län", back: "Geografiskt område som kontrolleras av en länsstyrelse. Sverige har 21 län." },
+  { front: "Länsstyrelse", back: "Regeringens företrädare i ett län." },
+  { front: "Riksdag", back: "Folkets valda representanter på riksnivå. Stiftar lagar." },
+  { front: "Regering", back: "Styrelsen för ett land. Bestämmer hur landet ska skötas." },
+  { front: "Landskap", back: "Gammal indelning som fanns innan Sverige blev ett land. Nästan som små länder. Idag mest kulturell betydelse." },
+  { front: "Kommun", back: "Sköter skolor, äldrevård, vatten och avlopp, idrottsplatser och bibliotek. Sverige har olika stora kommuner." },
+  { front: "Glesbygd", back: "Område där det bor få människor per kvadratkilometer." },
+  { front: "Tätort", back: "Område där det bor många människor nära varandra (t.ex. en stad)." },
+  { front: "Sveriges tre landsdelar", back: "Norrland (norr), Svealand (mitten), Götaland (söder)." },
+  { front: "Sveriges tre största städer", back: "Stockholm, Göteborg och Malmö." }
 ];
 
-// ==================== UNITS DRILL GENERATOR ====================
-function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+// ==================== DATA: LUCKTEXT ====================
+// Word bank from Uppgift 1, plus extra words distributed across more questions.
+const LUCKTEXT_BANK = ['Oslo', 'östra', 'Europa', 'Svealand', 'Afrika', 'Köpenhamn', 'Norrland', 'Stockholm', 'Götaland', 'norra', 'södra', 'Asien'];
+
+const LUCKTEXT_QUESTIONS = [
+  { parts: ['Sverige ligger på det ', '_', ' halvklotet.'], answer: 'norra' },
+  { parts: ['Jorden har sju världsdelar och Sverige ligger i världsdelen ', '_', '.'], answer: 'Europa' },
+  { parts: ['Sveriges nordligaste landsdel heter ', '_', '.'], answer: 'Norrland' },
+  { parts: ['Mitt i Sverige ligger landsdelen ', '_', '.'], answer: 'Svealand' },
+  { parts: ['Längst söderut i Sverige ligger ', '_', '.'], answer: 'Götaland' },
+  { parts: ['Huvudstaden i Sverige heter ', '_', '.'], answer: 'Stockholm' },
+  { parts: ['Norges huvudstad heter ', '_', '.'], answer: 'Oslo' },
+  { parts: ['Danmarks huvudstad heter ', '_', '.'], answer: 'Köpenhamn' },
+  { parts: ['Världsdelen söder om Europa heter ', '_', '.'], answer: 'Afrika' },
+  { parts: ['Den största världsdelen, öster om Europa, heter ', '_', '.'], answer: 'Asien' },
+  { parts: ['Sverige har en lång kust mot Östersjön på sin ', '_', ' sida.'], answer: 'östra' },
+  { parts: ['I ', '_', ' Sverige bor det fler människor än i norra Sverige.'], answer: 'södra' }
+];
+
+// ==================== DATA: SANT/FALSKT ====================
+const TF_QUESTIONS = [
+  { q: 'Vid kusterna bor det få människor.', ans: false, exp: 'Tvärtom – de flesta i Sverige bor nära kusterna.' },
+  { q: 'Glesbygd betyder att det bor få människor där.', ans: true, exp: 'Just det – få invånare per kvadratkilometer.' },
+  { q: 'Sveriges tre största städer är Stockholm, Göteborg och Malmö.', ans: true, exp: 'Korrekt!' },
+  { q: 'Nordpolen är den sydligaste punkten på jorden.', ans: false, exp: 'Nordpolen är nordligast. Sydpolen är sydligast.' },
+  { q: 'Sverige har 21 län.', ans: true, exp: 'Stämmer – 21 län som styrs av varsin länsstyrelse.' },
+  { q: 'Ekvatorn delar jorden i två halvklot.', ans: true, exp: 'Ekvatorn är en tänkt linje runt jordens mitt.' },
+  { q: 'Norden består av Sverige, Norge, Danmark och Tyskland.', ans: false, exp: 'Tyskland är inte med. Norden = Sverige, Norge, Finland, Danmark och Island.' },
+  { q: 'En kommun sköter skolor och bibliotek.', ans: true, exp: 'Ja – kommunen sköter skola, äldrevård, vatten, bibliotek m.m.' },
+  { q: 'Norrland är Sveriges sydligaste landsdel.', ans: false, exp: 'Norrland ligger i norr. Götaland är sydligast.' },
+  { q: 'Sverige ligger i världsdelen Europa.', ans: true, exp: 'Korrekt!' },
+  { q: 'Landskap är en gammal indelning av Sverige.', ans: true, exp: 'Just det – fanns innan Sverige blev ett land. Idag mest kulturell betydelse.' },
+  { q: 'Stockholm är huvudstad i Norge.', ans: false, exp: 'Stockholm är Sveriges huvudstad. Norges heter Oslo.' }
+];
+
+// ==================== DATA: MATCH (BEGREPP) ====================
+const MATCH_QUESTIONS = [
+  {
+    q: 'Sverige är indelat i 21 olika områden. De är viktiga för att regeringen ska kunna styra landet enklare.',
+    options: ['län', 'landskap', 'kommun'],
+    correct: 'län'
+  },
+  {
+    q: 'Gammal indelning som fanns innan Sverige blev ett land. Nästan som små länder. Idag mest kulturell betydelse.',
+    options: ['län', 'landskap', 'kommun'],
+    correct: 'landskap'
+  },
+  {
+    q: 'Sköter skolor, äldrevård, vatten och avlopp, idrottsplatser och bibliotek. Är olika stora.',
+    options: ['län', 'landskap', 'kommun'],
+    correct: 'kommun'
+  },
+  {
+    q: 'Folkets valda representanter på riksnivå – de stiftar lagar.',
+    options: ['Regeringen', 'Riksdagen', 'Länsstyrelsen'],
+    correct: 'Riksdagen'
+  },
+  {
+    q: 'Styrelsen för ett land. Bestämmer hur landet ska skötas.',
+    options: ['Regeringen', 'Riksdagen', 'Länsstyrelsen'],
+    correct: 'Regeringen'
+  },
+  {
+    q: 'Regeringens företrädare i ett län.',
+    options: ['Regeringen', 'Riksdagen', 'Länsstyrelsen'],
+    correct: 'Länsstyrelsen'
+  },
+  {
+    q: 'Den nordligaste punkten på jorden.',
+    options: ['Nordpolen', 'Sydpolen', 'Ekvatorn'],
+    correct: 'Nordpolen'
+  },
+  {
+    q: 'En tänkt cirkel runt jordens mitt som delar jorden i två halvklot.',
+    options: ['Nordpolen', 'Sydpolen', 'Ekvatorn'],
+    correct: 'Ekvatorn'
+  },
+  {
+    q: 'Sveriges nordligaste landsdel.',
+    options: ['Norrland', 'Svealand', 'Götaland'],
+    correct: 'Norrland'
+  },
+  {
+    q: 'Sveriges sydligaste landsdel.',
+    options: ['Norrland', 'Svealand', 'Götaland'],
+    correct: 'Götaland'
+  },
+  {
+    q: 'Den ort i ett land där de som styr finns.',
+    options: ['Huvudstad', 'Tätort', 'Glesbygd'],
+    correct: 'Huvudstad'
+  },
+  {
+    q: 'Sätt att tala ett språk på i en del av ett land.',
+    options: ['Dialekt', 'Världsdel', 'Halvklot'],
+    correct: 'Dialekt'
+  }
+];
+
+// ==================== UTILS ====================
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function generateUnits(n) {
-  const generators = [
-    // hg → g
-    () => { const x = rand(1, 12); return { q: `Skriv ${x} hg i gram.`, instr: 'Svara med talet i gram.', ans: x*100, exp: `1 hg = 100 g, så ${x} hg = ${x*100} g` }; },
-    // kg → g
-    () => { const x = rand(1, 8); return { q: `Skriv ${x} kg i gram.`, instr: 'Svara med talet i gram.', ans: x*1000, exp: `1 kg = 1 000 g, så ${x} kg = ${x*1000} g` }; },
-    // kg+g → g
-    () => { const k = rand(1, 5); const g = rand(50, 900); return { q: `Skriv ${k} kg ${g} g i gram.`, instr: 'Svara med talet i gram.', ans: k*1000+g, exp: `${k} kg = ${k*1000} g, plus ${g} g = ${k*1000+g} g` }; },
-    // kg → hg
-    () => { const x = rand(2, 12); return { q: `Skriv ${x} kg i hektogram.`, instr: 'Svara med talet i hg.', ans: x*10, exp: `1 kg = 10 hg, så ${x} kg = ${x*10} hg` }; },
-    // hg → kg+hg
-    () => { const x = rand(15, 95); const k = Math.floor(x/10); const h = x%10; return { q: `Skriv ${x} hg i kilogram och hektogram.`, instr: 'Skriv som "X kg Y hg".', ans: `${k} kg ${h} hg`, exp: `${x} hg = ${k}·10 hg + ${h} hg = ${k} kg ${h} hg` }; },
-    // g → hg+g
-    () => { const x = rand(105, 950); const h = Math.floor(x/100); const g = x%100; return { q: `Skriv ${x} g i hektogram och gram.`, instr: 'Skriv som "X hg Y g" (eller bara "X hg" om jämnt).', ans: g === 0 ? `${h} hg` : `${h} hg ${g} g`, accept: g === 0 ? [`${h} hg`, `${h} hg 0 g`] : [`${h} hg ${g} g`, `${h}hg${g}g`], exp: `${x} g = ${h}·100 + ${g} = ${h} hg ${g} g` }; },
-    // liter → dl
-    () => { const x = rand(2, 9); return { q: `Skriv ${x} liter i deciliter.`, instr: 'Svara med talet i dl.', ans: x*10, exp: `1 liter = 10 dl, så ${x} liter = ${x*10} dl` }; },
-    // l+dl → dl
-    () => { const l = rand(1, 4); const d = rand(1, 9); return { q: `Skriv ${l} liter ${d} dl i deciliter.`, instr: 'Svara med talet i dl.', ans: l*10+d, exp: `${l} liter = ${l*10} dl, plus ${d} dl = ${l*10+d} dl` }; },
-    // dl → cl
-    () => { const x = rand(2, 12); return { q: `Skriv ${x} dl i centiliter.`, instr: 'Svara med talet i cl.', ans: x*10, exp: `1 dl = 10 cl, så ${x} dl = ${x*10} cl` }; },
-    // dl+cl → cl
-    () => { const d = rand(1, 9); const c = rand(1, 9); return { q: `Skriv ${d} dl ${c} cl i centiliter.`, instr: 'Svara med talet i cl.', ans: d*10+c, exp: `${d} dl = ${d*10} cl, plus ${c} cl = ${d*10+c} cl` }; },
-    // cl → ml
-    () => { const x = rand(2, 12); return { q: `Skriv ${x} cl i milliliter.`, instr: 'Svara med talet i ml.', ans: x*10, exp: `1 cl = 10 ml, så ${x} cl = ${x*10} ml` }; },
-    // dl → ml
-    () => { const x = rand(2, 8); return { q: `Skriv ${x} dl i milliliter.`, instr: 'Svara med talet i ml.', ans: x*100, exp: `1 dl = 100 ml, så ${x} dl = ${x*100} ml` }; },
-    // ml → cl+ml
-    () => { const x = rand(15, 95); const c = Math.floor(x/10); const m = x%10; return { q: `Skriv ${x} ml i centiliter och milliliter.`, instr: 'Skriv som "X cl Y ml" (eller "X cl" om jämnt).', ans: m === 0 ? `${c} cl` : `${c} cl ${m} ml`, accept: m === 0 ? [`${c} cl`, `${c} cl 0 ml`] : [`${c} cl ${m} ml`, `${c}cl${m}ml`], exp: `${x} ml = ${c}·10 + ${m} = ${c} cl ${m} ml` }; },
-    // half liter
-    () => { const opts = [[0.5, '½', 5, 50], [1.5, '1½', 15, 150]]; const [_, txt, dl, cl] = pick(opts); return { q: `Skriv ${txt} liter i deciliter.`, instr: 'Svara med talet i dl.', ans: dl, exp: `${txt} liter = ${dl} dl` }; }
-  ];
-  const out = [];
-  for (let i = 0; i < n; i++) {
-    out.push(generators[i % generators.length]());
-  }
-  // shuffle
-  return out.sort(() => Math.random() - 0.5);
-}
-
-// ==================== MATH PROBLEMS ====================
-// Variants of textbook problems — randomized values
-function generateMath(n) {
-  const templates = [
-    () => {
-      const pris = pick([60, 72, 84, 96, 108, 120]);
-      const hg = pick([4, 5, 6, 8]);
-      const kg_pris = (pris / hg) * 10;
-      return {
-        q: `Saida betalar ${pris} kr för ${hg} hektogram ost. Vad kostar osten per kilogram?`,
-        ans: `${kg_pris} kr`,
-        accept: [`${kg_pris}`, `${kg_pris} kr`, `${kg_pris}kr`],
-        hint: `1 kg = 10 hg. Räkna först ut priset per hg.`,
-        sol: `${pris} kr / ${hg} hg = ${pris/hg} kr per hg. 1 kg = 10 hg, så ${pris/hg} × 10 = ${kg_pris} kr/kg.`
-      };
-    },
-    () => {
-      const syskon = pick([2, 4, 5]);
-      const kg = 1;
-      const g = 1000 / syskon;
-      return {
-        q: `${syskon === 2 ? 'Två' : syskon === 4 ? 'Fyra' : 'Fem'} syskon har plockat ${kg} kg blåbär som de delar lika. Hur mycket får var och en?`,
-        ans: `${g} g`,
-        accept: [`${g}`, `${g} g`, `${g}g`, syskon === 4 ? '2,5 hg' : '', syskon === 4 ? '250 gram' : ''].filter(Boolean),
-        hint: `${kg} kg = 1 000 g. Dela med antal syskon.`,
-        sol: `${kg} kg = 1 000 g. 1 000 / ${syskon} = ${g} g per syskon.`
-      };
-    },
-    () => {
-      const lit = pick([6, 7, 8, 10]);
-      const dl_per = pick([4, 5]);
-      const pris = pick([20, 25, 30]);
-      const kartonger = (lit * 10) / dl_per;
-      const totalt = kartonger * pris;
-      return {
-        q: `Enrico och Leo plockade ${lit} liter kantareller. De lade kantarellerna i kartonger med ${dl_per} dl i varje. Kartongerna sålde de för ${pris} kr styck. Hur mycket pengar fick de?`,
-        ans: `${totalt} kr`,
-        accept: [`${totalt}`, `${totalt} kr`],
-        hint: `${lit} liter = ${lit*10} dl. Hur många kartonger blir det?`,
-        sol: `${lit} liter = ${lit*10} dl. ${lit*10} / ${dl_per} = ${kartonger} kartonger. ${kartonger} × ${pris} kr = ${totalt} kr.`
-      };
-    },
-    () => {
-      const lit = pick([6, 8, 10]);
-      const flask = pick([6, 7]);
-      const totalDl = lit * 10;
-      const fulla = Math.floor(totalDl / flask);
-      const sista = totalDl - fulla * flask;
-      return {
-        q: `Maya kokar ${lit} liter saft. Saften häller hon i flaskor som rymmer ${flask} dl vardera. Den sista flaskan blir inte full. Hur mycket saft innehåller den?`,
-        ans: `${sista} dl`,
-        accept: [`${sista}`, `${sista} dl`, `${sista}dl`],
-        hint: `${lit} liter = ${totalDl} dl. Hur många hela flaskor blir det?`,
-        sol: `${lit} liter = ${totalDl} dl. ${totalDl} / ${flask} = ${fulla} hela flaskor med ${sista} dl över.`
-      };
-    },
-    () => {
-      const liter = pick([100, 150, 200, 300]);
-      const sek = liter * 2;
-      const min = Math.floor(sek / 60);
-      const restSek = sek % 60;
-      return {
-        q: `Olivia har en bassäng som rymmer ${liter} liter vatten. Pappa häller i vatten från en slang som ger ½ liter per sekund. Hur lång tid tar det att fylla bassängen? Svara i minuter och sekunder.`,
-        ans: `${min} min ${restSek} s`,
-        accept: [`${min} min ${restSek} s`, `${min}min${restSek}s`, `${min} minuter ${restSek} sekunder`, restSek === 0 ? `${min} min` : ''].filter(Boolean),
-        hint: `½ liter per sekund = 1 liter på 2 sekunder. Räkna ut totala antalet sekunder först.`,
-        sol: `${liter} liter × 2 s = ${sek} s = ${min} min ${restSek} s.`
-      };
-    },
-    () => {
-      const gadda = pick([1200, 1300, 1450, 1600]);
-      const abborre_hg = pick([3, 3.5, 4]);
-      const abborre_g = abborre_hg * 100;
-      const total = gadda + abborre_g;
-      const fattas = 2000 - total;
-      const fattas_g = Math.abs(fattas);
-      return {
-        q: `Farfar fångade en gädda som vägde ${gadda} g och en abborre som vägde ${abborre_hg === 3.5 ? 'tre och ett halvt' : abborre_hg} hektogram. Hur mycket fattas för att fiskarna sammanlagt ska väga 2 kg?`,
-        ans: `${fattas_g} g`,
-        accept: [`${fattas_g}`, `${fattas_g} g`, `${fattas_g/100} hg`],
-        hint: `2 kg = 2 000 g. Lägg ihop båda fiskarna först.`,
-        sol: `Abborre: ${abborre_hg} hg = ${abborre_g} g. Totalt: ${gadda} + ${abborre_g} = ${total} g. 2 000 - ${total} = ${fattas_g} g fattas.`
-      };
-    },
-    () => {
-      const sotis_kg = 2;
-      const sotis_g = pick([800, 850, 900]);
-      const mindre = pick([100, 150, 200]);
-      const misse_total = sotis_kg * 1000 + sotis_g - mindre;
-      const misse_kg = Math.floor(misse_total / 1000);
-      const misse_hg = Math.floor((misse_total % 1000) / 100);
-      const misse_rest = misse_total % 100;
-      return {
-        q: `Katten Sotis väger ${sotis_kg} kg ${sotis_g} g. Misse väger ${mindre} g mindre. Hur mycket väger Misse? Svara i kilogram och hektogram.`,
-        ans: misse_rest === 0 ? `${misse_kg} kg ${misse_hg} hg` : `${misse_total} g`,
-        accept: [`${misse_kg} kg ${misse_hg} hg`, `${misse_total} g`, `${misse_total}g`, `${misse_total/1000} kg`],
-        hint: `Räkna i gram först. 1 kg = 1 000 g, 1 hg = 100 g.`,
-        sol: `Sotis: ${sotis_kg*1000+sotis_g} g. Misse: ${sotis_kg*1000+sotis_g} - ${mindre} = ${misse_total} g = ${misse_kg} kg ${misse_hg} hg.`
-      };
-    },
-    () => {
-      const behov_kg = 1;
-      const behov_g = pick([300, 400, 500, 600]);
-      const har_kg = 1;
-      const fattas_g = behov_g;
-      const fattas_hg = fattas_g / 100;
-      return {
-        q: `Christina behöver ${behov_kg} kg ${behov_g} g socker för att göra klart hallonsylten. Men hon har bara ${har_kg} kg socker. Hur många hektogram socker saknar hon?`,
-        ans: `${fattas_hg} hg`,
-        accept: [`${fattas_hg}`, `${fattas_hg} hg`, `${fattas_hg}hg`, `${fattas_g} g`],
-        hint: `1 hg = 100 g. Hur mycket extra behöver hon?`,
-        sol: `Hon har ${har_kg} kg, behöver ${behov_kg} kg ${behov_g} g. Saknar ${behov_g} g = ${fattas_hg} hg.`
-      };
-    },
-    () => {
-      const fodelse_g = pick([3500, 3650, 3800]);
-      const okning_hg = pick([3, 4, 5]);
-      const okning_g = pick([0, 50, 100]);
-      const total = fodelse_g + okning_hg * 100 + okning_g;
-      return {
-        q: `När Ahmed föddes vägde han ${fodelse_g} g. Efter några veckor hade vikten ökat med ${okning_hg} hg ${okning_g} g. Vad vägde Ahmed då?`,
-        ans: `${total} g`,
-        accept: [`${total}`, `${total} g`, `${total/1000} kg`, `${Math.floor(total/1000)} kg ${total%1000} g`],
-        hint: `Räkna allt i gram. 1 hg = 100 g.`,
-        sol: `${okning_hg} hg ${okning_g} g = ${okning_hg*100+okning_g} g. ${fodelse_g} + ${okning_hg*100+okning_g} = ${total} g.`
-      };
-    },
-    () => {
-      const muggar = pick([4, 5, 6]);
-      const cl = pick([25, 30, 35]);
-      const total_cl = muggar * cl;
-      const dl = Math.floor(total_cl / 10);
-      const rest_cl = total_cl % 10;
-      return {
-        q: `I varje mugg är det ${cl} cl choklad. Hur många deciliter och centiliter choklad finns det i ${muggar} muggar sammanlagt?`,
-        ans: rest_cl === 0 ? `${dl} dl` : `${dl} dl ${rest_cl} cl`,
-        accept: [`${dl} dl ${rest_cl} cl`, `${total_cl} cl`, `${dl}dl${rest_cl}cl`, rest_cl === 0 ? `${dl} dl` : ''].filter(Boolean),
-        hint: `Multiplicera först. 1 dl = 10 cl.`,
-        sol: `${muggar} × ${cl} cl = ${total_cl} cl = ${dl} dl ${rest_cl} cl.`
-      };
-    }
-  ];
-  const out = [];
-  const shuffled = [...templates].sort(() => Math.random() - 0.5);
-  for (let i = 0; i < n; i++) {
-    out.push(shuffled[i % shuffled.length]());
-  }
-  return out;
-}
+function shuffled(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function normalize(s) { return String(s).toLowerCase().trim().replace(/\s+/g, ''); }
 
 // ==================== INIT / NAV ====================
 window.addEventListener('load', () => {
@@ -790,7 +818,7 @@ window.addEventListener('load', () => {
 });
 
 function showScreen(id) {
-  ['home-screen', 'units-screen', 'math-screen', 'flashcards-screen', 'cheatsheet-screen', 'assignment-screen', 'done-screen', 'reward-screen']
+  ['home-screen', 'lucktext-screen', 'tf-screen', 'match-screen', 'flashcards-screen', 'cheatsheet-screen', 'assignment-screen', 'done-screen', 'reward-screen']
     .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
@@ -837,156 +865,253 @@ function claimReward() {
 function showXpInfo() {
   alert(`⭐ Hur du tjänar XP:
 
-📏 Enhet rätt: +${XP_REWARDS.unitCorrect} XP
-📏 Enhet fel: +${XP_REWARDS.unitWrong} XP
-🔢 Matte rätt: +${XP_REWARDS.mathCorrect} XP
-🔢 Matte fel: +${XP_REWARDS.mathWrong} XP
-💡 Hint: ${XP_REWARDS.mathHint} XP
-🃏 Flashcard: +${XP_REWARDS.flashcardSeen} XP
+📝 Lucktext rätt: +${XP_REWARDS.lucktextCorrect} XP
+📝 Lucktext fel: +${XP_REWARDS.lucktextWrong} XP
+✅ Sant/Falskt rätt: +${XP_REWARDS.tfCorrect} XP
+✅ Sant/Falskt fel: +${XP_REWARDS.tfWrong} XP
+🧩 Matcha rätt: +${XP_REWARDS.matchCorrect} XP
+🧩 Matcha fel: +${XP_REWARDS.matchWrong} XP
+🃏 Begrepp (flashcard): +${XP_REWARDS.flashcardSeen} XP
 
 Vid 300 XP = 1 timme extra skärmtid 📱
 
 Belöningar tjänade: ${xpState.rewardsClaimed || 0}`);
 }
 
-// ==================== ANSWER MATCHING ====================
-function normalizeAns(s) {
-  return String(s).toLowerCase().trim()
-    .replace(/,/g, '.')
-    .replace(/\s+/g, '')
-    .replace(/(\d)(kg|hg|gram|g|liter|l|dl|cl|ml|kr|st|min|s|sek|sekunder|minuter)/g, '$1$2');
+// ==================== LUCKTEXT ====================
+let ltQuestions = [];
+let ltIdx = 0;
+let ltScore = 0;
+let ltAnswered = false;
+let ltCurrent = null;
+
+function startLucktext() {
+  ltQuestions = shuffled(LUCKTEXT_QUESTIONS);
+  ltIdx = 0;
+  ltScore = 0;
+  renderLucktext();
+  showScreen('lucktext-screen');
+  document.getElementById('done-again').onclick = startLucktext;
 }
-function isCorrect(user, correct, accept = []) {
-  const u = normalizeAns(user);
-  const cands = [correct, ...accept].filter(Boolean);
-  for (const c of cands) {
-    if (normalizeAns(c) === u) return true;
-  }
-  // numeric fallback when correct answer is purely numeric
-  const userNum = parseFloat(String(user).replace(',', '.').replace(/[^\d.]/g, ''));
-  if (!isNaN(userNum)) {
-    for (const c of cands) {
-      const cNum = parseFloat(String(c).replace(',', '.').replace(/[^\d.]/g, ''));
-      if (!isNaN(cNum) && Math.abs(userNum - cNum) < 0.0001) return true;
+
+function renderLucktext() {
+  ltAnswered = false;
+  ltCurrent = ltQuestions[ltIdx];
+  document.getElementById('lt-progress').textContent = `${ltIdx + 1} / ${ltQuestions.length}`;
+  document.getElementById('lt-score').textContent = `⭐ ${ltScore}`;
+  document.getElementById('lt-bar').style.width = ((ltIdx + 1) / ltQuestions.length * 100) + '%';
+
+  // Render word bank (shuffled, fresh each question)
+  const bank = document.getElementById('lt-bank');
+  bank.innerHTML = '';
+  shuffled(LUCKTEXT_BANK).forEach(word => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.onclick = () => {
+      if (ltAnswered) return;
+      document.getElementById('lt-answer').value = word;
+    };
+    bank.appendChild(chip);
+  });
+
+  // Render question with gap
+  const qEl = document.getElementById('lt-question');
+  qEl.innerHTML = '';
+  ltCurrent.parts.forEach(part => {
+    if (part === '_') {
+      const gap = document.createElement('span');
+      gap.className = 'gap empty';
+      gap.id = 'lt-gap';
+      gap.textContent = '_________';
+      qEl.appendChild(gap);
+    } else {
+      qEl.appendChild(document.createTextNode(part));
     }
-  }
-  return false;
+  });
+
+  document.getElementById('lt-answer').value = '';
+  document.getElementById('lt-answer').disabled = false;
+  document.getElementById('lt-feedback').classList.add('hidden');
+  document.getElementById('lt-submit-btn').classList.remove('hidden');
+  document.getElementById('lt-next-btn').classList.add('hidden');
+  document.getElementById('lt-answer').focus();
 }
 
-// ==================== UNITS DRILL ====================
-function startUnits() {
-  units = generateUnits(12);
-  unitsIdx = 0;
-  unitsScore = 0;
-  renderUnits();
-  showScreen('units-screen');
-  document.getElementById('done-again').onclick = startUnits;
-}
-function renderUnits() {
-  const u = units[unitsIdx];
-  unitsAnswered = false;
-  document.getElementById('units-question').textContent = u.q;
-  document.getElementById('units-instruction').textContent = u.instr || '';
-  document.getElementById('units-progress').textContent = `${unitsIdx + 1} / ${units.length}`;
-  document.getElementById('units-score').textContent = `⭐ ${unitsScore}`;
-  document.getElementById('units-bar').style.width = ((unitsIdx + 1) / units.length * 100) + '%';
-  document.getElementById('units-answer').value = '';
-  document.getElementById('units-answer').disabled = false;
-  document.getElementById('units-feedback').classList.add('hidden');
-  document.getElementById('units-submit-btn').classList.remove('hidden');
-  document.getElementById('units-next-btn').classList.add('hidden');
-  document.getElementById('units-answer').focus();
-}
-function submitUnits() {
-  if (unitsAnswered) return;
-  const val = document.getElementById('units-answer').value.trim();
-  if (!val) { document.getElementById('units-answer').focus(); return; }
-  unitsAnswered = true;
-  const u = units[unitsIdx];
-  const correct = isCorrect(val, u.ans, u.accept || []);
-  if (correct) { unitsScore++; awardXp(XP_REWARDS.unitCorrect, 'rätt!'); }
-  else { awardXp(XP_REWARDS.unitWrong, 'försök'); }
+function submitLucktext() {
+  if (ltAnswered) return;
+  const val = document.getElementById('lt-answer').value.trim();
+  if (!val) { document.getElementById('lt-answer').focus(); return; }
+  ltAnswered = true;
+  const correct = normalize(val) === normalize(ltCurrent.answer);
+  const gap = document.getElementById('lt-gap');
+  gap.textContent = val;
+  gap.classList.remove('empty');
+  gap.classList.add(correct ? 'correct' : 'wrong');
 
-  const fb = document.getElementById('units-feedback');
+  if (correct) { ltScore++; awardXp(XP_REWARDS.lucktextCorrect, 'rätt!'); }
+  else { awardXp(XP_REWARDS.lucktextWrong, 'försök'); }
+
+  const fb = document.getElementById('lt-feedback');
   fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-  fb.innerHTML = correct ? `✅ Rätt! ${u.exp || ''}` : `❌ Rätt svar: <strong>${u.ans}</strong><br>${u.exp || ''}`;
+  fb.innerHTML = correct
+    ? `✅ Rätt! Ordet är <strong>${ltCurrent.answer}</strong>.`
+    : `❌ Rätt svar: <strong>${ltCurrent.answer}</strong>`;
   fb.classList.remove('hidden');
-  document.getElementById('units-answer').disabled = true;
-  document.getElementById('units-submit-btn').classList.add('hidden');
-  document.getElementById('units-score').textContent = `⭐ ${unitsScore}`;
-  const nb = document.getElementById('units-next-btn');
+
+  document.getElementById('lt-answer').disabled = true;
+  document.getElementById('lt-score').textContent = `⭐ ${ltScore}`;
+  document.getElementById('lt-submit-btn').classList.add('hidden');
+  const nb = document.getElementById('lt-next-btn');
   nb.classList.remove('hidden');
-  nb.textContent = unitsIdx < units.length - 1 ? 'Nästa →' : 'Se resultat →';
-}
-function nextUnits() {
-  if (unitsIdx < units.length - 1) { unitsIdx++; renderUnits(); }
-  else { showDone(unitsScore, units.length, 'Enhetsdrill', startUnits); }
+  nb.textContent = ltIdx < ltQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
 }
 
-// ==================== MATH ====================
-function startMath() {
-  math = generateMath(6);
-  mathIdx = 0;
-  mathScore = 0;
-  renderMath();
-  showScreen('math-screen');
-  document.getElementById('done-again').onclick = startMath;
+function nextLucktext() {
+  if (ltIdx < ltQuestions.length - 1) { ltIdx++; renderLucktext(); }
+  else { showDone(ltScore, ltQuestions.length, 'Lucktext', startLucktext); }
 }
-function renderMath() {
-  const p = math[mathIdx];
-  mathAnswered = false;
-  mathHintUsed = false;
-  document.getElementById('math-question').textContent = p.q;
-  document.getElementById('math-progress').textContent = `${mathIdx + 1} / ${math.length}`;
-  document.getElementById('math-score').textContent = `⭐ ${mathScore}`;
-  document.getElementById('math-bar').style.width = ((mathIdx + 1) / math.length * 100) + '%';
-  document.getElementById('math-answer').value = '';
-  document.getElementById('math-answer').disabled = false;
-  document.getElementById('math-feedback').classList.add('hidden');
-  document.getElementById('math-hint-box').classList.add('hidden');
-  document.getElementById('math-hint-btn').classList.remove('hidden');
-  document.getElementById('math-submit-btn').classList.remove('hidden');
-  document.getElementById('math-next-btn').classList.add('hidden');
-  document.getElementById('math-answer').focus();
+
+// Allow Enter to submit
+document.addEventListener('DOMContentLoaded', () => {
+  const ltAns = document.getElementById('lt-answer');
+  if (ltAns) ltAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitLucktext(); });
+});
+
+// ==================== TRUE / FALSE ====================
+let tfQuestions = [];
+let tfIdx = 0;
+let tfScore = 0;
+let tfAnswered = false;
+
+function startTrueFalse() {
+  tfQuestions = shuffled(TF_QUESTIONS).slice(0, 10);
+  tfIdx = 0;
+  tfScore = 0;
+  renderTrueFalse();
+  showScreen('tf-screen');
+  document.getElementById('done-again').onclick = startTrueFalse;
 }
-function getMathHint() {
-  if (mathAnswered || mathHintUsed) return;
-  mathHintUsed = true;
-  const box = document.getElementById('math-hint-box');
-  box.textContent = '💡 ' + math[mathIdx].hint;
-  box.classList.remove('hidden');
-  awardXp(XP_REWARDS.mathHint, 'hint');
-  document.getElementById('math-hint-btn').classList.add('hidden');
+
+function renderTrueFalse() {
+  tfAnswered = false;
+  const q = tfQuestions[tfIdx];
+  document.getElementById('tf-question').textContent = q.q;
+  document.getElementById('tf-progress').textContent = `${tfIdx + 1} / ${tfQuestions.length}`;
+  document.getElementById('tf-score').textContent = `⭐ ${tfScore}`;
+  document.getElementById('tf-bar').style.width = ((tfIdx + 1) / tfQuestions.length * 100) + '%';
+  document.getElementById('tf-feedback').classList.add('hidden');
+  document.getElementById('tf-next-btn').classList.add('hidden');
+  document.getElementById('tf-true').disabled = false;
+  document.getElementById('tf-false').disabled = false;
 }
-function submitMath() {
-  if (mathAnswered) return;
-  const val = document.getElementById('math-answer').value.trim();
-  if (!val) { document.getElementById('math-answer').focus(); return; }
-  mathAnswered = true;
-  const p = math[mathIdx];
-  const correct = isCorrect(val, p.ans, p.accept || []);
-  if (correct) { mathScore++; awardXp(XP_REWARDS.mathCorrect, 'matte rätt!'); }
-  else { awardXp(XP_REWARDS.mathWrong, 'bra försök'); }
-  const fb = document.getElementById('math-feedback');
+
+function answerTrueFalse(userSaidTrue) {
+  if (tfAnswered) return;
+  tfAnswered = true;
+  const q = tfQuestions[tfIdx];
+  const correct = userSaidTrue === q.ans;
+  if (correct) { tfScore++; awardXp(XP_REWARDS.tfCorrect, 'rätt!'); }
+  else { awardXp(XP_REWARDS.tfWrong, 'försök'); }
+
+  document.getElementById('tf-true').disabled = true;
+  document.getElementById('tf-false').disabled = true;
+
+  const fb = document.getElementById('tf-feedback');
   fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-  fb.innerHTML = correct ? `✅ Rätt! ${p.sol || ''}` : `❌ Rätt svar: <strong>${p.ans}</strong><br><br>${p.sol || ''}`;
+  fb.innerHTML = correct
+    ? `✅ Rätt! ${q.exp}`
+    : `❌ Fel. Rätt svar: <strong>${q.ans ? 'Stämmer' : 'Stämmer inte'}</strong>.<br>${q.exp}`;
   fb.classList.remove('hidden');
-  document.getElementById('math-answer').disabled = true;
-  document.getElementById('math-submit-btn').classList.add('hidden');
-  document.getElementById('math-hint-btn').classList.add('hidden');
-  document.getElementById('math-score').textContent = `⭐ ${mathScore}`;
-  const nb = document.getElementById('math-next-btn');
+
+  document.getElementById('tf-score').textContent = `⭐ ${tfScore}`;
+  const nb = document.getElementById('tf-next-btn');
   nb.classList.remove('hidden');
-  nb.textContent = mathIdx < math.length - 1 ? 'Nästa →' : 'Se resultat →';
+  nb.textContent = tfIdx < tfQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
 }
-function nextMath() {
-  if (mathIdx < math.length - 1) { mathIdx++; renderMath(); }
-  else { showDone(mathScore, math.length, 'Mattetränare', startMath); }
+
+function nextTrueFalse() {
+  if (tfIdx < tfQuestions.length - 1) { tfIdx++; renderTrueFalse(); }
+  else { showDone(tfScore, tfQuestions.length, 'Sant/Falskt', startTrueFalse); }
+}
+
+// ==================== MATCH ====================
+let mtQuestions = [];
+let mtIdx = 0;
+let mtScore = 0;
+let mtAnswered = false;
+
+function startMatch() {
+  mtQuestions = shuffled(MATCH_QUESTIONS).slice(0, 8);
+  mtIdx = 0;
+  mtScore = 0;
+  renderMatch();
+  showScreen('match-screen');
+  document.getElementById('done-again').onclick = startMatch;
+}
+
+function renderMatch() {
+  mtAnswered = false;
+  const q = mtQuestions[mtIdx];
+  document.getElementById('mt-question').textContent = q.q;
+  document.getElementById('mt-progress').textContent = `${mtIdx + 1} / ${mtQuestions.length}`;
+  document.getElementById('mt-score').textContent = `⭐ ${mtScore}`;
+  document.getElementById('mt-bar').style.width = ((mtIdx + 1) / mtQuestions.length * 100) + '%';
+
+  const optsEl = document.getElementById('mt-options');
+  optsEl.innerHTML = '';
+  shuffled(q.options).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => answerMatch(opt, btn);
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById('mt-feedback').classList.add('hidden');
+  document.getElementById('mt-next-btn').classList.add('hidden');
+}
+
+function answerMatch(choice, btn) {
+  if (mtAnswered) return;
+  mtAnswered = true;
+  const q = mtQuestions[mtIdx];
+  const correct = choice === q.correct;
+
+  document.querySelectorAll('#mt-options .option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.correct) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+
+  if (correct) { mtScore++; awardXp(XP_REWARDS.matchCorrect, 'rätt!'); }
+  else { awardXp(XP_REWARDS.matchWrong, 'försök'); }
+
+  const fb = document.getElementById('mt-feedback');
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = correct
+    ? `✅ Rätt! Svaret är <strong>${q.correct}</strong>.`
+    : `❌ Rätt svar: <strong>${q.correct}</strong>`;
+  fb.classList.remove('hidden');
+
+  document.getElementById('mt-score').textContent = `⭐ ${mtScore}`;
+  const nb = document.getElementById('mt-next-btn');
+  nb.classList.remove('hidden');
+  nb.textContent = mtIdx < mtQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
+}
+
+function nextMatch() {
+  if (mtIdx < mtQuestions.length - 1) { mtIdx++; renderMatch(); }
+  else { showDone(mtScore, mtQuestions.length, 'Matcha', startMatch); }
 }
 
 // ==================== FLASHCARDS ====================
+let cards = [];
+let cardIdx = 0;
+let cardsSeen = new Set();
+
 function startFlashcards() {
-  cards = [...FLASHCARDS].sort(() => Math.random() - 0.5);
+  cards = shuffled(FLASHCARDS);
   cardIdx = 0;
   cardsSeen = new Set();
   renderCard();
@@ -1022,11 +1147,53 @@ function showCheatsheet() { showScreen('cheatsheet-screen'); }
 
 // ==================== ASSIGNMENT ====================
 const ASSIGNMENT_KEY = 'stellan_assignment';
-let assignment = { title: '', content: '', updatedAt: 0 };
+const DEFAULT_ASSIGNMENT = {
+  title: 'Vi bor i Sverige – SO',
+  content: `📖 Ordkollen – Vi bor i Sverige
+
+Sverige på kartan (s. 48–49)
+• Nordpolen – den nordligaste punkten på jorden
+• Sydpolen – den sydligaste punkten på jorden
+• ekvatorn – tänkt cirkel runt jordens mitt
+• halvklot – hälften av ett klot
+• världsdel – stor avgränsad del av jordklotets landmassor
+• Norden – länderna Sverige, Norge, Finland, Danmark, Island
+• huvudstad – den ort i ett land där de som styr finns
+
+Olika sätt att dela in Sverige (s. 50–51)
+• dialekt – sätt att tala ett språk på i en del av ett land
+• län – geografiskt område som kontrolleras av en länsstyrelse
+• länsstyrelse – regeringens företrädare i ett län
+• riksdag – folkets valda representanter på riksnivå
+• regering – styrelsen för ett land
+
+✍️ Dugga – Vi bor i Sverige
+
+Uppgift 1 – Lucktext
+Ord: Oslo, östra, Europa, Svealand, Afrika, Köpenhamn, Norrland, Stockholm, Götaland, norra, södra, Asien
+
+Uppgift 2 – Matcha begrepp (landskap / län / kommun)
+
+Uppgift 3 – Stämmer / Stämmer inte
+
+🧠 Tankekarta inför SO-provet
+• Sveriges befolkning – var bor flest? glesbygd vs tätort, inv/km²
+• Begrepp – ordlistan
+• Placera Sverige och områden på kartan (TB s. 48–49, 50, 52)
+• Indela Sverige: kommun, län, region, landskap (TB s. 50–51)`,
+  updatedAt: 1747008000000 // 2025-05-12 baseline so it shows "Sparad..."
+};
+let assignment = { ...DEFAULT_ASSIGNMENT };
 
 function loadAssignment() {
   const saved = localStorage.getItem(ASSIGNMENT_KEY);
-  if (saved) { try { assignment = JSON.parse(saved); } catch {} }
+  if (saved) {
+    try { assignment = JSON.parse(saved); } catch {}
+  } else {
+    // First time: seed with the current homework and persist
+    assignment = { ...DEFAULT_ASSIGNMENT, updatedAt: Date.now() };
+    saveAssignmentState();
+  }
 }
 function saveAssignmentState() {
   localStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(assignment));
@@ -1036,7 +1203,7 @@ function applyAssignmentToHome() {
   if (assignment.title) {
     subtitle.textContent = '📚 ' + assignment.title;
   } else {
-    subtitle.textContent = '📚 Volym och vikt – Kapitel 6';
+    subtitle.textContent = '🇸🇪 Vi bor i Sverige – SO';
   }
   const desc = document.getElementById('assignment-card-desc');
   if (desc) {
@@ -1108,7 +1275,7 @@ function showDone(score, total, label, againFn) {
   document.getElementById('done-score').textContent = `${score}/${total}`;
   const pct = score / total;
   let msg;
-  if (pct === 1) msg = '🏆 ALLA RÄTT! Mattegeni!';
+  if (pct === 1) msg = '🏆 ALLA RÄTT! SO-stjärna!';
   else if (pct >= 0.8) msg = '🌟 Sjukt bra!';
   else if (pct >= 0.6) msg = '💪 Bra! Fortsätt så.';
   else msg = '📚 Öva mer, du fixar det!';
