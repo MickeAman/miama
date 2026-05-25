@@ -293,9 +293,7 @@
   .assignment-empty { color: var(--ink-soft); font-style: italic; }
   .assignment-meta { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 12px; }
 
-  /* BOOK REPORT */
-  .stars { font-size: 2rem; line-height: 1; user-select: none; }
-  .stars span { cursor: pointer; color: var(--yellow); padding: 0 2px; }
+  /* READING LOG */
   .log-entry {
     background: var(--bg);
     border: 2px solid var(--ink);
@@ -337,9 +335,9 @@
         <div class="desc">Engelska ↔ svenska</div>
       </div>
       <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="showBokrapport()">
-        <span class="emoji">📕</span>
-        <div class="name">Bokrapport</div>
-        <div class="desc">Läs &amp; skriv om boken</div>
+        <span class="emoji">📖</span>
+        <div class="name">Läslogg</div>
+        <div class="desc">Logga din lästid</div>
       </div>
       <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6; grid-column: 1 / -1;" onclick="showAssignment()">
         <span class="emoji">📋</span>
@@ -370,45 +368,23 @@
   </div>
 </div>
 
-<!-- BOOK REPORT -->
+<!-- READING LOG -->
 <div id="bokrapport-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
-      <h2 style="flex:3;">📕 Bokrapport</h2>
+      <h2 style="flex:3;">📖 Läslogg</h2>
       <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
     </div>
 
-    <h3 class="section-title">📖 Läslogg</h3>
     <p class="small" style="margin-bottom:10px;">Skriv hur många minuter du läste och tryck på knappen. Du får ⭐ varje gång!</p>
     <div class="row" style="margin-bottom:10px;">
       <input type="text" id="br-minutes" inputmode="numeric" autocomplete="off" placeholder="Minuter, t.ex. 20" style="flex:2;" />
       <button class="btn btn-green" style="flex:1;" onclick="logReading()">➕ Logga</button>
     </div>
     <p style="font-weight:800;margin-bottom:8px;">Totalt läst: <span id="br-total">0</span> min</p>
-    <div id="br-log" style="margin-bottom:24px;"></div>
+    <div id="br-log"></div>
 
-    <h3 class="section-title">✍️ Min bokrapport</h3>
-    <label for="br-title">Bokens titel:</label>
-    <input type="text" id="br-title" placeholder="T.ex. Bröderna Lejonhjärta" style="margin-bottom:12px;" />
-    <label for="br-author">Författare:</label>
-    <input type="text" id="br-author" placeholder="T.ex. Astrid Lindgren" style="margin-bottom:12px;" />
-    <label for="br-pages">Antal sidor:</label>
-    <input type="text" id="br-pages" inputmode="numeric" placeholder="T.ex. 228" style="margin-bottom:12px;" />
-
-    <label for="br-about">Vad handlar boken om?</label>
-    <textarea id="br-about" placeholder="Skriv en kort sammanfattning..."></textarea>
-    <label for="br-favorite" style="margin-top:12px;">Min favoritdel:</label>
-    <textarea id="br-favorite" placeholder="Vad var bäst eller mest spännande?"></textarea>
-    <label for="br-opinion" style="margin-top:12px;">Vad tyckte jag om boken?</label>
-    <textarea id="br-opinion" placeholder="Gillade du den? Varför / varför inte?"></textarea>
-
-    <label style="margin-top:12px;">Mitt betyg:</label>
-    <div class="stars" id="br-stars">
-      <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span><span data-v="4">☆</span><span data-v="5">☆</span>
-    </div>
-
-    <button class="btn btn-blue btn-block" style="margin-top:16px;" onclick="saveBokrapport()">💾 Spara bokrapport</button>
-    <p id="br-saved-msg" class="hidden" style="text-align:center;margin-top:10px;color:var(--green);font-weight:800;">✅ Sparat!</p>
+    <p class="small" style="margin-top:18px;">📝 Själva bokrapporten skriver du för hand på papper.</p>
   </div>
 </div>
 
@@ -520,7 +496,6 @@ window.addEventListener('load', () => {
   loadAssignment();
   applyAssignmentToHome();
   loadBook();
-  wireBookStars();
   const glAns = document.getElementById('gl-answer');
   if (glAns) glAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitGlosor(); });
   const brMin = document.getElementById('br-minutes');
@@ -650,59 +625,34 @@ function nextGlosor() {
   else { showDone(glScore, glQuestions.length, 'Glosor v.22', startGlosor); }
 }
 
-// ==================== BOOK REPORT ====================
-const BOOK_KEY = 'stellan_bokrapport';
-let book = { title: '', author: '', pages: '', about: '', favorite: '', opinion: '', rating: 0, log: [] };
+// ==================== READING LOG ====================
+const READING_KEY = 'stellan_laslogg';
+let readingLog = [];
 
 function loadBook() {
-  const saved = localStorage.getItem(BOOK_KEY);
-  if (saved) { try { book = Object.assign(book, JSON.parse(saved)); } catch {} }
+  const saved = localStorage.getItem(READING_KEY);
+  if (saved) { try { readingLog = JSON.parse(saved); } catch {} }
 }
-function saveBookState() { localStorage.setItem(BOOK_KEY, JSON.stringify(book)); }
+function saveReadingState() { localStorage.setItem(READING_KEY, JSON.stringify(readingLog)); }
 
 function showBokrapport() {
-  renderBokrapport();
+  renderLog();
   showScreen('bokrapport-screen');
 }
-function renderBokrapport() {
-  document.getElementById('br-title').value = book.title || '';
-  document.getElementById('br-author').value = book.author || '';
-  document.getElementById('br-pages').value = book.pages || '';
-  document.getElementById('br-about').value = book.about || '';
-  document.getElementById('br-favorite').value = book.favorite || '';
-  document.getElementById('br-opinion').value = book.opinion || '';
-  document.getElementById('br-saved-msg').classList.add('hidden');
-  renderStars();
-  renderLog();
-}
-function renderStars() {
-  document.querySelectorAll('#br-stars span').forEach(s => {
-    s.textContent = (Number(s.dataset.v) <= book.rating) ? '★' : '☆';
-  });
-}
-function wireBookStars() {
-  document.querySelectorAll('#br-stars span').forEach(s => {
-    s.addEventListener('click', () => {
-      const v = Number(s.dataset.v);
-      book.rating = (book.rating === v) ? 0 : v; // tap same star again to clear
-      renderStars();
-    });
-  });
-}
 function renderLog() {
-  const total = (book.log || []).reduce((sum, e) => sum + (e.minutes || 0), 0);
+  const total = readingLog.reduce((sum, e) => sum + (e.minutes || 0), 0);
   document.getElementById('br-total').textContent = total;
   const el = document.getElementById('br-log');
   el.innerHTML = '';
-  if (!book.log || book.log.length === 0) {
+  if (readingLog.length === 0) {
     const p = document.createElement('p');
     p.className = 'small log-empty';
     p.textContent = 'Ingen läsning loggad än. Logga din första läsning!';
     el.appendChild(p);
     return;
   }
-  [...book.log].reverse().forEach((e, i) => {
-    const realIdx = book.log.length - 1 - i;
+  [...readingLog].reverse().forEach((e, i) => {
+    const realIdx = readingLog.length - 1 - i;
     const row = document.createElement('div');
     row.className = 'log-entry';
     const label = document.createElement('span');
@@ -721,29 +671,16 @@ function logReading() {
   const input = document.getElementById('br-minutes');
   const v = parseInt(input.value, 10);
   if (!v || v <= 0) { input.focus(); return; }
-  if (!book.log) book.log = [];
-  book.log.push({ date: Date.now(), minutes: v });
-  saveBookState();
+  readingLog.push({ date: Date.now(), minutes: v });
+  saveReadingState();
   input.value = '';
   renderLog();
   awardXp(XP_REWARDS.readingLog, 'läsning!');
 }
 function removeLog(idx) {
-  book.log.splice(idx, 1);
-  saveBookState();
+  readingLog.splice(idx, 1);
+  saveReadingState();
   renderLog();
-}
-function saveBokrapport() {
-  book.title = document.getElementById('br-title').value.trim();
-  book.author = document.getElementById('br-author').value.trim();
-  book.pages = document.getElementById('br-pages').value.trim();
-  book.about = document.getElementById('br-about').value.trim();
-  book.favorite = document.getElementById('br-favorite').value.trim();
-  book.opinion = document.getElementById('br-opinion').value.trim();
-  saveBookState();
-  const msg = document.getElementById('br-saved-msg');
-  msg.classList.remove('hidden');
-  setTimeout(() => msg.classList.add('hidden'), 2500);
 }
 
 // ==================== ASSIGNMENT ====================
@@ -762,12 +699,14 @@ Serious – Allvarlig
 Nothing – Ingenting
 Great idea – Bra idé
 
-📕 Bokrapport
-Läs i din bok och fyll i bokrapporten:
+📕 Bokrapport (skrivs för hand på papper)
+Läs i din bok och skriv bokrapporten på papper:
 • Titel och författare
 • Vad handlar boken om?
 • Din favoritdel
-• Vad du tyckte om boken + betyg`,
+• Vad du tyckte om boken + betyg
+
+📖 Logga din lästid i appen under "Läslogg".`,
   updatedAt: 0
 };
 let assignment = { ...DEFAULT_ASSIGNMENT };
