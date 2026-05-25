@@ -427,6 +427,11 @@
   <div class="card">
     <h2>🎯 Vad vill du öva på?</h2>
     <div class="mode-grid">
+      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft); grid-column: 1 / -1;" onclick="startGlosor()">
+        <span class="emoji">🔤</span>
+        <div class="name">Glosor v.22</div>
+        <div class="desc">Engelska ↔ svenska</div>
+      </div>
       <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="startFlashcards()">
         <span class="emoji">🃏</span>
         <div class="name">Begrepp</div>
@@ -461,6 +466,24 @@
   </div>
 
   <p class="small" style="text-align:center;">💡 Tjäna 300 XP = 1 timme extra skärmtid</p>
+</div>
+
+<!-- GLOSOR -->
+<div id="glosor-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="gl-progress">1 / 10</span>
+      <span class="badge" style="background: var(--green-soft);" id="gl-score">⭐ 0</span>
+      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="gl-bar"></div></div>
+    <p class="instruction" id="gl-direction">Översätt till svenska:</p>
+    <div class="question-text" id="gl-question"></div>
+    <input type="text" id="gl-answer" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Skriv översättningen..." />
+    <div id="gl-feedback" class="hidden"></div>
+    <button class="btn btn-green btn-block" id="gl-submit-btn" style="margin-top: 12px;" onclick="submitGlosor()">Svara →</button>
+    <button class="btn btn-block hidden" id="gl-next-btn" style="margin-top: 12px;" onclick="nextGlosor()">Nästa →</button>
+  </div>
 </div>
 
 <!-- LUCKTEXT -->
@@ -677,6 +700,7 @@ const XP_GOAL = 300;
 let xpState = { total: 0, rewardsClaimed: 0 };
 
 const XP_REWARDS = {
+  glosorCorrect: 8, glosorWrong: 2,
   lucktextCorrect: 8, lucktextWrong: 2,
   tfCorrect: 6, tfWrong: 1,
   matchCorrect: 10, matchWrong: 2,
@@ -804,10 +828,30 @@ const MATCH_QUESTIONS = [
   }
 ];
 
+// ==================== DATA: GLOSOR (ENGELSKA v.22) ====================
+const GLOSOR = [
+  { en: 'Head', sv: 'Huvud' },
+  { en: 'Practical', sv: 'Praktisk' },
+  { en: 'Look', sv: 'Utseende' },
+  { en: 'Fringe', sv: 'Lugg' },
+  { en: 'Ponytail', sv: 'Hästsvans' },
+  { en: 'Contact lenses', sv: 'Kontaktlinser' },
+  { en: 'Beard', sv: 'Skägg' },
+  { en: 'Serious', sv: 'Allvarlig' },
+  { en: 'Nothing', sv: 'Ingenting' },
+  { en: 'Great idea', sv: 'Bra idé' }
+];
+
 // ==================== UTILS ====================
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function shuffled(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 function normalize(s) { return String(s).toLowerCase().trim().replace(/\s+/g, ''); }
+// Lenient match for glosor: ignore case/space/punctuation and fold accents (idé = ide).
+function foldGlosor(s) {
+  return String(s).toLowerCase().trim()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
 
 // ==================== INIT / NAV ====================
 window.addEventListener('load', () => {
@@ -818,7 +862,7 @@ window.addEventListener('load', () => {
 });
 
 function showScreen(id) {
-  ['home-screen', 'lucktext-screen', 'tf-screen', 'match-screen', 'flashcards-screen', 'cheatsheet-screen', 'assignment-screen', 'done-screen', 'reward-screen']
+  ['home-screen', 'glosor-screen', 'lucktext-screen', 'tf-screen', 'match-screen', 'flashcards-screen', 'cheatsheet-screen', 'assignment-screen', 'done-screen', 'reward-screen']
     .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
@@ -865,6 +909,8 @@ function claimReward() {
 function showXpInfo() {
   alert(`⭐ Hur du tjänar XP:
 
+🔤 Glosa rätt: +${XP_REWARDS.glosorCorrect} XP
+🔤 Glosa fel: +${XP_REWARDS.glosorWrong} XP
 📝 Lucktext rätt: +${XP_REWARDS.lucktextCorrect} XP
 📝 Lucktext fel: +${XP_REWARDS.lucktextWrong} XP
 ✅ Sant/Falskt rätt: +${XP_REWARDS.tfCorrect} XP
@@ -876,6 +922,74 @@ function showXpInfo() {
 Vid 300 XP = 1 timme extra skärmtid 📱
 
 Belöningar tjänade: ${xpState.rewardsClaimed || 0}`);
+}
+
+// ==================== GLOSOR ====================
+let glQuestions = [];
+let glIdx = 0;
+let glScore = 0;
+let glAnswered = false;
+
+function startGlosor() {
+  // Each word asked once, random direction (EN->SV or SV->EN).
+  glQuestions = shuffled(GLOSOR).map(w => {
+    const toSwedish = Math.random() < 0.5;
+    return toSwedish
+      ? { prompt: w.en, answer: w.sv, dir: 'Översätt till svenska:' }
+      : { prompt: w.sv, answer: w.en, dir: 'Översätt till engelska:' };
+  });
+  glIdx = 0;
+  glScore = 0;
+  renderGlosor();
+  showScreen('glosor-screen');
+  document.getElementById('done-again').onclick = startGlosor;
+}
+
+function renderGlosor() {
+  glAnswered = false;
+  const q = glQuestions[glIdx];
+  document.getElementById('gl-direction').textContent = q.dir;
+  document.getElementById('gl-question').textContent = q.prompt;
+  document.getElementById('gl-progress').textContent = `${glIdx + 1} / ${glQuestions.length}`;
+  document.getElementById('gl-score').textContent = `⭐ ${glScore}`;
+  document.getElementById('gl-bar').style.width = ((glIdx + 1) / glQuestions.length * 100) + '%';
+  const ans = document.getElementById('gl-answer');
+  ans.value = '';
+  ans.disabled = false;
+  document.getElementById('gl-feedback').classList.add('hidden');
+  document.getElementById('gl-submit-btn').classList.remove('hidden');
+  document.getElementById('gl-next-btn').classList.add('hidden');
+  ans.focus();
+}
+
+function submitGlosor() {
+  if (glAnswered) return;
+  const val = document.getElementById('gl-answer').value.trim();
+  if (!val) { document.getElementById('gl-answer').focus(); return; }
+  glAnswered = true;
+  const q = glQuestions[glIdx];
+  const correct = foldGlosor(val) === foldGlosor(q.answer);
+  if (correct) { glScore++; awardXp(XP_REWARDS.glosorCorrect, 'rätt!'); }
+  else { awardXp(XP_REWARDS.glosorWrong, 'försök'); }
+
+  const fb = document.getElementById('gl-feedback');
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = correct
+    ? `✅ Rätt! <strong>${q.prompt}</strong> = <strong>${q.answer}</strong>`
+    : `❌ Rätt svar: <strong>${q.answer}</strong>`;
+  fb.classList.remove('hidden');
+
+  document.getElementById('gl-answer').disabled = true;
+  document.getElementById('gl-score').textContent = `⭐ ${glScore}`;
+  document.getElementById('gl-submit-btn').classList.add('hidden');
+  const nb = document.getElementById('gl-next-btn');
+  nb.classList.remove('hidden');
+  nb.textContent = glIdx < glQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
+}
+
+function nextGlosor() {
+  if (glIdx < glQuestions.length - 1) { glIdx++; renderGlosor(); }
+  else { showDone(glScore, glQuestions.length, 'Glosor v.22', startGlosor); }
 }
 
 // ==================== LUCKTEXT ====================
@@ -976,6 +1090,8 @@ function nextLucktext() {
 document.addEventListener('DOMContentLoaded', () => {
   const ltAns = document.getElementById('lt-answer');
   if (ltAns) ltAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitLucktext(); });
+  const glAns = document.getElementById('gl-answer');
+  if (glAns) glAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitGlosor(); });
 });
 
 // ==================== TRUE / FALSE ====================
