@@ -63,6 +63,13 @@
     font-size: 1.5rem;
     margin-bottom: 14px;
   }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 4px 0 8px;
+    font-size: 1.2rem;
+  }
 
   .btn {
     font-family: 'Nunito', sans-serif;
@@ -134,7 +141,7 @@
     transition: width 0.3s;
   }
 
-  .question-text { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 18px; line-height: 1.5; }
+  .question-text { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
   .instruction { color: var(--ink-soft); margin-bottom: 12px; }
 
   .feedback {
@@ -147,47 +154,6 @@
   }
   .feedback.correct { background: var(--green-soft); }
   .feedback.wrong { background: var(--red-soft); }
-
-  .flashcard {
-    perspective: 1000px;
-    height: 280px;
-    margin-bottom: 16px;
-    cursor: pointer;
-  }
-  .flashcard-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transition: transform 0.5s;
-  }
-  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
-  .flashcard-front, .flashcard-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border: 3px solid var(--ink);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    text-align: center;
-    box-shadow: var(--shadow);
-  }
-  .flashcard-front { background: var(--blue-soft); }
-  .flashcard-back { background: var(--green-soft); transform: rotateY(180deg); }
-  .flashcard-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 800;
-    color: var(--ink-soft);
-    margin-bottom: 12px;
-  }
-  .flashcard-text { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
 
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .row > * { flex: 1; }
@@ -308,7 +274,7 @@
     border-radius: 10px;
     background: white;
     resize: vertical;
-    min-height: 180px;
+    min-height: 100px;
     line-height: 1.5;
   }
   textarea:focus { outline: none; border-color: var(--accent); }
@@ -327,83 +293,21 @@
   .assignment-empty { color: var(--ink-soft); font-style: italic; }
   .assignment-meta { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 12px; }
 
-  /* WORD BANK + GAP */
-  .word-bank {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding: 12px;
-    background: var(--accent-soft);
-    border: 2px dashed var(--accent);
-    border-radius: 10px;
-  }
-  .word-chip {
-    background: white;
+  /* BOOK REPORT */
+  .stars { font-size: 2rem; line-height: 1; user-select: none; }
+  .stars span { cursor: pointer; color: var(--yellow); padding: 0 2px; }
+  .log-entry {
+    background: var(--bg);
     border: 2px solid var(--ink);
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
     font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.08s;
-    box-shadow: 2px 2px 0 var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .word-chip:hover { transform: translate(-1px, -1px); }
-  .word-chip:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
-  .word-chip.used { opacity: 0.35; cursor: default; }
-  .gap {
-    display: inline-block;
-    min-width: 110px;
-    border-bottom: 3px solid var(--ink);
-    padding: 2px 8px;
-    margin: 0 2px;
-    font-weight: 800;
-    color: var(--accent);
-    cursor: pointer;
-    line-height: 1.6;
-  }
-  .gap.empty { color: var(--ink-soft); font-weight: 500; font-style: italic; }
-  .gap.correct { background: var(--green-soft); border-bottom-color: var(--green); color: var(--ink); }
-  .gap.wrong { background: var(--red-soft); border-bottom-color: var(--red); color: var(--ink); }
-  .gap.active { background: var(--yellow); }
-
-  .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .option-btn {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    background: var(--bg-card);
-    color: var(--ink);
-    border: 3px solid var(--ink);
-    border-radius: 12px;
-    padding: 14px 18px;
-    cursor: pointer;
-    text-align: left;
-    box-shadow: var(--shadow);
-    transition: transform 0.08s;
-  }
-  .option-btn:hover { transform: translate(-1px, -1px); }
-  .option-btn.correct { background: var(--green-soft); }
-  .option-btn.wrong { background: var(--red-soft); }
-  .option-btn:disabled { cursor: default; }
-
-  .tf-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .tf-btn {
-    font-family: 'Fraunces', serif;
-    font-weight: 800;
-    font-size: 1.3rem;
-    border: 3px solid var(--ink);
-    border-radius: 14px;
-    padding: 22px 12px;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: transform 0.08s;
-  }
-  .tf-btn:hover { transform: translate(-2px, -2px); }
-  .tf-btn.true { background: var(--green-soft); color: var(--ink); }
-  .tf-btn.false { background: var(--red-soft); color: var(--ink); }
-  .tf-btn:disabled { cursor: default; opacity: 0.6; }
+  .log-empty { color: var(--ink-soft); font-style: italic; }
 </style>
 </head>
 <body>
@@ -411,7 +315,7 @@
 
 <header>
   <h1>Stellans <span class="accent">Pluggkompis</span></h1>
-  <p class="subtitle">🇸🇪 Vi bor i Sverige – SO</p>
+  <p class="subtitle">📚 Glosor &amp; bokrapport</p>
 </header>
 
 <!-- HOME -->
@@ -425,39 +329,19 @@
   </div>
 
   <div class="card">
-    <h2>🎯 Vad vill du öva på?</h2>
+    <h2>🎯 Vad vill du göra?</h2>
     <div class="mode-grid">
-      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft); grid-column: 1 / -1;" onclick="startGlosor()">
+      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="startGlosor()">
         <span class="emoji">🔤</span>
         <div class="name">Glosor v.22</div>
         <div class="desc">Engelska ↔ svenska</div>
       </div>
-      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="startFlashcards()">
-        <span class="emoji">🃏</span>
-        <div class="name">Begrepp</div>
-        <div class="desc">Ordlistan – flashcards</div>
+      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="showBokrapport()">
+        <span class="emoji">📕</span>
+        <div class="name">Bokrapport</div>
+        <div class="desc">Läs &amp; skriv om boken</div>
       </div>
-      <div class="mode-card" style="border-color: var(--green); background: var(--green-soft);" onclick="startLucktext()">
-        <span class="emoji">📝</span>
-        <div class="name">Lucktext</div>
-        <div class="desc">Fyll i orden</div>
-      </div>
-      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="startTrueFalse()">
-        <span class="emoji">✅</span>
-        <div class="name">Sant / Falskt</div>
-        <div class="desc">Stämmer det?</div>
-      </div>
-      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6;" onclick="startMatch()">
-        <span class="emoji">🧩</span>
-        <div class="name">Matcha</div>
-        <div class="desc">Län, kommun, landskap...</div>
-      </div>
-      <div class="mode-card" onclick="showCheatsheet()">
-        <span class="emoji">📖</span>
-        <div class="name">Fusklapp</div>
-        <div class="desc">Tankekarta inför provet</div>
-      </div>
-      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6;" onclick="showAssignment()">
+      <div class="mode-card" style="border-color: var(--yellow); background: #fff8d6; grid-column: 1 / -1;" onclick="showAssignment()">
         <span class="emoji">📋</span>
         <div class="name">Aktuell uppgift</div>
         <div class="desc" id="assignment-card-desc">Klistra in nytt område / läxa</div>
@@ -486,148 +370,45 @@
   </div>
 </div>
 
-<!-- LUCKTEXT -->
-<div id="lucktext-screen" class="hidden">
+<!-- BOOK REPORT -->
+<div id="bokrapport-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
-      <span class="badge" id="lt-progress">1 / 12</span>
-      <span class="badge" style="background: var(--green-soft);" id="lt-score">⭐ 0</span>
-      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="lt-bar"></div></div>
-    <p class="instruction">Tryck på ett ord nedan och sedan på luckan där det hör hemma. Eller skriv in i fältet längst ner.</p>
-    <div class="word-bank" id="lt-bank"></div>
-    <div class="question-text" id="lt-question"></div>
-    <div id="lt-feedback" class="hidden"></div>
-    <label style="margin-top:12px;">Eller skriv ditt svar:</label>
-    <input type="text" id="lt-answer" autocomplete="off" placeholder="Svar..." />
-    <button class="btn btn-green btn-block" id="lt-submit-btn" style="margin-top: 12px;" onclick="submitLucktext()">Kolla →</button>
-    <button class="btn btn-block hidden" id="lt-next-btn" style="margin-top: 12px;" onclick="nextLucktext()">Nästa →</button>
-  </div>
-</div>
-
-<!-- TRUE/FALSE -->
-<div id="tf-screen" class="hidden">
-  <div class="card">
-    <div class="row" style="margin-bottom: 14px;">
-      <span class="badge" id="tf-progress">1 / 10</span>
-      <span class="badge" style="background: var(--green-soft);" id="tf-score">⭐ 0</span>
-      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="tf-bar"></div></div>
-    <div class="question-text" id="tf-question"></div>
-    <div class="tf-buttons">
-      <button class="tf-btn true" id="tf-true" onclick="answerTrueFalse(true)">✅ Stämmer</button>
-      <button class="tf-btn false" id="tf-false" onclick="answerTrueFalse(false)">❌ Stämmer inte</button>
-    </div>
-    <div id="tf-feedback" class="hidden"></div>
-    <button class="btn btn-block hidden" id="tf-next-btn" style="margin-top: 12px;" onclick="nextTrueFalse()">Nästa →</button>
-  </div>
-</div>
-
-<!-- MATCH -->
-<div id="match-screen" class="hidden">
-  <div class="card">
-    <div class="row" style="margin-bottom: 14px;">
-      <span class="badge" id="mt-progress">1 / 8</span>
-      <span class="badge" style="background: var(--green-soft);" id="mt-score">⭐ 0</span>
-      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="mt-bar"></div></div>
-    <p class="instruction">Vilket begrepp passar beskrivningen?</p>
-    <div class="question-text" id="mt-question"></div>
-    <div class="options-grid" id="mt-options"></div>
-    <div id="mt-feedback" class="hidden"></div>
-    <button class="btn btn-block hidden" id="mt-next-btn" style="margin-top: 12px;" onclick="nextMatch()">Nästa →</button>
-  </div>
-</div>
-
-<!-- FLASHCARDS -->
-<div id="flashcards-screen" class="hidden">
-  <div class="card">
-    <div class="row" style="margin-bottom: 14px;">
-      <span class="badge" id="fc-progress">1 / 12</span>
-      <span class="badge" style="background: var(--yellow);" id="fc-xp-badge">⭐ 0</span>
-      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="fc-bar"></div></div>
-    <div class="flashcard" id="flashcard" onclick="flipCard()">
-      <div class="flashcard-inner">
-        <div class="flashcard-front">
-          <div class="flashcard-label">Begrepp</div>
-          <div class="flashcard-text" id="fc-front"></div>
-          <p class="small" style="margin-top: 16px;">👆 Tryck för att se svaret</p>
-        </div>
-        <div class="flashcard-back">
-          <div class="flashcard-label">Förklaring</div>
-          <div class="flashcard-text" id="fc-back"></div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <button class="btn btn-secondary" onclick="prevCard()">← Förra</button>
-      <button class="btn" onclick="nextCard()">Nästa →</button>
-    </div>
-  </div>
-</div>
-
-<!-- CHEATSHEET -->
-<div id="cheatsheet-screen" class="hidden">
-  <div class="card">
-    <div class="row" style="margin-bottom: 14px;">
-      <h2 style="flex:3;">📖 Fusklapp – Sverige</h2>
+      <h2 style="flex:3;">📕 Bokrapport</h2>
       <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
     </div>
 
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🌍 Sverige på kartan</h3>
-    <p style="line-height:1.8;margin-bottom:14px;">
-      • Sverige ligger i världsdelen <strong>Europa</strong>.<br>
-      • Sverige ligger på det <strong>norra halvklotet</strong>.<br>
-      • <strong>Ekvatorn</strong> delar jorden i två halvklot.<br>
-      • <strong>Nordpolen</strong> = nordligaste punkten, <strong>Sydpolen</strong> = sydligaste.<br>
-      • <strong>Norden</strong>: Sverige, Norge, Finland, Danmark, Island.
-    </p>
+    <h3 class="section-title">📖 Läslogg</h3>
+    <p class="small" style="margin-bottom:10px;">Skriv hur många minuter du läste och tryck på knappen. Du får ⭐ varje gång!</p>
+    <div class="row" style="margin-bottom:10px;">
+      <input type="text" id="br-minutes" inputmode="numeric" autocomplete="off" placeholder="Minuter, t.ex. 20" style="flex:2;" />
+      <button class="btn btn-green" style="flex:1;" onclick="logReading()">➕ Logga</button>
+    </div>
+    <p style="font-weight:800;margin-bottom:8px;">Totalt läst: <span id="br-total">0</span> min</p>
+    <div id="br-log" style="margin-bottom:24px;"></div>
 
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🏛️ Huvudstäder</h3>
-    <p style="line-height:1.8;margin-bottom:14px;">
-      Sverige → <strong>Stockholm</strong> &nbsp;·&nbsp;
-      Norge → <strong>Oslo</strong> &nbsp;·&nbsp;
-      Danmark → <strong>Köpenhamn</strong> &nbsp;·&nbsp;
-      Finland → <strong>Helsingfors</strong> &nbsp;·&nbsp;
-      Island → <strong>Reykjavik</strong>.
-    </p>
+    <h3 class="section-title">✍️ Min bokrapport</h3>
+    <label for="br-title">Bokens titel:</label>
+    <input type="text" id="br-title" placeholder="T.ex. Bröderna Lejonhjärta" style="margin-bottom:12px;" />
+    <label for="br-author">Författare:</label>
+    <input type="text" id="br-author" placeholder="T.ex. Astrid Lindgren" style="margin-bottom:12px;" />
+    <label for="br-pages">Antal sidor:</label>
+    <input type="text" id="br-pages" inputmode="numeric" placeholder="T.ex. 228" style="margin-bottom:12px;" />
 
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🗺️ Tre landsdelar</h3>
-    <p style="line-height:1.8;margin-bottom:14px;">
-      Sverige delas i tre landsdelar – uppifrån och ner:<br>
-      1. <strong>Norrland</strong> (störst, glest befolkat)<br>
-      2. <strong>Svealand</strong> (mitten, Stockholm)<br>
-      3. <strong>Götaland</strong> (söder, Göteborg och Malmö)
-    </p>
+    <label for="br-about">Vad handlar boken om?</label>
+    <textarea id="br-about" placeholder="Skriv en kort sammanfattning..."></textarea>
+    <label for="br-favorite" style="margin-top:12px;">Min favoritdel:</label>
+    <textarea id="br-favorite" placeholder="Vad var bäst eller mest spännande?"></textarea>
+    <label for="br-opinion" style="margin-top:12px;">Vad tyckte jag om boken?</label>
+    <textarea id="br-opinion" placeholder="Gillade du den? Varför / varför inte?"></textarea>
 
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🧩 Indelningar att kunna</h3>
-    <p style="line-height:1.8;margin-bottom:14px;">
-      • <strong>Län</strong> – 21 st, regeringens "områden" (styrs av länsstyrelse).<br>
-      • <strong>Landskap</strong> – gammal indelning, mest kulturell idag.<br>
-      • <strong>Kommun</strong> – sköter skola, äldrevård, vatten, bibliotek.<br>
-      • <strong>Region</strong> – sköter sjukvård och kollektivtrafik.
-    </p>
+    <label style="margin-top:12px;">Mitt betyg:</label>
+    <div class="stars" id="br-stars">
+      <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span><span data-v="4">☆</span><span data-v="5">☆</span>
+    </div>
 
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">👥 Befolkning</h3>
-    <p style="line-height:1.8;margin-bottom:14px;">
-      • Flest människor bor vid <strong>kusterna</strong> och i <strong>södra Sverige</strong>.<br>
-      • <strong>Glesbygd</strong> = få bor där &nbsp;·&nbsp; <strong>tätort</strong> = många bor där.<br>
-      • Tre största städer: <strong>Stockholm, Göteborg, Malmö</strong>.<br>
-      • inv/km² = invånare per kvadratkilometer (hur tätt det bor).
-    </p>
-
-    <h3 style="font-family:'Fraunces',serif;color:var(--accent);margin-bottom:8px;">🏛️ Hur Sverige styrs</h3>
-    <p style="line-height:1.8;">
-      • <strong>Riksdagen</strong> – folkets valda representanter, stiftar lagar.<br>
-      • <strong>Regeringen</strong> – styr landet, bestämmer politiken.<br>
-      • <strong>Länsstyrelsen</strong> – regeringens företrädare i ett län.<br>
-      • <strong>Dialekt</strong> – sätt att tala ett språk i en del av landet.
-    </p>
+    <button class="btn btn-blue btn-block" style="margin-top:16px;" onclick="saveBokrapport()">💾 Spara bokrapport</button>
+    <p id="br-saved-msg" class="hidden" style="text-align:center;margin-top:10px;color:var(--green);font-weight:800;">✅ Sparat!</p>
   </div>
 </div>
 
@@ -649,9 +430,9 @@
     </div>
     <div id="assignment-edit" class="hidden">
       <label for="assignment-title">Område / kapitel:</label>
-      <input type="text" id="assignment-title" placeholder="T.ex. Vi bor i Sverige – SO" style="margin-bottom: 12px;" />
+      <input type="text" id="assignment-title" placeholder="T.ex. Glosor v.23" style="margin-bottom: 12px;" />
       <label for="assignment-content">Uppgiftstext (klistra in här):</label>
-      <textarea id="assignment-content" placeholder="Klistra in läxan, instruktioner, formler eller text från läroboken..."></textarea>
+      <textarea id="assignment-content" placeholder="Klistra in läxan, instruktioner eller text från läroboken..."></textarea>
       <div class="row" style="margin-top: 12px;">
         <button class="btn btn-secondary btn-block" onclick="cancelAssignment()">Avbryt</button>
         <button class="btn btn-green btn-block" onclick="saveAssignment()">💾 Spara</button>
@@ -701,132 +482,8 @@ let xpState = { total: 0, rewardsClaimed: 0 };
 
 const XP_REWARDS = {
   glosorCorrect: 8, glosorWrong: 2,
-  lucktextCorrect: 8, lucktextWrong: 2,
-  tfCorrect: 6, tfWrong: 1,
-  matchCorrect: 10, matchWrong: 2,
-  flashcardSeen: 4
+  readingLog: 5
 };
-
-// ==================== DATA: BEGREPP (FLASHCARDS) ====================
-const FLASHCARDS = [
-  { front: "Nordpolen", back: "Den nordligaste punkten på jorden." },
-  { front: "Sydpolen", back: "Den sydligaste punkten på jorden." },
-  { front: "Ekvatorn", back: "En tänkt cirkel runt jordens mitt – delar jorden i två halvklot." },
-  { front: "Halvklot", back: "Hälften av ett klot. Sverige ligger på det norra halvklotet." },
-  { front: "Världsdel", back: "En stor avgränsad del av jordklotets landmassor. Sverige ligger i Europa." },
-  { front: "Norden", back: "Länderna Sverige, Norge, Finland, Danmark och Island." },
-  { front: "Huvudstad", back: "Den ort i ett land där de som styr finns. Sveriges huvudstad är Stockholm." },
-  { front: "Dialekt", back: "Sätt att tala ett språk på i en del av ett land." },
-  { front: "Län", back: "Geografiskt område som kontrolleras av en länsstyrelse. Sverige har 21 län." },
-  { front: "Länsstyrelse", back: "Regeringens företrädare i ett län." },
-  { front: "Riksdag", back: "Folkets valda representanter på riksnivå. Stiftar lagar." },
-  { front: "Regering", back: "Styrelsen för ett land. Bestämmer hur landet ska skötas." },
-  { front: "Landskap", back: "Gammal indelning som fanns innan Sverige blev ett land. Nästan som små länder. Idag mest kulturell betydelse." },
-  { front: "Kommun", back: "Sköter skolor, äldrevård, vatten och avlopp, idrottsplatser och bibliotek. Sverige har olika stora kommuner." },
-  { front: "Glesbygd", back: "Område där det bor få människor per kvadratkilometer." },
-  { front: "Tätort", back: "Område där det bor många människor nära varandra (t.ex. en stad)." },
-  { front: "Sveriges tre landsdelar", back: "Norrland (norr), Svealand (mitten), Götaland (söder)." },
-  { front: "Sveriges tre största städer", back: "Stockholm, Göteborg och Malmö." }
-];
-
-// ==================== DATA: LUCKTEXT ====================
-// Word bank from Uppgift 1, plus extra words distributed across more questions.
-const LUCKTEXT_BANK = ['Oslo', 'östra', 'Europa', 'Svealand', 'Afrika', 'Köpenhamn', 'Norrland', 'Stockholm', 'Götaland', 'norra', 'södra', 'Asien'];
-
-const LUCKTEXT_QUESTIONS = [
-  { parts: ['Sverige ligger på det ', '_', ' halvklotet.'], answer: 'norra' },
-  { parts: ['Jorden har sju världsdelar och Sverige ligger i världsdelen ', '_', '.'], answer: 'Europa' },
-  { parts: ['Sveriges nordligaste landsdel heter ', '_', '.'], answer: 'Norrland' },
-  { parts: ['Mitt i Sverige ligger landsdelen ', '_', '.'], answer: 'Svealand' },
-  { parts: ['Längst söderut i Sverige ligger ', '_', '.'], answer: 'Götaland' },
-  { parts: ['Huvudstaden i Sverige heter ', '_', '.'], answer: 'Stockholm' },
-  { parts: ['Norges huvudstad heter ', '_', '.'], answer: 'Oslo' },
-  { parts: ['Danmarks huvudstad heter ', '_', '.'], answer: 'Köpenhamn' },
-  { parts: ['Världsdelen söder om Europa heter ', '_', '.'], answer: 'Afrika' },
-  { parts: ['Den största världsdelen, öster om Europa, heter ', '_', '.'], answer: 'Asien' },
-  { parts: ['Sverige har en lång kust mot Östersjön på sin ', '_', ' sida.'], answer: 'östra' },
-  { parts: ['I ', '_', ' Sverige bor det fler människor än i norra Sverige.'], answer: 'södra' }
-];
-
-// ==================== DATA: SANT/FALSKT ====================
-const TF_QUESTIONS = [
-  { q: 'Vid kusterna bor det få människor.', ans: false, exp: 'Tvärtom – de flesta i Sverige bor nära kusterna.' },
-  { q: 'Glesbygd betyder att det bor få människor där.', ans: true, exp: 'Just det – få invånare per kvadratkilometer.' },
-  { q: 'Sveriges tre största städer är Stockholm, Göteborg och Malmö.', ans: true, exp: 'Korrekt!' },
-  { q: 'Nordpolen är den sydligaste punkten på jorden.', ans: false, exp: 'Nordpolen är nordligast. Sydpolen är sydligast.' },
-  { q: 'Sverige har 21 län.', ans: true, exp: 'Stämmer – 21 län som styrs av varsin länsstyrelse.' },
-  { q: 'Ekvatorn delar jorden i två halvklot.', ans: true, exp: 'Ekvatorn är en tänkt linje runt jordens mitt.' },
-  { q: 'Norden består av Sverige, Norge, Danmark och Tyskland.', ans: false, exp: 'Tyskland är inte med. Norden = Sverige, Norge, Finland, Danmark och Island.' },
-  { q: 'En kommun sköter skolor och bibliotek.', ans: true, exp: 'Ja – kommunen sköter skola, äldrevård, vatten, bibliotek m.m.' },
-  { q: 'Norrland är Sveriges sydligaste landsdel.', ans: false, exp: 'Norrland ligger i norr. Götaland är sydligast.' },
-  { q: 'Sverige ligger i världsdelen Europa.', ans: true, exp: 'Korrekt!' },
-  { q: 'Landskap är en gammal indelning av Sverige.', ans: true, exp: 'Just det – fanns innan Sverige blev ett land. Idag mest kulturell betydelse.' },
-  { q: 'Stockholm är huvudstad i Norge.', ans: false, exp: 'Stockholm är Sveriges huvudstad. Norges heter Oslo.' }
-];
-
-// ==================== DATA: MATCH (BEGREPP) ====================
-const MATCH_QUESTIONS = [
-  {
-    q: 'Sverige är indelat i 21 olika områden. De är viktiga för att regeringen ska kunna styra landet enklare.',
-    options: ['län', 'landskap', 'kommun'],
-    correct: 'län'
-  },
-  {
-    q: 'Gammal indelning som fanns innan Sverige blev ett land. Nästan som små länder. Idag mest kulturell betydelse.',
-    options: ['län', 'landskap', 'kommun'],
-    correct: 'landskap'
-  },
-  {
-    q: 'Sköter skolor, äldrevård, vatten och avlopp, idrottsplatser och bibliotek. Är olika stora.',
-    options: ['län', 'landskap', 'kommun'],
-    correct: 'kommun'
-  },
-  {
-    q: 'Folkets valda representanter på riksnivå – de stiftar lagar.',
-    options: ['Regeringen', 'Riksdagen', 'Länsstyrelsen'],
-    correct: 'Riksdagen'
-  },
-  {
-    q: 'Styrelsen för ett land. Bestämmer hur landet ska skötas.',
-    options: ['Regeringen', 'Riksdagen', 'Länsstyrelsen'],
-    correct: 'Regeringen'
-  },
-  {
-    q: 'Regeringens företrädare i ett län.',
-    options: ['Regeringen', 'Riksdagen', 'Länsstyrelsen'],
-    correct: 'Länsstyrelsen'
-  },
-  {
-    q: 'Den nordligaste punkten på jorden.',
-    options: ['Nordpolen', 'Sydpolen', 'Ekvatorn'],
-    correct: 'Nordpolen'
-  },
-  {
-    q: 'En tänkt cirkel runt jordens mitt som delar jorden i två halvklot.',
-    options: ['Nordpolen', 'Sydpolen', 'Ekvatorn'],
-    correct: 'Ekvatorn'
-  },
-  {
-    q: 'Sveriges nordligaste landsdel.',
-    options: ['Norrland', 'Svealand', 'Götaland'],
-    correct: 'Norrland'
-  },
-  {
-    q: 'Sveriges sydligaste landsdel.',
-    options: ['Norrland', 'Svealand', 'Götaland'],
-    correct: 'Götaland'
-  },
-  {
-    q: 'Den ort i ett land där de som styr finns.',
-    options: ['Huvudstad', 'Tätort', 'Glesbygd'],
-    correct: 'Huvudstad'
-  },
-  {
-    q: 'Sätt att tala ett språk på i en del av ett land.',
-    options: ['Dialekt', 'Världsdel', 'Halvklot'],
-    correct: 'Dialekt'
-  }
-];
 
 // ==================== DATA: GLOSOR (ENGELSKA v.22) ====================
 const GLOSOR = [
@@ -843,14 +500,17 @@ const GLOSOR = [
 ];
 
 // ==================== UTILS ====================
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function shuffled(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-function normalize(s) { return String(s).toLowerCase().trim().replace(/\s+/g, ''); }
 // Lenient match for glosor: ignore case/space/punctuation and fold accents (idé = ide).
 function foldGlosor(s) {
   return String(s).toLowerCase().trim()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]/g, '');
+}
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString('sv-SE') + ' ' + d.toTimeString().slice(0, 5);
 }
 
 // ==================== INIT / NAV ====================
@@ -859,10 +519,16 @@ window.addEventListener('load', () => {
   updateXp();
   loadAssignment();
   applyAssignmentToHome();
+  loadBook();
+  wireBookStars();
+  const glAns = document.getElementById('gl-answer');
+  if (glAns) glAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitGlosor(); });
+  const brMin = document.getElementById('br-minutes');
+  if (brMin) brMin.addEventListener('keydown', e => { if (e.key === 'Enter') logReading(); });
 });
 
 function showScreen(id) {
-  ['home-screen', 'glosor-screen', 'lucktext-screen', 'tf-screen', 'match-screen', 'flashcards-screen', 'cheatsheet-screen', 'assignment-screen', 'done-screen', 'reward-screen']
+  ['home-screen', 'glosor-screen', 'bokrapport-screen', 'assignment-screen', 'done-screen', 'reward-screen']
     .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
@@ -877,8 +543,6 @@ function saveXp() { localStorage.setItem(XP_KEY, JSON.stringify(xpState)); }
 function updateXp() {
   document.getElementById('xp-current').textContent = xpState.total;
   document.getElementById('xp-fill').style.width = Math.min(100, (xpState.total / XP_GOAL) * 100) + '%';
-  const fcXp = document.getElementById('fc-xp-badge');
-  if (fcXp) fcXp.textContent = `⭐ ${xpState.total} XP`;
 }
 function awardXp(amount, reason) {
   xpState.total = Math.max(0, xpState.total + amount);
@@ -911,13 +575,7 @@ function showXpInfo() {
 
 🔤 Glosa rätt: +${XP_REWARDS.glosorCorrect} XP
 🔤 Glosa fel: +${XP_REWARDS.glosorWrong} XP
-📝 Lucktext rätt: +${XP_REWARDS.lucktextCorrect} XP
-📝 Lucktext fel: +${XP_REWARDS.lucktextWrong} XP
-✅ Sant/Falskt rätt: +${XP_REWARDS.tfCorrect} XP
-✅ Sant/Falskt fel: +${XP_REWARDS.tfWrong} XP
-🧩 Matcha rätt: +${XP_REWARDS.matchCorrect} XP
-🧩 Matcha fel: +${XP_REWARDS.matchWrong} XP
-🃏 Begrepp (flashcard): +${XP_REWARDS.flashcardSeen} XP
+📖 Läslogg: +${XP_REWARDS.readingLog} XP per gång
 
 Vid 300 XP = 1 timme extra skärmtid 📱
 
@@ -992,312 +650,125 @@ function nextGlosor() {
   else { showDone(glScore, glQuestions.length, 'Glosor v.22', startGlosor); }
 }
 
-// ==================== LUCKTEXT ====================
-let ltQuestions = [];
-let ltIdx = 0;
-let ltScore = 0;
-let ltAnswered = false;
-let ltCurrent = null;
+// ==================== BOOK REPORT ====================
+const BOOK_KEY = 'stellan_bokrapport';
+let book = { title: '', author: '', pages: '', about: '', favorite: '', opinion: '', rating: 0, log: [] };
 
-function startLucktext() {
-  ltQuestions = shuffled(LUCKTEXT_QUESTIONS);
-  ltIdx = 0;
-  ltScore = 0;
-  renderLucktext();
-  showScreen('lucktext-screen');
-  document.getElementById('done-again').onclick = startLucktext;
+function loadBook() {
+  const saved = localStorage.getItem(BOOK_KEY);
+  if (saved) { try { book = Object.assign(book, JSON.parse(saved)); } catch {} }
 }
+function saveBookState() { localStorage.setItem(BOOK_KEY, JSON.stringify(book)); }
 
-function renderLucktext() {
-  ltAnswered = false;
-  ltCurrent = ltQuestions[ltIdx];
-  document.getElementById('lt-progress').textContent = `${ltIdx + 1} / ${ltQuestions.length}`;
-  document.getElementById('lt-score').textContent = `⭐ ${ltScore}`;
-  document.getElementById('lt-bar').style.width = ((ltIdx + 1) / ltQuestions.length * 100) + '%';
-
-  // Render word bank (shuffled, fresh each question)
-  const bank = document.getElementById('lt-bank');
-  bank.innerHTML = '';
-  shuffled(LUCKTEXT_BANK).forEach(word => {
-    const chip = document.createElement('span');
-    chip.className = 'word-chip';
-    chip.textContent = word;
-    chip.onclick = () => {
-      if (ltAnswered) return;
-      document.getElementById('lt-answer').value = word;
-    };
-    bank.appendChild(chip);
+function showBokrapport() {
+  renderBokrapport();
+  showScreen('bokrapport-screen');
+}
+function renderBokrapport() {
+  document.getElementById('br-title').value = book.title || '';
+  document.getElementById('br-author').value = book.author || '';
+  document.getElementById('br-pages').value = book.pages || '';
+  document.getElementById('br-about').value = book.about || '';
+  document.getElementById('br-favorite').value = book.favorite || '';
+  document.getElementById('br-opinion').value = book.opinion || '';
+  document.getElementById('br-saved-msg').classList.add('hidden');
+  renderStars();
+  renderLog();
+}
+function renderStars() {
+  document.querySelectorAll('#br-stars span').forEach(s => {
+    s.textContent = (Number(s.dataset.v) <= book.rating) ? '★' : '☆';
   });
-
-  // Render question with gap
-  const qEl = document.getElementById('lt-question');
-  qEl.innerHTML = '';
-  ltCurrent.parts.forEach(part => {
-    if (part === '_') {
-      const gap = document.createElement('span');
-      gap.className = 'gap empty';
-      gap.id = 'lt-gap';
-      gap.textContent = '_________';
-      qEl.appendChild(gap);
-    } else {
-      qEl.appendChild(document.createTextNode(part));
-    }
+}
+function wireBookStars() {
+  document.querySelectorAll('#br-stars span').forEach(s => {
+    s.addEventListener('click', () => {
+      const v = Number(s.dataset.v);
+      book.rating = (book.rating === v) ? 0 : v; // tap same star again to clear
+      renderStars();
+    });
   });
-
-  document.getElementById('lt-answer').value = '';
-  document.getElementById('lt-answer').disabled = false;
-  document.getElementById('lt-feedback').classList.add('hidden');
-  document.getElementById('lt-submit-btn').classList.remove('hidden');
-  document.getElementById('lt-next-btn').classList.add('hidden');
-  document.getElementById('lt-answer').focus();
 }
-
-function submitLucktext() {
-  if (ltAnswered) return;
-  const val = document.getElementById('lt-answer').value.trim();
-  if (!val) { document.getElementById('lt-answer').focus(); return; }
-  ltAnswered = true;
-  const correct = normalize(val) === normalize(ltCurrent.answer);
-  const gap = document.getElementById('lt-gap');
-  gap.textContent = val;
-  gap.classList.remove('empty');
-  gap.classList.add(correct ? 'correct' : 'wrong');
-
-  if (correct) { ltScore++; awardXp(XP_REWARDS.lucktextCorrect, 'rätt!'); }
-  else { awardXp(XP_REWARDS.lucktextWrong, 'försök'); }
-
-  const fb = document.getElementById('lt-feedback');
-  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-  fb.innerHTML = correct
-    ? `✅ Rätt! Ordet är <strong>${ltCurrent.answer}</strong>.`
-    : `❌ Rätt svar: <strong>${ltCurrent.answer}</strong>`;
-  fb.classList.remove('hidden');
-
-  document.getElementById('lt-answer').disabled = true;
-  document.getElementById('lt-score').textContent = `⭐ ${ltScore}`;
-  document.getElementById('lt-submit-btn').classList.add('hidden');
-  const nb = document.getElementById('lt-next-btn');
-  nb.classList.remove('hidden');
-  nb.textContent = ltIdx < ltQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
-}
-
-function nextLucktext() {
-  if (ltIdx < ltQuestions.length - 1) { ltIdx++; renderLucktext(); }
-  else { showDone(ltScore, ltQuestions.length, 'Lucktext', startLucktext); }
-}
-
-// Allow Enter to submit
-document.addEventListener('DOMContentLoaded', () => {
-  const ltAns = document.getElementById('lt-answer');
-  if (ltAns) ltAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitLucktext(); });
-  const glAns = document.getElementById('gl-answer');
-  if (glAns) glAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitGlosor(); });
-});
-
-// ==================== TRUE / FALSE ====================
-let tfQuestions = [];
-let tfIdx = 0;
-let tfScore = 0;
-let tfAnswered = false;
-
-function startTrueFalse() {
-  tfQuestions = shuffled(TF_QUESTIONS).slice(0, 10);
-  tfIdx = 0;
-  tfScore = 0;
-  renderTrueFalse();
-  showScreen('tf-screen');
-  document.getElementById('done-again').onclick = startTrueFalse;
-}
-
-function renderTrueFalse() {
-  tfAnswered = false;
-  const q = tfQuestions[tfIdx];
-  document.getElementById('tf-question').textContent = q.q;
-  document.getElementById('tf-progress').textContent = `${tfIdx + 1} / ${tfQuestions.length}`;
-  document.getElementById('tf-score').textContent = `⭐ ${tfScore}`;
-  document.getElementById('tf-bar').style.width = ((tfIdx + 1) / tfQuestions.length * 100) + '%';
-  document.getElementById('tf-feedback').classList.add('hidden');
-  document.getElementById('tf-next-btn').classList.add('hidden');
-  document.getElementById('tf-true').disabled = false;
-  document.getElementById('tf-false').disabled = false;
-}
-
-function answerTrueFalse(userSaidTrue) {
-  if (tfAnswered) return;
-  tfAnswered = true;
-  const q = tfQuestions[tfIdx];
-  const correct = userSaidTrue === q.ans;
-  if (correct) { tfScore++; awardXp(XP_REWARDS.tfCorrect, 'rätt!'); }
-  else { awardXp(XP_REWARDS.tfWrong, 'försök'); }
-
-  document.getElementById('tf-true').disabled = true;
-  document.getElementById('tf-false').disabled = true;
-
-  const fb = document.getElementById('tf-feedback');
-  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-  fb.innerHTML = correct
-    ? `✅ Rätt! ${q.exp}`
-    : `❌ Fel. Rätt svar: <strong>${q.ans ? 'Stämmer' : 'Stämmer inte'}</strong>.<br>${q.exp}`;
-  fb.classList.remove('hidden');
-
-  document.getElementById('tf-score').textContent = `⭐ ${tfScore}`;
-  const nb = document.getElementById('tf-next-btn');
-  nb.classList.remove('hidden');
-  nb.textContent = tfIdx < tfQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
-}
-
-function nextTrueFalse() {
-  if (tfIdx < tfQuestions.length - 1) { tfIdx++; renderTrueFalse(); }
-  else { showDone(tfScore, tfQuestions.length, 'Sant/Falskt', startTrueFalse); }
-}
-
-// ==================== MATCH ====================
-let mtQuestions = [];
-let mtIdx = 0;
-let mtScore = 0;
-let mtAnswered = false;
-
-function startMatch() {
-  mtQuestions = shuffled(MATCH_QUESTIONS).slice(0, 8);
-  mtIdx = 0;
-  mtScore = 0;
-  renderMatch();
-  showScreen('match-screen');
-  document.getElementById('done-again').onclick = startMatch;
-}
-
-function renderMatch() {
-  mtAnswered = false;
-  const q = mtQuestions[mtIdx];
-  document.getElementById('mt-question').textContent = q.q;
-  document.getElementById('mt-progress').textContent = `${mtIdx + 1} / ${mtQuestions.length}`;
-  document.getElementById('mt-score').textContent = `⭐ ${mtScore}`;
-  document.getElementById('mt-bar').style.width = ((mtIdx + 1) / mtQuestions.length * 100) + '%';
-
-  const optsEl = document.getElementById('mt-options');
-  optsEl.innerHTML = '';
-  shuffled(q.options).forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.textContent = opt;
-    btn.onclick = () => answerMatch(opt, btn);
-    optsEl.appendChild(btn);
-  });
-
-  document.getElementById('mt-feedback').classList.add('hidden');
-  document.getElementById('mt-next-btn').classList.add('hidden');
-}
-
-function answerMatch(choice, btn) {
-  if (mtAnswered) return;
-  mtAnswered = true;
-  const q = mtQuestions[mtIdx];
-  const correct = choice === q.correct;
-
-  document.querySelectorAll('#mt-options .option-btn').forEach(b => {
-    b.disabled = true;
-    if (b.textContent === q.correct) b.classList.add('correct');
-    else if (b === btn && !correct) b.classList.add('wrong');
-  });
-
-  if (correct) { mtScore++; awardXp(XP_REWARDS.matchCorrect, 'rätt!'); }
-  else { awardXp(XP_REWARDS.matchWrong, 'försök'); }
-
-  const fb = document.getElementById('mt-feedback');
-  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-  fb.innerHTML = correct
-    ? `✅ Rätt! Svaret är <strong>${q.correct}</strong>.`
-    : `❌ Rätt svar: <strong>${q.correct}</strong>`;
-  fb.classList.remove('hidden');
-
-  document.getElementById('mt-score').textContent = `⭐ ${mtScore}`;
-  const nb = document.getElementById('mt-next-btn');
-  nb.classList.remove('hidden');
-  nb.textContent = mtIdx < mtQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
-}
-
-function nextMatch() {
-  if (mtIdx < mtQuestions.length - 1) { mtIdx++; renderMatch(); }
-  else { showDone(mtScore, mtQuestions.length, 'Matcha', startMatch); }
-}
-
-// ==================== FLASHCARDS ====================
-let cards = [];
-let cardIdx = 0;
-let cardsSeen = new Set();
-
-function startFlashcards() {
-  cards = shuffled(FLASHCARDS);
-  cardIdx = 0;
-  cardsSeen = new Set();
-  renderCard();
-  showScreen('flashcards-screen');
-}
-function renderCard() {
-  const c = cards[cardIdx];
-  document.getElementById('fc-front').textContent = c.front;
-  document.getElementById('fc-back').textContent = c.back;
-  document.getElementById('flashcard').classList.remove('flipped');
-  document.getElementById('fc-progress').textContent = `${cardIdx + 1} / ${cards.length}`;
-  document.getElementById('fc-bar').style.width = ((cardIdx + 1) / cards.length * 100) + '%';
-}
-function flipCard() {
-  const card = document.getElementById('flashcard');
-  const wasFlipped = card.classList.contains('flipped');
-  card.classList.toggle('flipped');
-  if (!wasFlipped && !cardsSeen.has(cardIdx)) {
-    cardsSeen.add(cardIdx);
-    awardXp(XP_REWARDS.flashcardSeen, 'kort');
+function renderLog() {
+  const total = (book.log || []).reduce((sum, e) => sum + (e.minutes || 0), 0);
+  document.getElementById('br-total').textContent = total;
+  const el = document.getElementById('br-log');
+  el.innerHTML = '';
+  if (!book.log || book.log.length === 0) {
+    const p = document.createElement('p');
+    p.className = 'small log-empty';
+    p.textContent = 'Ingen läsning loggad än. Logga din första läsning!';
+    el.appendChild(p);
+    return;
   }
+  [...book.log].reverse().forEach((e, i) => {
+    const realIdx = book.log.length - 1 - i;
+    const row = document.createElement('div');
+    row.className = 'log-entry';
+    const label = document.createElement('span');
+    label.textContent = `${formatDate(e.date)} — ${e.minutes} min`;
+    const del = document.createElement('button');
+    del.className = 'btn btn-secondary';
+    del.style.cssText = 'flex:0;padding:4px 10px;font-size:0.9rem;';
+    del.textContent = '🗑️';
+    del.onclick = () => removeLog(realIdx);
+    row.appendChild(label);
+    row.appendChild(del);
+    el.appendChild(row);
+  });
 }
-function nextCard() {
-  if (cardIdx < cards.length - 1) { cardIdx++; renderCard(); }
-  else { goHome(); }
+function logReading() {
+  const input = document.getElementById('br-minutes');
+  const v = parseInt(input.value, 10);
+  if (!v || v <= 0) { input.focus(); return; }
+  if (!book.log) book.log = [];
+  book.log.push({ date: Date.now(), minutes: v });
+  saveBookState();
+  input.value = '';
+  renderLog();
+  awardXp(XP_REWARDS.readingLog, 'läsning!');
 }
-function prevCard() {
-  if (cardIdx > 0) { cardIdx--; renderCard(); }
+function removeLog(idx) {
+  book.log.splice(idx, 1);
+  saveBookState();
+  renderLog();
 }
-
-// ==================== CHEATSHEET ====================
-function showCheatsheet() { showScreen('cheatsheet-screen'); }
+function saveBokrapport() {
+  book.title = document.getElementById('br-title').value.trim();
+  book.author = document.getElementById('br-author').value.trim();
+  book.pages = document.getElementById('br-pages').value.trim();
+  book.about = document.getElementById('br-about').value.trim();
+  book.favorite = document.getElementById('br-favorite').value.trim();
+  book.opinion = document.getElementById('br-opinion').value.trim();
+  saveBookState();
+  const msg = document.getElementById('br-saved-msg');
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 2500);
+}
 
 // ==================== ASSIGNMENT ====================
-const ASSIGNMENT_KEY = 'stellan_assignment';
+const ASSIGNMENT_KEY = 'stellan_assignment_v2';
 const DEFAULT_ASSIGNMENT = {
-  title: 'Vi bor i Sverige – SO',
-  content: `📖 Ordkollen – Vi bor i Sverige
+  title: 'Glosor v.22 & bokrapport',
+  content: `🔤 Glosor till v.22 (engelska → svenska)
+Head – Huvud
+Practical – Praktisk
+Look – Utseende
+Fringe – Lugg
+Ponytail – Hästsvans
+Contact lenses – Kontaktlinser
+Beard – Skägg
+Serious – Allvarlig
+Nothing – Ingenting
+Great idea – Bra idé
 
-Sverige på kartan (s. 48–49)
-• Nordpolen – den nordligaste punkten på jorden
-• Sydpolen – den sydligaste punkten på jorden
-• ekvatorn – tänkt cirkel runt jordens mitt
-• halvklot – hälften av ett klot
-• världsdel – stor avgränsad del av jordklotets landmassor
-• Norden – länderna Sverige, Norge, Finland, Danmark, Island
-• huvudstad – den ort i ett land där de som styr finns
-
-Olika sätt att dela in Sverige (s. 50–51)
-• dialekt – sätt att tala ett språk på i en del av ett land
-• län – geografiskt område som kontrolleras av en länsstyrelse
-• länsstyrelse – regeringens företrädare i ett län
-• riksdag – folkets valda representanter på riksnivå
-• regering – styrelsen för ett land
-
-✍️ Dugga – Vi bor i Sverige
-
-Uppgift 1 – Lucktext
-Ord: Oslo, östra, Europa, Svealand, Afrika, Köpenhamn, Norrland, Stockholm, Götaland, norra, södra, Asien
-
-Uppgift 2 – Matcha begrepp (landskap / län / kommun)
-
-Uppgift 3 – Stämmer / Stämmer inte
-
-🧠 Tankekarta inför SO-provet
-• Sveriges befolkning – var bor flest? glesbygd vs tätort, inv/km²
-• Begrepp – ordlistan
-• Placera Sverige och områden på kartan (TB s. 48–49, 50, 52)
-• Indela Sverige: kommun, län, region, landskap (TB s. 50–51)`,
-  updatedAt: 1747008000000 // 2025-05-12 baseline so it shows "Sparad..."
+📕 Bokrapport
+Läs i din bok och fyll i bokrapporten:
+• Titel och författare
+• Vad handlar boken om?
+• Din favoritdel
+• Vad du tyckte om boken + betyg`,
+  updatedAt: 0
 };
 let assignment = { ...DEFAULT_ASSIGNMENT };
 
@@ -1306,7 +777,6 @@ function loadAssignment() {
   if (saved) {
     try { assignment = JSON.parse(saved); } catch {}
   } else {
-    // First time: seed with the current homework and persist
     assignment = { ...DEFAULT_ASSIGNMENT, updatedAt: Date.now() };
     saveAssignmentState();
   }
@@ -1319,19 +789,14 @@ function applyAssignmentToHome() {
   if (assignment.title) {
     subtitle.textContent = '📚 ' + assignment.title;
   } else {
-    subtitle.textContent = '🇸🇪 Vi bor i Sverige – SO';
+    subtitle.textContent = '📚 Glosor & bokrapport';
   }
   const desc = document.getElementById('assignment-card-desc');
   if (desc) {
     desc.textContent = assignment.content
-      ? 'Sparad ' + formatAssignmentDate(assignment.updatedAt)
+      ? 'Sparad ' + formatDate(assignment.updatedAt)
       : 'Klistra in nytt område / läxa';
   }
-}
-function formatAssignmentDate(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  return d.toLocaleDateString('sv-SE') + ' ' + d.toTimeString().slice(0, 5);
 }
 function showAssignment() {
   renderAssignmentView();
@@ -1348,7 +813,7 @@ function renderAssignmentView() {
   const clearBtn = document.getElementById('assignment-clear-btn');
   if (assignment.content || assignment.title) {
     titleEl.textContent = assignment.title || '(utan titel)';
-    metaEl.textContent = assignment.updatedAt ? 'Sparad ' + formatAssignmentDate(assignment.updatedAt) : '';
+    metaEl.textContent = assignment.updatedAt ? 'Sparad ' + formatDate(assignment.updatedAt) : '';
     bodyEl.textContent = assignment.content || '';
     bodyEl.classList.remove('assignment-empty');
     clearBtn.classList.remove('hidden');
@@ -1391,7 +856,7 @@ function showDone(score, total, label, againFn) {
   document.getElementById('done-score').textContent = `${score}/${total}`;
   const pct = score / total;
   let msg;
-  if (pct === 1) msg = '🏆 ALLA RÄTT! SO-stjärna!';
+  if (pct === 1) msg = '🏆 ALLA RÄTT! Toppen!';
   else if (pct >= 0.8) msg = '🌟 Sjukt bra!';
   else if (pct >= 0.6) msg = '💪 Bra! Fortsätt så.';
   else msg = '📚 Öva mer, du fixar det!';
