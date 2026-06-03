@@ -331,7 +331,7 @@
     <div class="mode-grid">
       <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="startGlosor()">
         <span class="emoji">🔤</span>
-        <div class="name">Glosor v.22</div>
+        <div class="name">Glosor v.23</div>
         <div class="desc">Engelska ↔ svenska</div>
       </div>
       <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="showBokrapport()">
@@ -461,18 +461,18 @@ const XP_REWARDS = {
   readingLog: 5
 };
 
-// ==================== DATA: GLOSOR (ENGELSKA v.22) ====================
+// ==================== DATA: GLOSOR (ENGELSKA v.23) ====================
 const GLOSOR = [
-  { en: 'Head', sv: 'Huvud' },
-  { en: 'Practical', sv: 'Praktisk' },
-  { en: 'Look', sv: 'Utseende' },
-  { en: 'Fringe', sv: 'Lugg' },
-  { en: 'Ponytail', sv: 'Hästsvans' },
-  { en: 'Contact lenses', sv: 'Kontaktlinser' },
-  { en: 'Beard', sv: 'Skägg' },
-  { en: 'Serious', sv: 'Allvarlig' },
-  { en: 'Nothing', sv: 'Ingenting' },
-  { en: 'Great idea', sv: 'Bra idé' }
+  { en: 'Enthusiastic', sv: 'Entusiastisk' },
+  { en: 'Emotional', sv: 'Känslosam' },
+  { en: 'Continue', sv: 'Fortsätta' },
+  { en: 'Spend', sv: 'Göra av med' },
+  { en: 'Well done', sv: 'Bra jobbat' },
+  { en: 'Happiness', sv: 'Lycka' },
+  { en: 'Hysterical', sv: 'Hysterisk' },
+  { en: 'Calm down', sv: 'Lugna sig' },
+  { en: 'Laugh', sv: 'Skratta' },
+  { en: 'Throw', sv: 'Kasta' }
 ];
 
 // ==================== UTILS ====================
@@ -622,7 +622,7 @@ function submitGlosor() {
 
 function nextGlosor() {
   if (glIdx < glQuestions.length - 1) { glIdx++; renderGlosor(); }
-  else { showDone(glScore, glQuestions.length, 'Glosor v.22', startGlosor); }
+  else { showDone(glScore, glQuestions.length, 'Glosor v.23', startGlosor); }
 }
 
 // ==================== READING LOG ====================
@@ -684,20 +684,20 @@ function removeLog(idx) {
 }
 
 // ==================== ASSIGNMENT ====================
-const ASSIGNMENT_KEY = 'stellan_assignment_v2';
+const ASSIGNMENT_KEY = 'stellan_assignment_v3';
 const DEFAULT_ASSIGNMENT = {
-  title: 'Glosor v.22 & bokrapport',
-  content: `🔤 Glosor till v.22 (engelska → svenska)
-Head – Huvud
-Practical – Praktisk
-Look – Utseende
-Fringe – Lugg
-Ponytail – Hästsvans
-Contact lenses – Kontaktlinser
-Beard – Skägg
-Serious – Allvarlig
-Nothing – Ingenting
-Great idea – Bra idé
+  title: 'Glosor v.23 & bokrapport',
+  content: `🔤 Glosor till v.23 (engelska → svenska)
+Enthusiastic – Entusiastisk
+Emotional – Känslosam
+Continue – Fortsätta
+Spend – Göra av med
+Well done – Bra jobbat
+Happiness – Lycka
+Hysterical – Hysterisk
+Calm down – Lugna sig
+Laugh – Skratta
+Throw – Kasta
 
 📕 Bokrapport (skrivs för hand på papper)
 Läs i din bok och skriv bokrapporten på papper:
