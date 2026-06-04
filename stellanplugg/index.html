@@ -38,7 +38,7 @@
     padding: 20px;
   }
   .container { max-width: 720px; margin: 0 auto; }
-  header { text-align: center; margin: 20px 0 30px; }
+  header { text-align: center; margin: 20px 0 20px; }
   h1 {
     font-family: 'Fraunces', serif;
     font-weight: 900;
@@ -124,7 +124,7 @@
   }
   .mode-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
   .mode-card .emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
-  .mode-card .name { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.3rem; }
+  .mode-card .name { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.25rem; }
   .mode-card .desc { font-size: 0.9rem; color: var(--ink-soft); margin-top: 4px; }
 
   .progress-bar {
@@ -155,6 +155,49 @@
   .feedback.correct { background: var(--green-soft); }
   .feedback.wrong { background: var(--red-soft); }
 
+  /* FLASHCARD */
+  .flashcard {
+    perspective: 1000px;
+    height: 340px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    overflow: auto;
+  }
+  .flashcard-front { background: var(--blue-soft); }
+  .flashcard-back { background: var(--green-soft); transform: rotateY(180deg); }
+  .flashcard-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .flashcard-term { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 800; line-height: 1.3; }
+  .flashcard-def { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 500; line-height: 1.5; }
+
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .row > * { flex: 1; }
 
@@ -175,6 +218,20 @@
     0% { transform: scale(0.5); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
   }
+
+  /* PROV BANNER */
+  .prov-banner {
+    background: linear-gradient(135deg, var(--red) 0%, var(--accent) 100%);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    color: white;
+    text-align: center;
+  }
+  .prov-banner .prov-title { font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.15rem; margin-bottom: 4px; }
+  .prov-banner .prov-date { font-weight: 800; font-size: 1.05rem; }
 
   /* XP BAR */
   .xp-bar {
@@ -306,6 +363,25 @@
     align-items: center;
   }
   .log-empty { color: var(--ink-soft); font-style: italic; }
+
+  /* FRÅGOR notes */
+  .fraga-q {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .fraga-notes {
+    background: var(--bg);
+    border: 2px dashed var(--ink);
+    border-radius: 10px;
+    padding: 14px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
 </style>
 </head>
 <body>
@@ -313,11 +389,16 @@
 
 <header>
   <h1>Stellans <span class="accent">Pluggkompis</span></h1>
-  <p class="subtitle">📚 Glosor &amp; bokrapport</p>
+  <p class="subtitle">📝 SO-prov: Sveriges naturresurser</p>
 </header>
 
 <!-- HOME -->
 <div id="home-screen">
+  <div id="prov-banner" class="prov-banner">
+    <p class="prov-title">📝 PROV: Sveriges naturresurser</p>
+    <p class="prov-date" id="prov-label">Fredag 5 juni 2026</p>
+  </div>
+
   <div class="xp-bar" onclick="showXpInfo()">
     <div class="xp-bar-top">
       <span class="xp-label">⭐ Dina poäng</span>
@@ -329,12 +410,22 @@
   <div class="card">
     <h2>🎯 Vad vill du göra?</h2>
     <div class="mode-grid">
-      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="startGlosor()">
+      <div class="mode-card" style="border-color: var(--accent); background: var(--accent-soft);" onclick="showSOSections()">
+        <span class="emoji">🌲</span>
+        <div class="name">Ordkollen SO</div>
+        <div class="desc">96 begrepp i 7 avsnitt</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--red); background: var(--red-soft);" onclick="startFragor()">
+        <span class="emoji">🤔</span>
+        <div class="name">Fördjupande frågor</div>
+        <div class="desc">3 frågor + pluggstoff</div>
+      </div>
+      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="startGlosor()">
         <span class="emoji">🔤</span>
         <div class="name">Glosor v.23</div>
         <div class="desc">Engelska ↔ svenska</div>
       </div>
-      <div class="mode-card" style="border-color: var(--blue); background: var(--blue-soft);" onclick="showBokrapport()">
+      <div class="mode-card" style="border-color: var(--green); background: var(--green-soft);" onclick="showReading()">
         <span class="emoji">📖</span>
         <div class="name">Läslogg</div>
         <div class="desc">Logga din lästid</div>
@@ -348,6 +439,66 @@
   </div>
 
   <p class="small" style="text-align:center;">💡 Tjäna 300 XP = 1 timme extra skärmtid</p>
+</div>
+
+<!-- SO SECTION PICKER -->
+<div id="so-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <h2 style="flex:3;">🌲 Ordkollen SO</h2>
+      <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <p class="instruction">Välj ett avsnitt att öva på:</p>
+    <div class="mode-grid" id="so-sections-grid"></div>
+  </div>
+</div>
+
+<!-- SO FLASHCARDS -->
+<div id="so-cards-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="soc-progress">1 / 1</span>
+      <span class="badge" style="background: var(--accent-soft); border-color: var(--accent);" id="soc-section">Avsnitt</span>
+      <button class="btn btn-secondary" style="max-width: 110px;" onclick="showSOSections()">← Avsnitt</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="soc-bar"></div></div>
+    <div class="flashcard" id="soc-card" onclick="flipSOCard()">
+      <div class="flashcard-inner">
+        <div class="flashcard-face flashcard-front">
+          <div class="flashcard-label">Begrepp</div>
+          <div class="flashcard-term" id="soc-front"></div>
+          <p class="small" style="margin-top:16px;color:var(--ink-soft);">👆 Tryck för att se förklaringen</p>
+        </div>
+        <div class="flashcard-face flashcard-back">
+          <div class="flashcard-label">Förklaring</div>
+          <div class="flashcard-def" id="soc-back"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn btn-secondary" onclick="prevSOCard()">← Förra</button>
+      <button class="btn" onclick="nextSOCard()">Nästa →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FÖRDJUPANDE FRÅGOR -->
+<div id="fragor-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="fr-progress">1 / 3</span>
+      <button class="btn btn-secondary" style="max-width: 100px;" onclick="goHome()">← Hem</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="fr-bar"></div></div>
+    <p class="instruction" style="font-weight:700;color:var(--red);">🤔 Fördjupande fråga inför provet:</p>
+    <div class="fraga-q" id="fr-question"></div>
+    <button class="btn btn-blue btn-block" id="fr-show-btn" onclick="showFragaNotes()">💡 Visa pluggstoff</button>
+    <div class="fraga-notes hidden" id="fr-notes" style="margin-top:12px;"></div>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn btn-secondary" onclick="prevFraga()">← Förra</button>
+      <button class="btn" onclick="nextFraga()">Nästa →</button>
+    </div>
+  </div>
 </div>
 
 <!-- GLOSOR -->
@@ -369,7 +520,7 @@
 </div>
 
 <!-- READING LOG -->
-<div id="bokrapport-screen" class="hidden">
+<div id="reading-screen" class="hidden">
   <div class="card">
     <div class="row" style="margin-bottom: 14px;">
       <h2 style="flex:3;">📖 Läslogg</h2>
@@ -406,7 +557,7 @@
     </div>
     <div id="assignment-edit" class="hidden">
       <label for="assignment-title">Område / kapitel:</label>
-      <input type="text" id="assignment-title" placeholder="T.ex. Glosor v.23" style="margin-bottom: 12px;" />
+      <input type="text" id="assignment-title" placeholder="T.ex. Glosor v.24" style="margin-bottom: 12px;" />
       <label for="assignment-content">Uppgiftstext (klistra in här):</label>
       <textarea id="assignment-content" placeholder="Klistra in läxan, instruktioner eller text från läroboken..."></textarea>
       <div class="row" style="margin-top: 12px;">
@@ -458,8 +609,12 @@ let xpState = { total: 0, rewardsClaimed: 0 };
 
 const XP_REWARDS = {
   glosorCorrect: 8, glosorWrong: 2,
-  readingLog: 5
+  readingLog: 5,
+  soCardSeen: 3,
+  fragaSeen: 8
 };
+
+const PROV_DATE = new Date(2026, 5, 5); // 5 juni 2026
 
 // ==================== DATA: GLOSOR (ENGELSKA v.23) ====================
 const GLOSOR = [
@@ -475,9 +630,211 @@ const GLOSOR = [
   { en: 'Throw', sv: 'Kasta' }
 ];
 
+// ==================== DATA: ORDKOLLEN SO (Sveriges naturresurser) ====================
+const SO_SECTIONS = [
+  {
+    key: 'vader', icon: '🌦️', title: 'Väder och klimat', pages: 's. 58–59',
+    items: [
+      { term: 'väder', def: 'tillstånd i fråga om vind, nederbörd, temperatur m.m. på viss plats, vid visst tillfälle' },
+      { term: 'klimat', def: 'genomsnittliga väderleksförhållanden inom ett större område över längre tidsperioder' },
+      { term: 'inland', def: 'den del av land som ligger långt från havet' },
+      { term: 'årstid', def: 'längre period av året som kännetecknas av viss genomsnittstemperatur och viss utveckling av växtligheten' },
+      { term: 'medeltemperatur', def: 'genomsnitt av temperatur som har mätts under en längre tid' },
+      { term: '°C', def: 'grader Celsius, enhet för temperatur som har fått sitt namn efter sin uppfinnare, den svenske vetenskapsmannen och astronomen Anders Celsius. Den uttrycker temperaturer på celsiusskalan.' },
+      { term: 'milt klimat', def: 'inte kallt klimat' },
+      { term: 'havsström', def: 'stora mängder havsvatten som strömmar i en viss riktning' }
+    ]
+  },
+  {
+    key: 'naturtyper', icon: '🌲', title: 'Naturtyper i Sverige', pages: 's. 60–61',
+    items: [
+      { term: 'naturtyp', def: 'avgränsat område i naturen som består av samma flora och fauna' },
+      { term: 'barrskog', def: 'skog som domineras av barrträd, som gran och tall' },
+      { term: 'lövskog', def: 'skog som domineras av lövträd, som björk, asp, lind och lönn' },
+      { term: 'odlingsmark', def: 'samlingsbegrepp för olika marker som lämpar sig för att odla på' },
+      { term: 'Östersjökusten', def: 'kustremsan i östra Sverige som gränsar mot Östersjön' },
+      { term: 'bördig jord', def: 'näringsrik jord, bra för odling' },
+      { term: 'sädesfält', def: 'fält där säd odlas, som vete, råg, havre och korn' },
+      { term: 'fjäll', def: 'de berg som finns i bergskedjan Skanderna' },
+      { term: 'bergskedja', def: 'stort område med många berg som hänger samman' },
+      { term: 'trädgräns', def: 'tänkt gränslinje i naturen ovanför vilken inga träd kan växa' },
+      { term: 'kalfjäll', def: 'den del av fjället där det bara växer små buskar och ris' },
+      { term: 'vattendrag', def: 'vatten som rör sig från ett högre område i naturen' },
+      { term: 'älv', def: 'större vattendrag i Norden' },
+      { term: 'flod', def: 'större vattendrag i andra delar av världen' },
+      { term: 'å', def: 'mindre eller medelstort vattendrag, vanligen större än bäck men mindre än älv' },
+      { term: 'bäck', def: 'smalt vattendrag, vanligen mindre än å' },
+      { term: 'våtmark', def: 'sank och fuktig mark' },
+      { term: 'myr', def: 'fuktig mark med naturlig växtlighet' }
+    ]
+  },
+  {
+    key: 'skogen', icon: '🪵', title: 'Vad använder vi skogen till?', pages: 's. 62–63',
+    items: [
+      { term: 'syre', def: 'ett grundämne, den viktigaste komponenten i luften' },
+      { term: 'urskog', def: 'skog som är orörd av människan' },
+      { term: 'naturreservat', def: 'fridlyst naturområde för bevarande av känslig eller unik natur' },
+      { term: 'bruksskog', def: 'skog som människan planterar och sköter' },
+      { term: 'avverka', def: 'hugga eller såga ner träd' },
+      { term: 'frö', def: 'liten del av en växt som innehåller anlaget till en ny växt' },
+      { term: 'planta', def: 'växtdel som befinner sig i början av sin utveckling' },
+      { term: 'gallra', def: 'ta bort innehåll som inte är önskvärt, sålla, sovra' },
+      { term: 'fälla', def: 'få något att falla, i det här fallet såga ner' },
+      { term: 'timmer', def: 'grova stockar, trädstammar' },
+      { term: 'sågverk', def: 'anläggning med maskinsågar' },
+      { term: 'virke', def: 'trämaterial som är avsett för viss användning' },
+      { term: 'ved', def: 'trä i mindre, sågade eller huggna bitar avsett till bränsle eller tillverkning av massa' },
+      { term: 'träflis', def: 'fint sönderdelat, flisat, virke' },
+      { term: 'värmeelement', def: 'anordning som ger ifrån sig värme inomhus' },
+      { term: 'bräda', def: 'långsmalt och relativt tunt stycke trävirke, planka' },
+      { term: 'pappersmassa', def: 'fibermaterial av trä, som utgör råvara för framställning av papper, papp och kartong' },
+      { term: 'returpapper', def: 'använt papper som samlats in och går i retur, i första hand till pappersbruk, som återanvänd fiberråvara för papperstillverkning' },
+      { term: 'mala', def: 'sönderdela till finfördelad form' }
+    ]
+  },
+  {
+    key: 'odlingsmarken', icon: '🌾', title: 'Vad använder vi odlingsmarken till?', pages: 's. 64–65',
+    items: [
+      { term: 'skörda', def: 'skära eller plocka av mogen säd, frukt, grönsaker osv.' },
+      { term: 'råvara', def: 'något som finns i naturen och som går att bearbeta så att den förändras och får mer värdefulla egenskaper, till exempel trä från skogen och metaller från berggrunden' },
+      { term: 'jordbruk', def: 'när man odlar t.ex. vete, råg eller potatis på åkrar' },
+      { term: 'spannmål', def: 'de frön som kommer från säd, exempelvis vete och havre' },
+      { term: 'sädesslag', def: 'gräsväxter vars frön används som mat' },
+      { term: 'hage', def: 'inhägnad betesmark' },
+      { term: 'beta', def: 'äta gräs eller löv' },
+      { term: 'mejeri', def: 'anläggning för förädling av mjölk till grädde, ost osv.' },
+      { term: 'mjölkprodukt', def: 'matvara som framställs ur mjölk' },
+      { term: 'slakteri', def: 'anläggning för slakt och styckning av djur' },
+      { term: 'gödsla', def: 'att tillföra näring till jorden för att förbättra den' },
+      { term: 'kupa jord', def: 'lägga jord runt plantor' },
+      { term: 'bespruta', def: 'spruta vätska på växter för att skydda dem mot skador' },
+      { term: 'näring', def: 'ämne som tillförs en varelse eller växt och som får den att fortsätta leva och växa' },
+      { term: 'bekämpningsmedel', def: 'medel som förhindrar växtsjukdomar eller skadliga djur/växter' }
+    ]
+  },
+  {
+    key: 'berggrunden', icon: '⛏️', title: 'Vad använder vi berggrunden till?', pages: 's. 66–67',
+    items: [
+      { term: 'jordlager', def: 'skikt av jord, sand och stenar' },
+      { term: 'berggrund', def: 'fast stengrund under de lösa jordlagren, det hårda skalet runt jorden' },
+      { term: 'metall', def: 'typ av grundämne som har glansig yta och god förmåga att leda värme och elektricitet' },
+      { term: 'gruva', def: 'område under jord eller inne i berg där malm eller mineraler bryts' },
+      { term: 'malm', def: 'bergart (sten) som innehåller metall' },
+      { term: 'stål', def: 'järn som går att smida' },
+      { term: 'stålverk', def: 'anläggning för framställning och bearbetning av stål' },
+      { term: 'hetta upp', def: 'värma upp mycket, alstra stark värme' },
+      { term: 'smälta', def: 'övergå från fast till flytande form' },
+      { term: 'renas', def: 'görs ren' },
+      { term: 'kol', def: 'grundämne som alla levande varelser är uppbyggda av' },
+      { term: 'balk', def: 'långsträckt del som har en bärande funktion i byggnader och andra konstruktioner' },
+      { term: 'långtradare', def: 'tung lastbil med släp' },
+      { term: 'rost', def: 'löst, rödbrunt ämne som bildas på järn och stål genom att järnet reagerar med syre, särskilt i närvaro av vatten' }
+    ]
+  },
+  {
+    key: 'vattnet', icon: '💧', title: 'Vad använder vi vattnet till?', pages: 's. 68–69',
+    items: [
+      { term: 'sjö', def: 'vattensamling som omges av land' },
+      { term: 'yrkesfiskare', def: 'person som arbetar med att fiska' },
+      { term: 'fritidsfiske', def: 'fiske som hobby' },
+      { term: 'hamn', def: 'skyddad plats för förtöjning av båtar' },
+      { term: 'fors', def: 'del av vattendrag där vattnet häftigt strömmar fram' },
+      { term: 'vattenfall', def: 'del av vattendrag där vattnet faller från en högre till en lägre nivå' },
+      { term: 'kvarn', def: 'anläggning för malning av spannmål, som exempelvis vete, råg och korn' },
+      { term: 'såg', def: 'sågverk, anläggning för maskinsågning av timmer' },
+      { term: 'vattenkraftverk', def: 'kraftverk som drivs av fallande vatten och omvandlar vattenkraften till elektricitet' },
+      { term: 'damm', def: 'sjöliknande vattensamling, ibland konstgjord' },
+      { term: 'turbin', def: 'maskin där energin hos strömmande vatten (eller ånga eller gas) omvandlas till rotationsenergi med hjälp av skovlar' }
+    ]
+  },
+  {
+    key: 'hallbar', icon: '♻️', title: 'Naturresurser och hållbar utveckling', pages: 's. 70–71',
+    items: [
+      { term: 'förädla', def: 'bearbeta en råvara för att ge den värdefullare egenskaper' },
+      { term: 'råvara', def: 'något som finns i naturen och som går att förädla' },
+      { term: 'ull', def: 'hår från får eller liknande djur' },
+      { term: 'karda', def: 'rensa och reda ut ullen före spinning' },
+      { term: 'spinna', def: 'framställa garn genom tvinning' },
+      { term: 'garn', def: 'spunnen tråd' },
+      { term: 'industri', def: 'anläggning för tillverkning eller förädling i stor skala' },
+      { term: 'förnybar', def: 'som kan användas igen och igen' },
+      { term: 'hållbar', def: 'stå emot påfrestningar, inte gå sönder eller förstöras' },
+      { term: 'resurs', def: 'något som finns att använda' },
+      { term: 'utvinna', def: 'lyckas få ut' }
+    ]
+  }
+];
+
+// ==================== DATA: FÖRDJUPANDE FRÅGOR ====================
+const SO_FRAGOR = [
+  {
+    q: '1. Hur påverkar Golfströmmen vårt klimat här i Norden?',
+    notes: `Golfströmmen är en stor varm havsström. Den börjar i Mexikanska golfen och rinner norrut över Atlanten, förbi Storbritannien och upp mot Norden.
+
+Den för med sig varmt vatten norrut. Det gör att luften som blåser in över Sverige och övriga Norden blir varmare.
+
+Tack vare Golfströmmen har vi:
+• Mildare vintrar än andra länder lika långt norrut
+• Hamnar som ofta är isfria – bra för sjöfart
+• Längre växtsäsong och bördigare jordar i södra Sverige
+
+Jämför med Sibirien eller Alaska som ligger på samma breddgrad – där är det mycket kallare för att de saknar en varm havsström.
+
+Kort sagt: utan Golfströmmen skulle Sverige vara mycket kallare.`
+  },
+  {
+    q: '2. Hur blir en naturresurs en färdig vara? Välj en vara och förklara hur den blir till.',
+    notes: `Tänk på kedjan:
+naturresurs → råvara → industri → färdig vara
+
+📄 Papper
+• Naturresurs: skogen
+• Råvara: timmer / pappersmassa
+• Industri: pappersbruk (mal träflis, kokar, pressar och torkar)
+• Färdig vara: papper, kartong, böcker
+
+🍞 Bröd
+• Naturresurs: odlingsmarken
+• Råvara: spannmål (vete, råg)
+• Industri: kvarn (mal till mjöl) + bageri (bakar)
+• Färdig vara: bröd
+
+🐟 Fiskpinnar
+• Naturresurs: havet / sjön
+• Råvara: fisk
+• Industri: fiskfabrik (filéar, panerar, fryser)
+• Färdig vara: fiskpinnar
+
+🚗 Bilar
+• Naturresurs: berggrunden
+• Råvara: malm → järn → stål
+• Industri: stålverk + bilfabrik
+• Färdig vara: bil`
+  },
+  {
+    q: '3. Varför har människor gärna bosatt sig nära vatten genom historien?',
+    notes: `Det finns flera anledningar – tänk på fler än en!
+
+💧 Dricksvatten – människor och djur behöver vatten för att leva.
+
+🐟 Mat – fisk och annat från vattnet är livsmedel.
+
+🚢 Transport – med båt kan man frakta människor och varor långa sträckor, även när det inte fanns vägar.
+
+🏪 Handel – hamnar gör det enkelt att byta varor med andra länder.
+
+🌾 Bördig jord – vid älvar och floder är jorden ofta näringsrik, bra för jordbruk.
+
+⚡ Energi – vattendrag har drivit kvarnar och sågar förr, idag vattenkraftverk.
+
+🛡️ Skydd – vatten kan vara en naturlig barriär mot fiender.
+
+🧼 Hygien – tvätta sig och kläder.`
+  }
+];
+
 // ==================== UTILS ====================
 function shuffled(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-// Lenient match for glosor: ignore case/space/punctuation and fold accents (idé = ide).
 function foldGlosor(s) {
   return String(s).toLowerCase().trim()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -495,7 +852,9 @@ window.addEventListener('load', () => {
   updateXp();
   loadAssignment();
   applyAssignmentToHome();
-  loadBook();
+  loadReading();
+  updateProvBanner();
+  renderSOSectionGrid();
   const glAns = document.getElementById('gl-answer');
   if (glAns) glAns.addEventListener('keydown', e => { if (e.key === 'Enter') submitGlosor(); });
   const brMin = document.getElementById('br-minutes');
@@ -503,11 +862,30 @@ window.addEventListener('load', () => {
 });
 
 function showScreen(id) {
-  ['home-screen', 'glosor-screen', 'bokrapport-screen', 'assignment-screen', 'done-screen', 'reward-screen']
+  ['home-screen', 'so-screen', 'so-cards-screen', 'fragor-screen', 'glosor-screen', 'reading-screen', 'assignment-screen', 'done-screen', 'reward-screen']
     .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
 function goHome() { showScreen('home-screen'); }
+
+// ==================== PROV BANNER ====================
+function updateProvBanner() {
+  const banner = document.getElementById('prov-banner');
+  if (!banner) return;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const prov = new Date(PROV_DATE);
+  prov.setHours(0, 0, 0, 0);
+  const days = Math.round((prov - today) / 86400000);
+  let label;
+  if (days < -7) { banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  if (days < 0) label = 'Provet är klart! Bra jobbat 🎉';
+  else if (days === 0) label = '🔥 PROV IDAG! Lycka till!';
+  else if (days === 1) label = '🔥 PROV I MORGON (fredag 5 juni)';
+  else label = `📝 ${days} dagar till provet (fredag 5 juni)`;
+  document.getElementById('prov-label').textContent = label;
+}
 
 // ==================== XP ====================
 function loadXp() {
@@ -548,6 +926,8 @@ function claimReward() {
 function showXpInfo() {
   alert(`⭐ Hur du tjänar XP:
 
+🌲 Ordkollen begrepp: +${XP_REWARDS.soCardSeen} XP per nytt kort
+🤔 Fördjupande fråga: +${XP_REWARDS.fragaSeen} XP per ny fråga
 🔤 Glosa rätt: +${XP_REWARDS.glosorCorrect} XP
 🔤 Glosa fel: +${XP_REWARDS.glosorWrong} XP
 📖 Läslogg: +${XP_REWARDS.readingLog} XP per gång
@@ -564,7 +944,6 @@ let glScore = 0;
 let glAnswered = false;
 
 function startGlosor() {
-  // Each word asked once, random direction (EN->SV or SV->EN).
   glQuestions = shuffled(GLOSOR).map(w => {
     const toSwedish = Math.random() < 0.5;
     return toSwedish
@@ -625,19 +1004,134 @@ function nextGlosor() {
   else { showDone(glScore, glQuestions.length, 'Glosor v.23', startGlosor); }
 }
 
+// ==================== SO ORDKOLLEN ====================
+let soCards = [];
+let soIdx = 0;
+let soSeen = new Set();
+let soCurrentSectionTitle = '';
+
+function renderSOSectionGrid() {
+  const grid = document.getElementById('so-sections-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  SO_SECTIONS.forEach((section, i) => {
+    const card = document.createElement('div');
+    card.className = 'mode-card';
+    card.style.borderColor = 'var(--accent)';
+    card.innerHTML = `<span class="emoji">${section.icon}</span>
+      <div class="name" style="font-size:1.05rem;">${section.title}</div>
+      <div class="desc">${section.items.length} begrepp · ${section.pages}</div>`;
+    card.onclick = () => startSOSection(i);
+    grid.appendChild(card);
+  });
+  // "Allt blandat" card
+  const total = SO_SECTIONS.reduce((s, sec) => s + sec.items.length, 0);
+  const all = document.createElement('div');
+  all.className = 'mode-card';
+  all.style.borderColor = 'var(--red)';
+  all.style.background = 'var(--red-soft)';
+  all.style.gridColumn = '1 / -1';
+  all.innerHTML = `<span class="emoji">🎲</span>
+    <div class="name">Allt blandat</div>
+    <div class="desc">${total} begrepp i slumpvis ordning</div>`;
+  all.onclick = () => startSOSection('all');
+  grid.appendChild(all);
+}
+
+function showSOSections() {
+  showScreen('so-screen');
+}
+
+function startSOSection(idxOrAll) {
+  if (idxOrAll === 'all') {
+    soCards = shuffled(SO_SECTIONS.flatMap(s => s.items));
+    soCurrentSectionTitle = 'Allt blandat';
+  } else {
+    const section = SO_SECTIONS[idxOrAll];
+    soCards = shuffled(section.items);
+    soCurrentSectionTitle = section.title;
+  }
+  soIdx = 0;
+  soSeen = new Set();
+  renderSOCard();
+  showScreen('so-cards-screen');
+}
+
+function renderSOCard() {
+  const c = soCards[soIdx];
+  document.getElementById('soc-front').textContent = c.term;
+  document.getElementById('soc-back').textContent = c.def;
+  document.getElementById('soc-card').classList.remove('flipped');
+  document.getElementById('soc-progress').textContent = `${soIdx + 1} / ${soCards.length}`;
+  document.getElementById('soc-section').textContent = soCurrentSectionTitle;
+  document.getElementById('soc-bar').style.width = ((soIdx + 1) / soCards.length * 100) + '%';
+}
+function flipSOCard() {
+  const card = document.getElementById('soc-card');
+  const wasFlipped = card.classList.contains('flipped');
+  card.classList.toggle('flipped');
+  if (!wasFlipped && !soSeen.has(soIdx)) {
+    soSeen.add(soIdx);
+    awardXp(XP_REWARDS.soCardSeen, 'begrepp');
+  }
+}
+function nextSOCard() {
+  if (soIdx < soCards.length - 1) { soIdx++; renderSOCard(); }
+  else { showDone(soSeen.size, soCards.length, 'Ordkollen SO', () => startSOSection(soCurrentSectionTitle === 'Allt blandat' ? 'all' : SO_SECTIONS.findIndex(s => s.title === soCurrentSectionTitle))); }
+}
+function prevSOCard() {
+  if (soIdx > 0) { soIdx--; renderSOCard(); }
+}
+
+// ==================== FÖRDJUPANDE FRÅGOR ====================
+let frIdx = 0;
+let frSeen = new Set();
+
+function startFragor() {
+  frIdx = 0;
+  frSeen = new Set();
+  renderFraga();
+  showScreen('fragor-screen');
+}
+
+function renderFraga() {
+  const f = SO_FRAGOR[frIdx];
+  document.getElementById('fr-question').textContent = f.q;
+  document.getElementById('fr-notes').textContent = f.notes;
+  document.getElementById('fr-notes').classList.add('hidden');
+  document.getElementById('fr-show-btn').classList.remove('hidden');
+  document.getElementById('fr-progress').textContent = `${frIdx + 1} / ${SO_FRAGOR.length}`;
+  document.getElementById('fr-bar').style.width = ((frIdx + 1) / SO_FRAGOR.length * 100) + '%';
+}
+function showFragaNotes() {
+  document.getElementById('fr-notes').classList.remove('hidden');
+  document.getElementById('fr-show-btn').classList.add('hidden');
+  if (!frSeen.has(frIdx)) {
+    frSeen.add(frIdx);
+    awardXp(XP_REWARDS.fragaSeen, 'fråga');
+  }
+}
+function nextFraga() {
+  if (frIdx < SO_FRAGOR.length - 1) { frIdx++; renderFraga(); }
+  else { goHome(); }
+}
+function prevFraga() {
+  if (frIdx > 0) { frIdx--; renderFraga(); }
+}
+
 // ==================== READING LOG ====================
 const READING_KEY = 'stellan_laslogg';
 let readingLog = [];
 
-function loadBook() {
+function loadReading() {
   const saved = localStorage.getItem(READING_KEY);
   if (saved) { try { readingLog = JSON.parse(saved); } catch {} }
 }
 function saveReadingState() { localStorage.setItem(READING_KEY, JSON.stringify(readingLog)); }
 
-function showBokrapport() {
+function showReading() {
   renderLog();
-  showScreen('bokrapport-screen');
+  showScreen('reading-screen');
 }
 function renderLog() {
   const total = readingLog.reduce((sum, e) => sum + (e.minutes || 0), 0);
@@ -684,29 +1178,30 @@ function removeLog(idx) {
 }
 
 // ==================== ASSIGNMENT ====================
-const ASSIGNMENT_KEY = 'stellan_assignment_v3';
+const ASSIGNMENT_KEY = 'stellan_assignment_v4';
 const DEFAULT_ASSIGNMENT = {
-  title: 'Glosor v.23 & bokrapport',
-  content: `🔤 Glosor till v.23 (engelska → svenska)
-Enthusiastic – Entusiastisk
-Emotional – Känslosam
-Continue – Fortsätta
-Spend – Göra av med
-Well done – Bra jobbat
-Happiness – Lycka
-Hysterical – Hysterisk
-Calm down – Lugna sig
-Laugh – Skratta
-Throw – Kasta
+  title: 'PROV 5 juni: Sveriges naturresurser',
+  content: `📝 PROV fredag 5 juni 2026
+SO – Sveriges naturresurser
 
-📕 Bokrapport (skrivs för hand på papper)
-Läs i din bok och skriv bokrapporten på papper:
-• Titel och författare
-• Vad handlar boken om?
-• Din favoritdel
-• Vad du tyckte om boken + betyg
+📖 Att läsa:
+• Textboken s. 56–73
+• Arbetsboken s. 22–31
 
-📖 Logga din lästid i appen under "Läslogg".`,
+❓ Fördjupande frågor:
+1. Hur påverkar Golfströmmen vårt klimat i Norden?
+2. Hur blir en naturresurs en färdig vara?
+   (kedjan: naturresurs → råvara → industri → färdig vara)
+   Förslag på varor: papper, bröd, fiskpinnar, bilar
+3. Varför har människor gärna bosatt sig nära vatten genom historien?
+
+📚 Öva i appen:
+• Ordkollen SO – alla 96 begrepp i 7 avsnitt
+• Fördjupande frågor – pluggstoff till de tre frågorna
+
+🔤 Glosor v.23 (engelska) ligger kvar.
+📖 Logga din lästid i Läslogg.
+📕 Bokrapport skrivs för hand på papper.`,
   updatedAt: 0
 };
 let assignment = { ...DEFAULT_ASSIGNMENT };
@@ -728,7 +1223,7 @@ function applyAssignmentToHome() {
   if (assignment.title) {
     subtitle.textContent = '📚 ' + assignment.title;
   } else {
-    subtitle.textContent = '📚 Glosor & bokrapport';
+    subtitle.textContent = '📝 SO-prov: Sveriges naturresurser';
   }
   const desc = document.getElementById('assignment-card-desc');
   if (desc) {
@@ -793,9 +1288,9 @@ function clearAssignment() {
 // ==================== DONE SCREEN ====================
 function showDone(score, total, label, againFn) {
   document.getElementById('done-score').textContent = `${score}/${total}`;
-  const pct = score / total;
+  const pct = total > 0 ? score / total : 0;
   let msg;
-  if (pct === 1) msg = '🏆 ALLA RÄTT! Toppen!';
+  if (pct === 1) msg = '🏆 ALLA klara! Toppen!';
   else if (pct >= 0.8) msg = '🌟 Sjukt bra!';
   else if (pct >= 0.6) msg = '💪 Bra! Fortsätt så.';
   else msg = '📚 Öva mer, du fixar det!';
