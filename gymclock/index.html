@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>IRON CLOCK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#000; --fg:#fff; }
+  .work { --bg:#fff; --fg:#000; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; height:100%; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family:'JetBrains Mono', monospace;
+    transition: background 120ms linear, color 120ms linear;
+    padding: 20px 16px 48px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .disp-font { font-family:'Bebas Neue','Arial Narrow',sans-serif; }
+  h1 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:3px; margin:0; }
+
+  .head { display:flex; justify-content:space-between; align-items:center;
+          border-bottom:3px solid var(--fg); padding-bottom:12px; margin-bottom:24px; }
+  .head-btns { display:flex; gap:8px; }
+
+  button { cursor:pointer; }
+  .ibtn { background:transparent; color:var(--fg); border:2px solid var(--fg);
+          font-family:'JetBrains Mono',monospace; letter-spacing:2px; font-size:12px; padding:8px 12px; }
+  .bigbtn { padding:18px 0; font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:3px;
+            background:transparent; color:var(--fg); border:2px solid var(--fg); }
+  .bigbtn:disabled { opacity:.35; cursor:not-allowed; }
+
+  /* tabs */
+  #tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .tab { position:relative; flex:1 0 auto; }
+  .tab > button.sel { background:var(--fg); color:var(--bg); }
+  .tab > button.exbtn { width:100%; padding:14px 34px 14px 16px; font-family:'Bebas Neue',sans-serif;
+            font-size:22px; letter-spacing:2px; background:transparent; color:var(--fg); border:2px solid var(--fg); }
+  .tab .rm { position:absolute; top:0; right:0; width:30px; height:30px; line-height:30px; text-align:center;
+            background:transparent; border:none; font-family:'JetBrains Mono',monospace; font-size:18px;
+            color:var(--fg); opacity:.55; }
+  .tab .rm:hover { opacity:1; }
+  .tab > button.sel + .rm { color:var(--bg); }
+
+  /* add row */
+  #addrow { display:flex; gap:8px; margin-bottom:20px; }
+  #newex { flex:1; background:transparent; color:var(--fg); border:2px solid var(--fg);
+           font-family:'JetBrains Mono',monospace; letter-spacing:2px; font-size:13px;
+           padding:0 12px; text-transform:uppercase; outline:none; }
+  #newex::placeholder { color:var(--fg); opacity:.45; }
+  #addbtn { padding:10px 20px; font-size:20px; }
+
+  /* display */
+  .display { border:3px solid var(--fg); padding:18px 18px 24px; margin-bottom:22px; text-align:center; }
+  .disp-top { display:flex; justify-content:space-between; font-size:13px; letter-spacing:3px; opacity:.7; }
+  .number { font-family:'Bebas Neue',sans-serif; font-size:clamp(7rem,30vw,16rem);
+            line-height:.82; letter-spacing:-.02em; margin:4px 0; }
+  .exline { font-size:14px; letter-spacing:2px; }
+  .dots { display:flex; justify-content:center; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .dot { width:14px; height:14px; border:2px solid var(--fg); }
+  .dot.on { background:var(--fg); }
+
+  /* controls */
+  .ctrls { display:flex; gap:10px; margin-bottom:26px; }
+  #startBtn { flex:2; background:var(--fg); color:var(--bg); }
+  .ctrls .bigbtn:not(#startBtn) { flex:1; }
+
+  /* steppers */
+  .steps { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .step { display:flex; flex-direction:column; gap:6px; flex:1; min-width:120px; }
+  .step .lbl { font-size:11px; letter-spacing:2px; opacity:.6; }
+  .step .box { display:flex; border:2px solid var(--fg); }
+  .step .box button { width:48px; background:transparent; color:var(--fg);
+        border:none; border-left:2px solid var(--fg); border-right:2px solid var(--fg); font-size:26px; }
+  .step .box button:first-child { border-left:none; }
+  .step .box button:last-child { border-right:none; }
+  .step .val { flex:1; display:flex; align-items:center; justify-content:center;
+        font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:1px; }
+  .step .val small { font-family:'JetBrains Mono',monospace; font-size:11px; opacity:.5; margin-left:4px; }
+
+  /* log */
+  #logwrap { border-top:2px solid var(--fg); padding-top:14px; }
+  .log-top { display:flex; justify-content:space-between; font-size:12px; letter-spacing:3px; opacity:.7; margin-bottom:8px; }
+  .log-row { display:flex; justify-content:space-between; font-size:14px; padding:6px 0;
+             border-bottom:1px solid rgba(128,128,128,.4); }
+  .log-row .mut { opacity:.6; }
+  .hidden { display:none !important; }
+
+  /* BIG / CAST overlay */
+  #big { position:fixed; inset:0; background:var(--bg); color:var(--fg);
+         display:flex; flex-direction:column; justify-content:space-between;
+         padding:3vh 4vw; transition:background 120ms,color 120ms; user-select:none; overflow:hidden; }
+  #big .bar { display:flex; justify-content:space-between; align-items:center;
+              letter-spacing:4px; font-size:clamp(14px,2.4vw,34px); }
+  #big .bnum { flex:1; display:flex; align-items:center; justify-content:center; }
+  #big .bnum span { font-family:'Bebas Neue',sans-serif; font-size:clamp(8rem,42vw,70rem);
+                    line-height:.8; letter-spacing:-.02em; }
+  #big .exitb { background:transparent; color:var(--fg); border:2px solid var(--fg);
+                letter-spacing:3px; padding:8px 16px; font-size:clamp(12px,1.6vw,22px); }
+  #big .resume { position:absolute; top:62%; left:0; right:0; text-align:center;
+                 letter-spacing:6px; font-size:clamp(12px,2vw,28px); opacity:.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>IRON CLOCK</h1>
+    <div class="head-btns">
+      <button class="ibtn" id="muteBtn">LJUD</button>
+      <button class="ibtn" id="bigBtn">⤢ STOR</button>
+    </div>
+  </div>
+
+  <div id="tabs"></div>
+
+  <div id="addrow">
+    <input id="newex" placeholder="LÄGG TILL ÖVNING — t.ex. MARKLYFT" maxlength="16" />
+    <button class="bigbtn" id="addbtn">+ LÄGG TILL</button>
+  </div>
+
+  <div class="display">
+    <div class="disp-top"><span id="phaseLbl">REDO</span><span id="setLbl">SET 0/4</span></div>
+    <div class="number" id="number">90</div>
+    <div class="exline" id="exLine">KNÄBÖJ · 60 KG × 8 REPS</div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="ctrls">
+    <button class="bigbtn" id="startBtn">START</button>
+    <button class="bigbtn" id="skipBtn" disabled>HOPPA</button>
+    <button class="bigbtn" id="resetBtn">NOLLSTÄLL</button>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="lbl" id="wLbl">KNÄBÖJ VIKT</span>
+      <div class="box"><button data-act="w-">−</button>
+        <div class="val"><span id="wVal">60</span><small>KG</small></div>
+        <button data-act="w+">+</button></div>
+    </div>
+    <div class="step">
+      <span class="lbl">REPS</span>
+      <div class="box"><button data-act="r-">−</button>
+        <div class="val"><span id="rVal">8</span></div>
+        <button data-act="r+">+</button></div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="lbl">KÖR</span>
+      <div class="box"><button data-act="work-">−</button>
+        <div class="val"><span id="workVal">90</span><small>S</small></div>
+        <button data-act="work+">+</button></div>
+    </div>
+    <div class="step">
+      <span class="lbl">VILA</span>
+      <div class="box"><button data-act="rest-">−</button>
+        <div class="val"><span id="restVal">30</span><small>S</small></div>
+        <button data-act="rest+">+</button></div>
+    </div>
+    <div class="step">
+      <span class="lbl">SET</span>
+      <div class="box"><button data-act="sets-">−</button>
+        <div class="val"><span id="setsVal">4</span></div>
+        <button data-act="sets+">+</button></div>
+    </div>
+  </div>
+
+  <div id="logwrap" class="hidden">
+    <div class="log-top"><span>KLARA SET</span><span id="volLbl">VOLYM 0 KG</span></div>
+    <div id="logrows"></div>
+  </div>
+</div>
+
+<!-- BIG / CAST overlay -->
+<div id="big" class="hidden">
+  <div class="bar"><span id="bPhase">REDO</span><span id="bSet">SET 0/4</span></div>
+  <div class="bnum"><span id="bNum">90</span></div>
+  <div class="bar" style="align-items:flex-end;">
+    <span id="bEx">KNÄBÖJ · 60KG × 8</span>
+    <button class="exitb" id="exitBig">STÄNG</button>
+  </div>
+  <div class="resume hidden" id="bResume">▶ TRYCK FÖR ATT FORTSÄTTA</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- persisted state ----------
+  var DEFAULT = {
+    exercises: ["KNÄBÖJ","BÄNKPRESS","CURL","CRUNCH"],
+    weights: { KNÄBÖJ:60, BÄNKPRESS:40, CURL:12.5, CRUNCH:0 },
+    repsByEx: { KNÄBÖJ:8, BÄNKPRESS:8, CURL:12, CRUNCH:20 },
+    exercise: "KNÄBÖJ",
+    workSec: 90, restSec: 30, totalSets: 4, muted: false
+  };
+  var S = load();
+  function load(){
+    var data;
+    try { var raw = localStorage.getItem("ironclock_sv");
+      data = raw ? Object.assign({}, DEFAULT, JSON.parse(raw)) : JSON.parse(JSON.stringify(DEFAULT));
+    } catch(e){ data = JSON.parse(JSON.stringify(DEFAULT)); }
+    // normalize so every exercise always has a weight + reps entry
+    if(!data.weights) data.weights = {};
+    if(!data.repsByEx) data.repsByEx = {};
+    if(!Array.isArray(data.exercises) || !data.exercises.length) data.exercises = DEFAULT.exercises.slice();
+    data.exercises.forEach(function(ex){
+      if(typeof data.weights[ex] !== "number") data.weights[ex] = 0;
+      if(typeof data.repsByEx[ex] !== "number") data.repsByEx[ex] = 8;
+    });
+    if(data.exercises.indexOf(data.exercise) < 0) data.exercise = data.exercises[0];
+    [ "workSec","restSec","totalSets" ].forEach(function(k){ if(typeof data[k] !== "number") data[k] = DEFAULT[k]; });
+    return data;
+  }
+  function save(){ try { localStorage.setItem("ironclock_sv", JSON.stringify(S)); } catch(e){} }
+
+  // ---------- runtime state ----------
+  var phase="IDLE", running=false, currentSet=0, secondsLeft=S.workSec, big=false;
+  var log=[];
+  var endTime=0, lastSec=0, tickId=null, audio=null;
+
+  // ---------- elements ----------
+  var $ = function(id){ return document.getElementById(id); };
+  var root = document.body;
+
+  // ---------- audio ----------
+  function ctx(){ if(!audio){ var AC=window.AudioContext||window.webkitAudioContext; if(AC) audio=new AC(); } return audio; }
+  function unlockAudio(){ var c=ctx(); if(c && c.state==="suspended") c.resume(); }
+  function tone(freq, start, dur, vol, type){
+    try{
+      var c=ctx(); if(!c) return; if(c.state==="suspended") c.resume();
+      var t0=c.currentTime+start;
+      var o=c.createOscillator(), g=c.createGain();
+      o.type=type||"square"; o.frequency.setValueAtTime(freq,t0);
+      o.connect(g); g.connect(c.destination);
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.exponentialRampToValueAtTime(vol,t0+0.012);
+      g.gain.setValueAtTime(vol, t0+Math.max(0.02,dur-0.04));
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+      o.start(t0); o.stop(t0+dur+0.03);
+    }catch(e){}
+  }
+  function sound(kind){
+    if(S.muted) return;
+    if(kind==="count") tone(760,0,0.13,0.55);
+    else if(kind==="go") tone(1180,0,0.6,0.65);
+    else if(kind==="end"){ tone(523,0,0.18,0.6); tone(392,0.19,0.5,0.6); }
+    else if(kind==="done"){ tone(784,0,0.16,0.6); tone(988,0.17,0.16,0.6); tone(1318,0.34,0.6,0.7); }
+    else if(kind==="test") tone(900,0,0.22,0.55);
+  }
+
+  // ---------- helpers ----------
+  function fmt(s){ return s>=100 ? Math.floor(s/60)+":"+String(s%60).padStart(2,"0") : String(s); }
+  function w(){ return S.weights[S.exercise]||0; }
+  function reps(){ var r=S.repsByEx[S.exercise]; return typeof r==="number"?r:8; }
+  function phaseLabel(){
+    if(phase==="DONE") return "KLAR";
+    if(phase==="IDLE") return "REDO";
+    if(phase==="WORK") return "KÖR";
+    if(phase==="REST") return "VILA";
+    return phase;
+  }
+
+  // ---------- timer ----------
+  function startPhase(name, dur){
+    phase=name; endTime=Date.now()+dur*1000; lastSec=dur; secondsLeft=dur;
+    if(name==="WORK") sound("go");
+    renderDisplay(); applyTheme();
+  }
+  function advance(){
+    if(phase==="WORK"){
+      log.push({ set:currentSet, exercise:S.exercise, weight:w(), reps:reps() });
+      renderLog();
+      if(currentSet>=S.totalSets){
+        phase="DONE"; running=false; secondsLeft=0; stopTick(); wakeRelease();
+        sound("done"); renderDisplay(); applyTheme(); renderControls(); return;
+      }
+      sound("end");
+      startPhase("REST", S.restSec);
+    } else if(phase==="REST"){
+      currentSet++; startPhase("WORK", S.workSec);
+    }
+  }
+  function tick(){
+    if(!running) return;
+    var now=Date.now();
+    var left=Math.ceil((endTime-now)/1000); if(left<0) left=0;
+    if(left!==lastSec){
+      if(left>0 && left<=3) sound("count");
+      lastSec=left; secondsLeft=left; renderDisplay();
+    }
+    if(now>=endTime) advance();
+  }
+  function startTick(){ stopTick(); tickId=setInterval(tick,120); }
+  function stopTick(){ if(tickId){ clearInterval(tickId); tickId=null; } }
+
+  function start(){
+    unlockAudio(); wakeAcquire();
+    if(phase==="IDLE"||phase==="DONE"){
+      log=[]; renderLog(); currentSet=1; running=true; startPhase("WORK", S.workSec);
+    } else {
+      endTime=Date.now()+secondsLeft*1000; running=true; applyTheme();
+    }
+    startTick(); renderControls();
+  }
+  function pause(){ running=false; stopTick(); wakeRelease(); renderControls(); applyTheme(); }
+  function toggle(){ running?pause():start(); }
+  function skip(){ if(phase==="WORK"||phase==="REST") advance(); }
+  function reset(){
+    if((running || log.length) && !window.confirm("Nollställa passet?")) return;
+    running=false; stopTick(); wakeRelease(); phase="IDLE"; currentSet=0; secondsLeft=S.workSec; log=[];
+    renderAll();
+  }
+
+  // ---------- exercises ----------
+  function selectEx(name){ S.exercise=name; save(); renderTabs(); renderSteppers(); renderDisplay(); }
+  function addEx(){
+    var name=($("newex").value||"").trim().toUpperCase();
+    $("newex").value="";
+    if(!name || S.exercises.indexOf(name)>=0) return;
+    S.exercises.push(name); S.weights[name]=0; S.repsByEx[name]=10; S.exercise=name; save();
+    renderTabs(); renderSteppers(); renderDisplay();
+  }
+  function removeEx(name){
+    if(S.exercises.length<=1) return;
+    S.exercises=S.exercises.filter(function(e){return e!==name;});
+    if(S.exercise===name) S.exercise=S.exercises[0];
+    save(); renderTabs(); renderSteppers(); renderDisplay();
+  }
+
+  // ---------- render ----------
+  function applyTheme(){ root.classList.toggle("work", phase==="WORK"); }
+
+  function renderTabs(){
+    var t=$("tabs"); t.innerHTML="";
+    S.exercises.forEach(function(ex){
+      var d=document.createElement("div"); d.className="tab";
+      var b=document.createElement("button");
+      b.className="exbtn"+(ex===S.exercise?" sel":""); b.textContent=ex;
+      b.onclick=function(){ selectEx(ex); };
+      d.appendChild(b);
+      if(S.exercises.length>1){
+        var x=document.createElement("button"); x.className="rm"; x.textContent="×";
+        x.title="Ta bort"; x.setAttribute("aria-label","Ta bort "+ex); x.onclick=function(e){ e.stopPropagation(); removeEx(ex); };
+        d.appendChild(x);
+      }
+      t.appendChild(d);
+    });
+  }
+
+  function renderDisplay(){
+    $("phaseLbl").textContent=phaseLabel();
+    $("setLbl").textContent="SET "+(phase==="IDLE"?0:currentSet)+"/"+S.totalSets;
+    $("number").textContent= phase==="DONE" ? "✓" : fmt(secondsLeft);
+    $("exLine").textContent= S.exercise+" · "+w()+" KG × "+reps()+" REPS";
+    // dots
+    var dots=$("dots"); dots.innerHTML="";
+    for(var i=0;i<S.totalSets;i++){
+      var s=document.createElement("span"); s.className="dot";
+      var done = i < (phase==="DONE"?S.totalSets:currentSet) && !(i===currentSet-1 && phase==="WORK");
+      if(done) s.className+=" on";
+      dots.appendChild(s);
+    }
+    // big mirror
+    $("bPhase").textContent=phaseLabel();
+    $("bSet").textContent="SET "+(phase==="IDLE"?0:currentSet)+"/"+S.totalSets;
+    $("bNum").textContent= phase==="DONE" ? "✓" : fmt(secondsLeft);
+    $("bEx").textContent= S.exercise+" · "+w()+"KG × "+reps();
+    $("bResume").classList.toggle("hidden", !(!running && (phase==="WORK"||phase==="REST")));
+  }
+
+  function renderSteppers(){
+    $("wLbl").textContent=S.exercise+" VIKT";
+    $("wVal").textContent=w();
+    $("rVal").textContent=reps();
+    $("workVal").textContent=S.workSec;
+    $("restVal").textContent=S.restSec;
+    $("setsVal").textContent=S.totalSets;
+  }
+
+  function renderControls(){
+    $("startBtn").textContent= running?"PAUS":(phase==="IDLE"||phase==="DONE"?"START":"FORTSÄTT");
+    $("skipBtn").disabled= (phase==="IDLE"||phase==="DONE");
+  }
+
+  function renderLog(){
+    var wrap=$("logwrap"), rows=$("logrows");
+    if(!log.length){ wrap.classList.add("hidden"); rows.innerHTML=""; return; }
+    wrap.classList.remove("hidden");
+    var vol=0; rows.innerHTML="";
+    log.forEach(function(x){
+      vol += x.weight*x.reps;
+      var r=document.createElement("div"); r.className="log-row";
+      r.innerHTML='<span class="mut">#'+x.set+'</span><span>'+x.exercise+'</span><span>'+x.weight+' KG × '+x.reps+'</span>';
+      rows.appendChild(r);
+    });
+    $("volLbl").textContent="VOLYM "+(Math.round(vol*10)/10)+" KG";
+  }
+
+  function renderBig(){ $("big").classList.toggle("hidden", !big); }
+
+  function renderAll(){ renderTabs(); renderDisplay(); renderSteppers(); renderControls(); renderLog(); applyTheme(); renderBig(); }
+
+  // ---------- steppers wiring ----------
+  function adj(act){
+    switch(act){
+      case "w-": S.weights[S.exercise]=Math.max(0, Math.round((w()-2.5)*10)/10); break;
+      case "w+": S.weights[S.exercise]=Math.round((w()+2.5)*10)/10; break;
+      case "r-": S.repsByEx[S.exercise]=Math.max(1, reps()-1); break;
+      case "r+": S.repsByEx[S.exercise]=reps()+1; break;
+      case "work-": S.workSec=Math.max(5,S.workSec-5); if(phase==="IDLE") secondsLeft=S.workSec; break;
+      case "work+": S.workSec=S.workSec+5; if(phase==="IDLE") secondsLeft=S.workSec; break;
+      case "rest-": S.restSec=Math.max(5,S.restSec-5); break;
+      case "rest+": S.restSec=S.restSec+5; break;
+      case "sets-": S.totalSets=Math.max(1,S.totalSets-1); break;
+      case "sets+": S.totalSets=S.totalSets+1; break;
+    }
+    save(); renderSteppers(); renderDisplay();
+  }
+
+  // ---------- keep screen awake (so the timer never disappears mid-set) ----------
+  var wakeLock=null;
+  function wakeAcquire(){
+    try {
+      if(navigator.wakeLock && !wakeLock){
+        navigator.wakeLock.request("screen").then(function(wl){
+          wakeLock=wl;
+          wakeLock.addEventListener("release", function(){ wakeLock=null; });
+        }).catch(function(){});
+      }
+    } catch(e){}
+  }
+  function wakeRelease(){ try { if(wakeLock){ wakeLock.release(); wakeLock=null; } } catch(e){} }
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState==="visible" && running) wakeAcquire();
+  });
+
+  // ---------- big / cast mode (true fullscreen when allowed) ----------
+  function enterBig(){
+    big=true; renderBig(); ctx();
+    try {
+      var el=document.documentElement;
+      if(el.requestFullscreen) { var p=el.requestFullscreen(); if(p&&p.catch) p.catch(function(){}); }
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } catch(e){}
+  }
+  function closeBig(){
+    big=false; renderBig();
+    try {
+      if(document.fullscreenElement && document.exitFullscreen) { var p=document.exitFullscreen(); if(p&&p.catch) p.catch(function(){}); }
+      else if(document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } catch(e){}
+  }
+  function onFsChange(){ if(!document.fullscreenElement && !document.webkitFullscreenElement && big){ big=false; renderBig(); } }
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+
+  // ---------- events ----------
+  document.querySelectorAll('[data-act]').forEach(function(b){
+    b.addEventListener("click", function(){ adj(b.getAttribute("data-act")); });
+  });
+  $("startBtn").onclick=toggle;
+  $("skipBtn").onclick=skip;
+  $("resetBtn").onclick=reset;
+  $("addbtn").onclick=addEx;
+  $("newex").addEventListener("keydown", function(e){ if(e.key==="Enter") addEx(); });
+  $("bigBtn").onclick=function(){ enterBig(); };
+  $("exitBig").onclick=function(e){ e.stopPropagation(); closeBig(); };
+  $("muteBtn").onclick=function(){ unlockAudio(); S.muted=!S.muted; save(); $("muteBtn").textContent=S.muted?"TYST":"LJUD"; if(!S.muted) sound("test"); };
+  // tap the big overlay to pause/resume
+  $("big").addEventListener("click", function(){ toggle(); });
+
+  // keyboard: space=start/pause, s=skip
+  document.addEventListener("keydown", function(e){
+    if(e.target && e.target.id==="newex") return;
+    if(e.code==="Space"){ e.preventDefault(); toggle(); }
+    else if(e.key==="s"||e.key==="S"){ skip(); }
+  });
+
+  // ---------- init ----------
+  $("muteBtn").textContent=S.muted?"TYST":"LJUD";
+  renderAll();
+})();
+</script>
+</body>
+</html>
