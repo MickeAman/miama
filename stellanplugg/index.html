@@ -382,6 +382,86 @@
     line-height: 1.6;
     font-size: 1rem;
   }
+
+  /* DAILY QUEST + STREAK */
+  .quest-widget {
+    background: linear-gradient(135deg, #ffe6c2 0%, #ffc285 100%);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .quest-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .quest-streak { font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.1rem; }
+  .quest-info-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 4px; }
+  .quest-task { font-weight: 700; font-size: 0.95rem; }
+  .quest-progress {
+    height: 10px; background: white;
+    border: 2px solid var(--ink); border-radius: 8px;
+    overflow: hidden; margin-top: 4px;
+  }
+  .quest-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green) 0%, var(--accent) 100%);
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  /* TOGGLE PILLS (SO mode picker) */
+  .toggle-pills {
+    display: flex;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .toggle-pill {
+    flex: 1;
+    padding: 12px;
+    background: var(--bg-card);
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+    color: var(--ink);
+  }
+  .toggle-pill.active { background: var(--accent); color: white; }
+  .toggle-pill + .toggle-pill { border-left: 3px solid var(--ink); }
+
+  /* SO QUIZ */
+  .quiz-def {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.5;
+    background: var(--blue-soft);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .quiz-options { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .quiz-option {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: var(--bg-card);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: var(--shadow);
+    transition: transform 0.08s;
+  }
+  .quiz-option:hover:not(:disabled) { transform: translate(-1px, -1px); }
+  .quiz-option.correct { background: var(--green-soft); }
+  .quiz-option.wrong { background: var(--red-soft); }
+  .quiz-option:disabled { cursor: default; }
 </style>
 </head>
 <body>
@@ -405,6 +485,14 @@
       <span class="xp-numbers"><span id="xp-current">0</span> / 300 XP</span>
     </div>
     <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="quest-widget" id="quest-widget">
+    <div class="quest-top">
+      <span class="quest-streak" id="quest-streak">🌱 Starta din streak!</span>
+      <button class="quest-info-btn" onclick="showQuestInfo()" title="Vad är detta?">ℹ️</button>
+    </div>
+    <div id="quest-body"></div>
   </div>
 
   <div class="card">
@@ -448,7 +536,11 @@
       <h2 style="flex:3;">🌲 Ordkollen SO</h2>
       <button class="btn btn-secondary" style="flex:1;max-width:100px;" onclick="goHome()">← Hem</button>
     </div>
-    <p class="instruction">Välj ett avsnitt att öva på:</p>
+    <div class="toggle-pills">
+      <button class="toggle-pill active" id="so-toggle-cards" onclick="setSOMode('cards')">🃏 Flashcards</button>
+      <button class="toggle-pill" id="so-toggle-quiz" onclick="setSOMode('quiz')">📝 Quiz</button>
+    </div>
+    <p class="instruction" id="so-instr">Tryck på ett avsnitt för att öva med flashcards.</p>
     <div class="mode-grid" id="so-sections-grid"></div>
   </div>
 </div>
@@ -479,6 +571,23 @@
       <button class="btn btn-secondary" onclick="prevSOCard()">← Förra</button>
       <button class="btn" onclick="nextSOCard()">Nästa →</button>
     </div>
+  </div>
+</div>
+
+<!-- SO QUIZ -->
+<div id="so-quiz-screen" class="hidden">
+  <div class="card">
+    <div class="row" style="margin-bottom: 14px;">
+      <span class="badge" id="qz-progress">1 / 10</span>
+      <span class="badge" style="background: var(--green-soft);" id="qz-score">⭐ 0</span>
+      <button class="btn btn-secondary" style="max-width: 110px;" onclick="showSOSections()">← Avsnitt</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="qz-bar"></div></div>
+    <p class="instruction">Vilket begrepp passar beskrivningen?</p>
+    <div class="quiz-def" id="qz-def"></div>
+    <div class="quiz-options" id="qz-options"></div>
+    <div id="qz-feedback" class="hidden" style="margin-top:14px;"></div>
+    <button class="btn btn-block hidden" id="qz-next-btn" style="margin-top: 12px;" onclick="nextQuiz()">Nästa →</button>
   </div>
 </div>
 
@@ -611,8 +720,12 @@ const XP_REWARDS = {
   glosorCorrect: 8, glosorWrong: 2,
   readingLog: 5,
   soCardSeen: 3,
+  quizCorrect: 6, quizWrong: 1,
   fragaSeen: 8
 };
+
+const QUEST_GOAL = { glosor: 3, begrepp: 5 };
+const QUEST_BONUS = 25;
 
 const PROV_DATE = new Date(2026, 5, 5); // 5 juni 2026
 
@@ -853,6 +966,8 @@ window.addEventListener('load', () => {
   loadAssignment();
   applyAssignmentToHome();
   loadReading();
+  loadQuest();
+  updateQuestWidget();
   updateProvBanner();
   renderSOSectionGrid();
   const glAns = document.getElementById('gl-answer');
@@ -862,7 +977,7 @@ window.addEventListener('load', () => {
 });
 
 function showScreen(id) {
-  ['home-screen', 'so-screen', 'so-cards-screen', 'fragor-screen', 'glosor-screen', 'reading-screen', 'assignment-screen', 'done-screen', 'reward-screen']
+  ['home-screen', 'so-screen', 'so-cards-screen', 'so-quiz-screen', 'fragor-screen', 'glosor-screen', 'reading-screen', 'assignment-screen', 'done-screen', 'reward-screen']
     .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
@@ -927,14 +1042,160 @@ function showXpInfo() {
   alert(`⭐ Hur du tjänar XP:
 
 🌲 Ordkollen begrepp: +${XP_REWARDS.soCardSeen} XP per nytt kort
+📝 Begreppsquiz rätt: +${XP_REWARDS.quizCorrect} XP
+📝 Begreppsquiz fel: +${XP_REWARDS.quizWrong} XP
 🤔 Fördjupande fråga: +${XP_REWARDS.fragaSeen} XP per ny fråga
 🔤 Glosa rätt: +${XP_REWARDS.glosorCorrect} XP
 🔤 Glosa fel: +${XP_REWARDS.glosorWrong} XP
 📖 Läslogg: +${XP_REWARDS.readingLog} XP per gång
+🔥 Dagens uppdrag klart: +${QUEST_BONUS} XP bonus
 
 Vid 300 XP = 1 timme extra skärmtid 📱
 
 Belöningar tjänade: ${xpState.rewardsClaimed || 0}`);
+}
+
+// ==================== DAILY QUEST + STREAK ====================
+const QUEST_KEY = 'stellan_quest_v1';
+let questState = {
+  streak: 0,
+  bestStreak: 0,
+  lastCompletedDate: null,
+  todayDate: null,
+  todayProgress: { glosor: 0, begrepp: 0 },
+  todayCompleted: false
+};
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function daysBetween(aKey, bKey) {
+  const a = new Date(aKey); a.setHours(0,0,0,0);
+  const b = new Date(bKey); b.setHours(0,0,0,0);
+  return Math.round((b - a) / 86400000);
+}
+
+function loadQuest() {
+  const saved = localStorage.getItem(QUEST_KEY);
+  if (saved) {
+    try {
+      const p = JSON.parse(saved);
+      questState = {
+        streak: p.streak || 0,
+        bestStreak: p.bestStreak || 0,
+        lastCompletedDate: p.lastCompletedDate || null,
+        todayDate: p.todayDate || null,
+        todayProgress: p.todayProgress || { glosor: 0, begrepp: 0 },
+        todayCompleted: !!p.todayCompleted
+      };
+    } catch {}
+  }
+  ensureTodayQuest();
+}
+function saveQuest() { localStorage.setItem(QUEST_KEY, JSON.stringify(questState)); }
+
+function ensureTodayQuest() {
+  const today = todayKey();
+  if (questState.todayDate !== today) {
+    if (questState.lastCompletedDate) {
+      const diff = daysBetween(questState.lastCompletedDate, today);
+      if (diff > 1) questState.streak = 0;
+    }
+    questState.todayDate = today;
+    questState.todayProgress = { glosor: 0, begrepp: 0 };
+    questState.todayCompleted = false;
+    saveQuest();
+  }
+}
+
+function bumpQuest(kind) {
+  ensureTodayQuest();
+  if (questState.todayCompleted) return;
+  if (questState.todayProgress[kind] < QUEST_GOAL[kind]) {
+    questState.todayProgress[kind] += 1;
+    saveQuest();
+    updateQuestWidget();
+    checkQuestCompletion();
+  }
+}
+
+function checkQuestCompletion() {
+  if (questState.todayCompleted) return;
+  if (questState.todayProgress.glosor >= QUEST_GOAL.glosor &&
+      questState.todayProgress.begrepp >= QUEST_GOAL.begrepp) {
+    completeQuest();
+  }
+}
+
+function completeQuest() {
+  questState.todayCompleted = true;
+  const today = todayKey();
+  if (questState.lastCompletedDate) {
+    const diff = daysBetween(questState.lastCompletedDate, today);
+    if (diff === 1) questState.streak += 1;
+    else if (diff > 1) questState.streak = 1;
+  } else {
+    questState.streak = 1;
+  }
+  questState.bestStreak = Math.max(questState.bestStreak || 0, questState.streak);
+  questState.lastCompletedDate = today;
+  saveQuest();
+  awardXp(QUEST_BONUS, '🔥 ' + questState.streak + ' i rad');
+  updateQuestWidget();
+  showQuestComplete();
+}
+
+function showQuestComplete() {
+  const popup = document.createElement('div');
+  popup.className = 'xp-popup';
+  popup.style.background = '#d6f0d8';
+  popup.style.color = 'var(--ink)';
+  popup.style.fontSize = '1.15rem';
+  popup.textContent = '🎉 Uppdrag klart! 🔥 ' + questState.streak + (questState.streak === 1 ? ' dag' : ' dagar') + ' i rad';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 2400);
+}
+
+function updateQuestWidget() {
+  const streakEl = document.getElementById('quest-streak');
+  const bodyEl = document.getElementById('quest-body');
+  if (!streakEl || !bodyEl) return;
+  if (questState.streak > 0) {
+    streakEl.textContent = '🔥 ' + questState.streak + ' ' + (questState.streak === 1 ? 'dag' : 'dagar') + ' i rad';
+  } else {
+    streakEl.textContent = '🌱 Starta din streak idag!';
+  }
+  if (questState.todayCompleted) {
+    bodyEl.innerHTML = `
+      <p style="font-weight:800;color:#1b6b1e;">✅ Klart för idag! +${QUEST_BONUS} XP</p>
+      <p class="small" style="margin-top:4px;">Kom tillbaka i morgon för att hålla streaken levande.</p>`;
+  } else {
+    const g = questState.todayProgress.glosor, gMax = QUEST_GOAL.glosor;
+    const b = questState.todayProgress.begrepp, bMax = QUEST_GOAL.begrepp;
+    bodyEl.innerHTML = `
+      <p style="font-weight:800;margin-bottom:6px;">📝 Dagens uppdrag · +${QUEST_BONUS} XP när klart</p>
+      <div class="quest-task">🔤 ${g}/${gMax} glosor rätt</div>
+      <div class="quest-progress"><div class="quest-fill" style="width:${Math.min(100,(g/gMax)*100)}%"></div></div>
+      <div class="quest-task" style="margin-top:8px;">🌲 ${b}/${bMax} begrepp lärda</div>
+      <div class="quest-progress"><div class="quest-fill" style="width:${Math.min(100,(b/bMax)*100)}%"></div></div>`;
+  }
+}
+
+function showQuestInfo() {
+  alert(`🔥 STREAK & DAGENS UPPDRAG
+
+Dagens uppdrag:
+• Svara rätt på ${QUEST_GOAL.glosor} glosor
+• Lär dig ${QUEST_GOAL.begrepp} begrepp (flippa kort eller svara rätt i quiz)
+
+När du klarar uppdraget får du:
+• +${QUEST_BONUS} XP bonus
+• +1 till din streak 🔥
+
+Missar du en dag återställs streaken till 0.
+
+Längsta streak: ${questState.bestStreak || 0} ${(questState.bestStreak || 0) === 1 ? 'dag' : 'dagar'}`);
 }
 
 // ==================== GLOSOR ====================
@@ -981,7 +1242,7 @@ function submitGlosor() {
   glAnswered = true;
   const q = glQuestions[glIdx];
   const correct = foldGlosor(val) === foldGlosor(q.answer);
-  if (correct) { glScore++; awardXp(XP_REWARDS.glosorCorrect, 'rätt!'); }
+  if (correct) { glScore++; awardXp(XP_REWARDS.glosorCorrect, 'rätt!'); bumpQuest('glosor'); }
   else { awardXp(XP_REWARDS.glosorWrong, 'försök'); }
 
   const fb = document.getElementById('gl-feedback');
@@ -1009,6 +1270,16 @@ let soCards = [];
 let soIdx = 0;
 let soSeen = new Set();
 let soCurrentSectionTitle = '';
+let soMode = 'cards'; // 'cards' or 'quiz'
+
+function setSOMode(mode) {
+  soMode = mode;
+  document.getElementById('so-toggle-cards').classList.toggle('active', mode === 'cards');
+  document.getElementById('so-toggle-quiz').classList.toggle('active', mode === 'quiz');
+  document.getElementById('so-instr').textContent = mode === 'quiz'
+    ? 'Tryck på ett avsnitt för att starta en quiz (4 svarsalternativ).'
+    : 'Tryck på ett avsnitt för att öva med flashcards.';
+}
 
 function renderSOSectionGrid() {
   const grid = document.getElementById('so-sections-grid');
@@ -1043,18 +1314,25 @@ function showSOSections() {
 }
 
 function startSOSection(idxOrAll) {
+  let items, label;
   if (idxOrAll === 'all') {
-    soCards = shuffled(SO_SECTIONS.flatMap(s => s.items));
-    soCurrentSectionTitle = 'Allt blandat';
+    items = SO_SECTIONS.flatMap(s => s.items);
+    label = 'Allt blandat';
   } else {
     const section = SO_SECTIONS[idxOrAll];
-    soCards = shuffled(section.items);
-    soCurrentSectionTitle = section.title;
+    items = section.items;
+    label = section.title;
   }
-  soIdx = 0;
-  soSeen = new Set();
-  renderSOCard();
-  showScreen('so-cards-screen');
+  if (soMode === 'quiz') {
+    startSOQuiz(items, label);
+  } else {
+    soCards = shuffled(items);
+    soCurrentSectionTitle = label;
+    soIdx = 0;
+    soSeen = new Set();
+    renderSOCard();
+    showScreen('so-cards-screen');
+  }
 }
 
 function renderSOCard() {
@@ -1073,6 +1351,7 @@ function flipSOCard() {
   if (!wasFlipped && !soSeen.has(soIdx)) {
     soSeen.add(soIdx);
     awardXp(XP_REWARDS.soCardSeen, 'begrepp');
+    bumpQuest('begrepp');
   }
 }
 function nextSOCard() {
@@ -1081,6 +1360,88 @@ function nextSOCard() {
 }
 function prevSOCard() {
   if (soIdx > 0) { soIdx--; renderSOCard(); }
+}
+
+// ==================== SO QUIZ (multiple choice) ====================
+let qzQuestions = [];
+let qzIdx = 0;
+let qzScore = 0;
+let qzAnswered = false;
+let qzLastItems = null;
+let qzLastLabel = '';
+
+function startSOQuiz(items, label) {
+  qzLastItems = items;
+  qzLastLabel = label;
+  qzScore = 0;
+  qzIdx = 0;
+  const n = Math.min(10, items.length);
+  const pool = SO_SECTIONS.flatMap(s => s.items);
+  qzQuestions = shuffled(items).slice(0, n).map(item => {
+    const distractors = shuffled(pool.filter(d => d.term !== item.term))
+      .slice(0, 3).map(d => d.term);
+    return {
+      def: item.def,
+      correct: item.term,
+      options: shuffled([item.term, ...distractors])
+    };
+  });
+  renderQuiz();
+  showScreen('so-quiz-screen');
+  document.getElementById('done-again').onclick = () => startSOQuiz(qzLastItems, qzLastLabel);
+}
+
+function renderQuiz() {
+  qzAnswered = false;
+  const q = qzQuestions[qzIdx];
+  document.getElementById('qz-progress').textContent = `${qzIdx + 1} / ${qzQuestions.length}`;
+  document.getElementById('qz-score').textContent = `⭐ ${qzScore}`;
+  document.getElementById('qz-bar').style.width = ((qzIdx + 1) / qzQuestions.length * 100) + '%';
+  document.getElementById('qz-def').textContent = q.def;
+  const opts = document.getElementById('qz-options');
+  opts.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuiz(opt, btn);
+    opts.appendChild(btn);
+  });
+  document.getElementById('qz-feedback').classList.add('hidden');
+  document.getElementById('qz-next-btn').classList.add('hidden');
+}
+
+function answerQuiz(choice, btn) {
+  if (qzAnswered) return;
+  qzAnswered = true;
+  const q = qzQuestions[qzIdx];
+  const correct = choice === q.correct;
+
+  document.querySelectorAll('#qz-options .quiz-option').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.correct) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+
+  if (correct) { qzScore++; awardXp(XP_REWARDS.quizCorrect, 'rätt!'); bumpQuest('begrepp'); }
+  else { awardXp(XP_REWARDS.quizWrong, 'försök'); }
+
+  const fb = document.getElementById('qz-feedback');
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = correct
+    ? `✅ Rätt! Svaret är <strong>${q.correct}</strong>.`
+    : `❌ Rätt svar: <strong>${q.correct}</strong>`;
+  fb.classList.remove('hidden');
+
+  document.getElementById('qz-score').textContent = `⭐ ${qzScore}`;
+  const nb = document.getElementById('qz-next-btn');
+  nb.classList.remove('hidden');
+  nb.textContent = qzIdx < qzQuestions.length - 1 ? 'Nästa →' : 'Se resultat →';
+}
+
+function nextQuiz() {
+  if (qzIdx < qzQuestions.length - 1) { qzIdx++; renderQuiz(); }
+  else { showDone(qzScore, qzQuestions.length, 'Quiz: ' + qzLastLabel, () => startSOQuiz(qzLastItems, qzLastLabel)); }
 }
 
 // ==================== FÖRDJUPANDE FRÅGOR ====================
