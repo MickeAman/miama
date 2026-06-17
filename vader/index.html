@@ -113,6 +113,23 @@
   .stat .k{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
   .stat .e{font-size:1.05rem}
 
+  /* ---- Roligt vädertips ---- */
+  .tip{
+    width:100%;text-align:left;border:none;cursor:pointer;font-family:inherit;color:#5a3a12;
+    background:linear-gradient(135deg,#fff0c9,#ffe0a8);
+    border-radius:var(--radius);padding:15px 18px;margin-bottom:4px;
+    box-shadow:0 12px 26px rgba(239,108,42,.18);border:1px solid rgba(255,180,90,.55);
+    display:flex;align-items:center;gap:13px;line-height:1.4;
+    transition:transform .12s ease
+  }
+  .tip:active{transform:scale(.985)}
+  .tip .tic{font-size:1.9rem;flex:0 0 auto;animation:wobble 2.6s ease-in-out infinite}
+  @keyframes wobble{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+  .tip .ttx{flex:1}
+  .tip .tlbl{display:block;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.6;margin-bottom:2px}
+  .tip .tmsg{font-weight:700;font-size:.95rem}
+  .tip .more{font-size:.7rem;opacity:.45;flex:0 0 auto;align-self:flex-start}
+
   /* ---- Sektionsrubrik ---- */
   .section-h{
     font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--ink-soft);
@@ -183,6 +200,8 @@
 
   <div id="content" class="hidden">
     <div class="now" id="now"></div>
+
+    <button class="tip" id="tip" title="Tryck för nytt tips"></button>
 
     <div class="section-h">Timme för timme</div>
     <div class="hours" id="hours"></div>
@@ -255,6 +274,85 @@
     const d=new Date(iso);
     return d.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'});
   }
+
+  /* ---- Roliga vädertips ---- */
+  // Bygger en lista med passande tips utifrån väder, temp, vind och dygn.
+  function buildTips(c,isDay){
+    const code=c.weather_code, t=c.temperature_2m, feels=c.apparent_temperature,
+          wind=c.wind_speed_10m, rain=c.precipitation||0;
+    const snow=[71,73,75,77,85,86].includes(code);
+    const wet=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)||rain>=0.2;
+    const storm=code>=95;
+    const fog=[45,48].includes(code);
+    const clear=[0,1].includes(code);
+    const tips=[];
+
+    if(storm){
+      tips.push("⛈️","Åska på gång – håll dig inne och mysa! Perfekt dag för film och varm choklad.",
+        "⚡","Naturens eget ljusshow pågår. Dra ur laddaren och njut från fönstret.");
+    }
+    if(snow){
+      tips.push("⛄","Snö! Dags att bygga en snögubbe eller åka pulka. Glöm inte mössan!",
+        "🧤","Vantar, mössa och varma sockor – idag bjuder vädret på vintermys.",
+        "❄️","Perfekt snöbollsväder. Den som kastar först vinner (oskrivna regler).");
+    }
+    if(wet && !snow && !storm){
+      tips.push("☔","Ta med paraply – annars blir frisyren en överraskning.",
+        "🌧️","Regnkläder på! Eller stanna inne med en bok och en kopp te.",
+        "🦆","Det är ankväder ute. Stövlar på och hoppa i pölarna – ingen ser ändå.");
+    }
+    if(fog){
+      tips.push("🌫️","Dimmigt och mystiskt. Kör försiktigt och tänd lyktorna.",
+        "👻","Sikten är som i en skräckfilm. Perfekt för en lugn promenad.");
+    }
+    if((t<=-5||feels<=-8) && !storm){
+      tips.push("🥶","Iskallt! Lager på lager och en termos med något varmt är räddningen.",
+        "🧣","Det biter i kinderna idag. Halsduk över näsan och full fart!");
+    } else if(t<3 && !snow && !storm){
+      tips.push("🧥","Kyligt – ta på en extra tröja innan du går ut.",
+        "☕","Lagom kallt för en varm dryck och en rejäl jacka.");
+    }
+    if(t>=26){
+      tips.push("🥵","Hetta! Drick mycket vatten, sök skugga och ta det lugnt mitt på dagen.",
+        "🍦","Glassväder utan tvekan. Solkräm först, glass sen.",
+        "🏊","Perfekt dag för ett dopp – havet, sjön eller trädgårdsslangen.");
+    } else if(clear && isDay && t>=18){
+      tips.push("😎","Strålande! Solglasögon på och passa på att vara ute.",
+        "🧺","Picknickväder! Plocka ihop en korg och hitta en fin gräsplätt.",
+        "🌳","Soligt och skönt – ladda D-vitamin medan chansen finns.");
+    } else if(clear && isDay){
+      tips.push("🌤️","Klart och fint – en promenad sitter aldrig fel idag.",
+        "🚶","Snäll väderlek. Lämna soffan, ta en sväng ut.");
+    }
+    if(wind>=12 && !storm){
+      tips.push("💨","Blåsigt! Håll i hatten – och kanske inte dagen för paraply.",
+        "🪁","Perfekt drakflygarväder. Eller frisyr-förstörarväder, beror på.");
+    }
+    if(clear && !isDay){
+      tips.push("🌙","Klar natt – kika upp, kanske syns både stjärnor och planeter.",
+        "✨","Stjälklart ute. Ett perfekt tillfälle att blicka uppåt.");
+    }
+    // Alltid något kul kvar om inget annat matchar (t.ex. halvklart, milt)
+    if(!tips.length){
+      tips.push("🙂","Helt okej väder! Inget extremt – gör precis vad du känner för.",
+        "🌥️","Mittemellan-väder. En lätt jacka räcker oftast långt.",
+        "👍","Lugnt på väderfronten. Passa på att göra det där du skjutit upp.");
+    }
+    return tips;
+  }
+
+  let TIP_POOL=[], TIP_LAST=-1;
+  function showTip(){
+    if(!TIP_POOL.length) return;
+    let i=Math.floor(Math.random()*(TIP_POOL.length/2));
+    if(TIP_POOL.length>2 && i===TIP_LAST) i=(i+1)%(TIP_POOL.length/2);
+    TIP_LAST=i;
+    const emoji=TIP_POOL[i*2], msg=TIP_POOL[i*2+1];
+    el('tip').innerHTML=`<span class="tic">${emoji}</span>
+      <span class="ttx"><span class="tlbl">Dagens tips</span><span class="tmsg">${msg}</span></span>
+      <span class="more">↻</span>`;
+  }
+  el('tip').onclick=showTip;
 
   /* ---- Bakgrundstema efter väder + dygn ---- */
   function setSky(code,isDay){
@@ -384,6 +482,9 @@
         <div class="stat"><div class="e">🌧️</div><div class="v">${(c.precipitation||0)} mm</div><div class="k">Nederbörd</div></div>
         <div class="stat"><div class="e">${isDay?'🌇':'🌅'}</div><div class="v">${isDay&&sunset?fmtTime(sunset):(sunrise?fmtTime(sunrise):'–')}</div><div class="k">${isDay?'Solnedgång':'Soluppgång'}</div></div>
       </div>`;
+
+    /* Roligt tips baserat på vädret */
+    TIP_POOL=buildTips(c,isDay); TIP_LAST=-1; showTip();
 
     /* Timmar – nästa 24h från nu */
     const H=d.hourly, nowIdx=nearestHourIndex(H.time,c.time);
