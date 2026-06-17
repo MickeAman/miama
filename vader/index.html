@@ -80,6 +80,30 @@
   .suggest button + button{border-top:1px solid var(--line)}
   .suggest .sm{color:var(--muted);font-size:.8rem;margin-left:auto}
 
+  /* ---- Favoriter ---- */
+  .favs{display:flex;gap:8px;flex-wrap:wrap;margin:-6px 2px 16px}
+  .favs:empty{display:none}
+  .fav-chip{
+    display:inline-flex;align-items:center;gap:7px;border:none;cursor:pointer;font-family:inherit;
+    background:var(--card);backdrop-filter:blur(8px);color:var(--ink);font-weight:700;font-size:.85rem;
+    padding:8px 8px 8px 13px;border-radius:99px;box-shadow:0 6px 14px rgba(22,33,58,.12)
+  }
+  .fav-chip:active{transform:scale(.95)}
+  .fav-chip .x{
+    width:20px;height:20px;border-radius:50%;background:rgba(22,33,58,.10);color:var(--ink-soft);
+    display:grid;place-items:center;font-size:.8rem;line-height:1
+  }
+  .fav-chip .x:hover{background:#ffd3d3;color:#c23030}
+
+  .nowhead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .fav-star{
+    border:none;cursor:pointer;background:rgba(255,255,255,.5);color:#ef9b1e;
+    width:42px;height:42px;border-radius:14px;font-size:1.45rem;line-height:1;
+    display:grid;place-items:center;flex:0 0 auto;transition:transform .12s ease
+  }
+  .fav-star:active{transform:scale(.85)}
+  .fav-star.on{background:linear-gradient(135deg,#ffd66b,#ff9d3d);color:#fff;box-shadow:0 6px 14px rgba(239,108,42,.35)}
+
   /* ---- Status (laddar / fel) ---- */
   .status{text-align:center;color:var(--ink-soft);padding:40px 10px;font-size:.95rem;line-height:1.6}
   .status .big{font-size:2.6rem;display:block;margin-bottom:8px}
@@ -192,6 +216,8 @@
     <button class="clr" id="clrBtn" aria-label="Rensa">✕</button>
     <div class="suggest" id="suggest"></div>
   </div>
+
+  <div class="favs" id="favs"></div>
 
   <div id="status" class="status">
     <span class="big">🌤️</span>
@@ -443,7 +469,9 @@
   }
 
   /* ---- Hämta & rendera väder ---- */
+  let current=null;
   async function loadWeather(lat,lon,name){
+    current={lat,lon,name};
     showStatus("Hämtar vädret…",true);
     try{
       const url=`${FORECAST}?latitude=${lat}&longitude=${lon}`+
@@ -468,8 +496,13 @@
     /* Nuvarande */
     const sunrise=d.daily.sunrise?.[0], sunset=d.daily.sunset?.[0];
     el('now').innerHTML=`
-      <div class="place"><span class="pin">📍</span>${esc(name)}</div>
-      <div class="updated">Uppdaterat ${fmtTime(c.time)}</div>
+      <div class="nowhead">
+        <div>
+          <div class="place"><span class="pin">📍</span>${esc(name)}</div>
+          <div class="updated">Uppdaterat ${fmtTime(c.time)}</div>
+        </div>
+        <button class="fav-star" id="favStar" aria-label="Spara som favorit">☆</button>
+      </div>
       <div class="main">
         <span class="emoji">${w.emoji}</span>
         <span class="temp">${Math.round(c.temperature_2m)}<small>°</small></span>
@@ -482,6 +515,10 @@
         <div class="stat"><div class="e">🌧️</div><div class="v">${(c.precipitation||0)} mm</div><div class="k">Nederbörd</div></div>
         <div class="stat"><div class="e">${isDay?'🌇':'🌅'}</div><div class="v">${isDay&&sunset?fmtTime(sunset):(sunrise?fmtTime(sunrise):'–')}</div><div class="k">${isDay?'Solnedgång':'Soluppgång'}</div></div>
       </div>`;
+
+    /* Favorit-stjärna */
+    el('favStar').onclick=toggleFav;
+    updateFavStar();
 
     /* Roligt tips baserat på vädret */
     TIP_POOL=buildTips(c,isDay); TIP_LAST=-1; showTip();
@@ -535,28 +572,79 @@
     return best;
   }
 
-  /* ---- Spara/återställ senaste plats ---- */
-  async function saveLast(lat,lon,name){
-    try{ await window.storage?.set('vader_last',JSON.stringify({lat,lon,name})); }
-    catch(e){ try{localStorage.setItem('vader_last',JSON.stringify({lat,lon,name}));}catch(_){} }
+  /* ---- Generisk lagring (window.storage med localStorage som reserv) ---- */
+  async function store(key,val){
+    const s=JSON.stringify(val);
+    try{ if(window.storage?.set){ await window.storage.set(key,s); return; } }catch(e){}
+    try{ localStorage.setItem(key,s); }catch(e){}
   }
-  async function loadLast(){
+  async function read(key){
     let raw=null;
-    try{ const r=await window.storage?.get('vader_last'); raw=r&&r.value; }catch(e){}
-    if(!raw){ try{raw=localStorage.getItem('vader_last');}catch(e){} }
-    if(raw){
-      try{
-        const p=JSON.parse(raw);
-        qInput.value=p.name; clrBtn.style.display='block';
-        loadWeather(p.lat,p.lon,p.name);
-        return true;
-      }catch(e){}
+    try{ const r=await window.storage?.get(key); raw=r&&r.value; }catch(e){}
+    if(raw==null){ try{ raw=localStorage.getItem(key); }catch(e){} }
+    if(raw==null) return null;
+    try{ return JSON.parse(raw); }catch(e){ return null; }
+  }
+
+  /* ---- Senaste plats ---- */
+  function saveLast(lat,lon,name){ store('vader_last',{lat,lon,name}); }
+  async function loadLast(){
+    const p=await read('vader_last');
+    if(p && typeof p.lat==='number'){
+      qInput.value=p.name; clrBtn.style.display='block';
+      loadWeather(p.lat,p.lon,p.name);
+      return true;
     }
     return false;
   }
 
+  /* ---- Favoriter ---- */
+  let FAVS=[];
+  const favKey=(lat,lon)=>lat.toFixed(3)+','+lon.toFixed(3);
+  function isFav(lat,lon){ return FAVS.some(f=>favKey(f.lat,f.lon)===favKey(lat,lon)); }
+
+  function renderFavs(){
+    el('favs').innerHTML=FAVS.map((f,i)=>
+      `<span class="fav-chip" data-i="${i}"><span class="lbl">⭐ ${esc(f.name)}</span>`+
+      `<span class="x" data-rm="${i}" role="button" aria-label="Ta bort">✕</span></span>`
+    ).join('');
+    el('favs').querySelectorAll('.fav-chip').forEach(chip=>{
+      chip.querySelector('.lbl').onclick=()=>{
+        const f=FAVS[+chip.dataset.i];
+        qInput.value=f.name; clrBtn.style.display='block';
+        suggest.classList.remove('show');
+        loadWeather(f.lat,f.lon,f.name); saveLast(f.lat,f.lon,f.name);
+      };
+      chip.querySelector('.x').onclick=e=>{
+        e.stopPropagation();
+        FAVS.splice(+chip.dataset.rm,1); store('vader_favs',FAVS);
+        renderFavs(); updateFavStar();
+      };
+    });
+  }
+  function toggleFav(){
+    if(!current) return;
+    const k=favKey(current.lat,current.lon);
+    const idx=FAVS.findIndex(f=>favKey(f.lat,f.lon)===k);
+    if(idx>=0) FAVS.splice(idx,1);
+    else FAVS.push({lat:current.lat,lon:current.lon,name:current.name});
+    store('vader_favs',FAVS); renderFavs(); updateFavStar();
+  }
+  function updateFavStar(){
+    const star=el('favStar'); if(!star||!current) return;
+    const on=isFav(current.lat,current.lon);
+    star.textContent=on?'★':'☆';
+    star.classList.toggle('on',on);
+    star.title=on?'Ta bort favorit':'Spara som favorit';
+  }
+
   /* ---- Start ---- */
-  loadLast();
+  (async function init(){
+    const f=await read('vader_favs');
+    if(Array.isArray(f)) FAVS=f.filter(x=>x&&typeof x.lat==='number');
+    renderFavs();
+    loadLast();
+  })();
 })();
 </script>
 </body>
