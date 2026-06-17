@@ -154,6 +154,25 @@
   .tip .tmsg{font-weight:700;font-size:.95rem}
   .tip .more{font-size:.7rem;opacity:.45;flex:0 0 auto;align-self:flex-start}
 
+  /* ---- Shopping-CTA (Amazon) ---- */
+  .shop{
+    display:flex;align-items:center;gap:13px;text-decoration:none;color:#2a2118;
+    background:linear-gradient(135deg,#fff7ec,#ffe9c7);
+    border:1px solid rgba(255,153,30,.45);border-radius:var(--radius);
+    padding:13px 16px;margin:10px 0 2px;box-shadow:0 10px 24px rgba(239,108,42,.14);
+    transition:transform .12s ease,box-shadow .2s ease
+  }
+  .shop:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(239,108,42,.22)}
+  .shop:active{transform:scale(.99)}
+  .shop .sic{font-size:1.7rem;flex:0 0 auto}
+  .shop .stx{flex:1;display:flex;flex-direction:column;line-height:1.25}
+  .shop .slbl{font-size:.72rem;font-weight:700;color:var(--muted)}
+  .shop .scta{font-weight:800;font-size:.98rem;color:var(--accent-deep)}
+  .shop .samz{
+    flex:0 0 auto;font-size:.66rem;font-weight:800;letter-spacing:.04em;color:#7a5a1a;
+    background:rgba(255,255,255,.7);padding:5px 9px;border-radius:99px
+  }
+
   /* ---- Sektionsrubrik ---- */
   .section-h{
     font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--ink-soft);
@@ -196,10 +215,35 @@
   .foot a{color:var(--accent-deep);text-decoration:none;font-weight:700}
   .hidden{display:none!important}
 
+  /* tangentbordsval i sökförslag */
+  .suggest button.active{background:#eaf2fd}
+  /* aktiv favorit-chip */
+  .fav-chip.active{background:linear-gradient(135deg,#ffe7b0,#ffd58a);box-shadow:0 6px 16px rgba(239,108,42,.25)}
+  /* dagens hög/låg i nu-kortet */
+  .now .hilo{display:inline-flex;gap:10px;margin-left:8px;font-size:.86rem;font-weight:700}
+  .now .hilo .hi{color:var(--accent-deep)} .now .hilo .lo{color:var(--muted)}
+  .now .updated{cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .now .updated .rf{opacity:.55;font-size:.78rem}
+  /* retry-knapp i felläge */
+  .retry{margin-top:14px;border:none;cursor:pointer;font-family:inherit;font-weight:800;
+    background:var(--accent);color:#fff;padding:11px 20px;border-radius:99px;font-size:.9rem;
+    box-shadow:0 8px 18px rgba(239,108,42,.3)}
+  .retry:active{transform:scale(.95)}
+
+  /* tillgänglighet: synlig fokusring */
+  a:focus-visible,button:focus-visible,input:focus-visible,
+  .fav-chip:focus-visible,.suggest button:focus-visible{
+    outline:3px solid #2f6fd6;outline-offset:2px;border-radius:12px
+  }
+
   @media (max-width:380px){
     .now .temp{font-size:3.3rem}
     .now .emoji{font-size:3.8rem}
     .stat .v{font-size:.9rem}
+  }
+  /* respektera minskad rörelse */
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   }
 </style>
 </head>
@@ -229,6 +273,8 @@
 
     <button class="tip" id="tip" title="Tryck för nytt tips"></button>
 
+    <a class="shop" id="shop" target="_blank" rel="noopener nofollow sponsored"></a>
+
     <div class="section-h">Timme för timme</div>
     <div class="hours" id="hours"></div>
 
@@ -247,6 +293,31 @@
   "use strict";
   const GEO="https://geocoding-api.open-meteo.com/v1/search";
   const FORECAST="https://api.open-meteo.com/v1/forecast";
+  const REVGEO="https://api.bigdatacloud.net/data/reverse-geocode-client";
+
+  /* === Amazon-affiliate ===
+     Lägg in din associate-tag här (t.ex. "dittnamn-21") så får du provision
+     på allt som köps via shoppingknappen. Tom sträng = vanlig Amazon-länk. */
+  const AFFILIATE_TAG="miama38-21";
+  function amazonLink(query){
+    const tag=AFFILIATE_TAG?`&tag=${encodeURIComponent(AFFILIATE_TAG)}`:"";
+    return `https://www.amazon.se/s?k=${encodeURIComponent(query)}${tag}`;
+  }
+  // Väljer passande produktförslag utifrån vädret.
+  function gearFor(c,isDay){
+    const code=c.weather_code, t=c.temperature_2m, wind=c.wind_speed_10m, rain=c.precipitation||0;
+    const snow=[71,73,75,77,85,86].includes(code);
+    const wet=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)||rain>=0.2;
+    if(snow)                              return {emoji:"🧤",label:"Snö och kyla idag",cta:"Shoppa mössa & vantar",query:"mössa vantar set vinter varm"};
+    if(code>=95)                          return {emoji:"🧥",label:"Åska och rusk",cta:"Shoppa regnjacka",query:"regnjacka vattentät unisex"};
+    if(wet)                               return {emoji:"☔",label:"Regn i sikte",cta:"Shoppa paraply",query:"paraply hopfällbart vindsäkert"};
+    if(t<=0)                              return {emoji:"🧣",label:"Iskallt ute",cta:"Shoppa varma plagg",query:"halsduk mössa ull set"};
+    if([0,1].includes(code)&&isDay&&t>=22)return {emoji:"🧴",label:"Stark sol",cta:"Shoppa solkräm & solglasögon",query:"solkräm spf 50 solglasögon"};
+    if([0,1].includes(code)&&isDay&&t>=16)return {emoji:"😎",label:"Soligt och fint",cta:"Shoppa solglasögon",query:"solglasögon polariserade unisex"};
+    if(wind>=12)                          return {emoji:"💨",label:"Blåsigt idag",cta:"Shoppa vindtät jacka",query:"vindjacka vattentät lätt"};
+    if(t<10)                              return {emoji:"🧥",label:"Lite kyligt",cta:"Shoppa höstjacka",query:"höstjacka softshell unisex"};
+    return {emoji:"🛍️",label:"Gör dig redo för vädret",cta:"Shoppa utomhusprylar",query:"utomhus friluft prylar"};
+  }
 
   const el=id=>document.getElementById(id);
   const qInput=el('q'), suggest=el('suggest'), statusEl=el('status'),
@@ -413,11 +484,18 @@
   document.addEventListener('click',e=>{
     if(!e.target.closest('.search')) suggest.classList.remove('show');
   });
+  let selIdx=-1;
+  function highlight(){
+    const btns=[...suggest.querySelectorAll('button')];
+    btns.forEach((b,i)=>b.classList.toggle('active',i===selIdx));
+    if(selIdx>=0 && btns[selIdx]) btns[selIdx].scrollIntoView({block:'nearest'});
+  }
   qInput.addEventListener('keydown',e=>{
-    if(e.key==='Enter'){
-      const first=suggest.querySelector('button');
-      if(first) first.click();
-    }
+    const btns=[...suggest.querySelectorAll('button')];
+    if(e.key==='ArrowDown'){ e.preventDefault(); if(!btns.length) return; selIdx=(selIdx+1)%btns.length; highlight(); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); if(!btns.length) return; selIdx=(selIdx-1+btns.length)%btns.length; highlight(); }
+    else if(e.key==='Enter'){ (btns[selIdx]||btns[0])?.click(); }
+    else if(e.key==='Escape'){ suggest.classList.remove('show'); selIdx=-1; }
   });
 
   async function geocode(name){
@@ -442,6 +520,7 @@
           saveLast(+b.dataset.lat,+b.dataset.lon,b.dataset.name);
         };
       });
+      selIdx=-1;
       suggest.classList.add('show');
     }catch(e){ suggest.classList.remove('show'); }
   }
@@ -464,8 +543,14 @@
     );
   };
   async function reverseName(lat,lon){
-    // Open-Meteos geocoder stöder ingen reverse-lookup, så vi visar koordinater snyggt.
-    return `Din plats (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
+    // Gratis reverse-geocoding utan nyckel för att visa ett riktigt ortnamn.
+    try{
+      const r=await fetch(`${REVGEO}?latitude=${lat}&longitude=${lon}&localityLanguage=sv`);
+      const j=await r.json();
+      const n=j.city||j.locality||j.principalSubdivision;
+      if(n) return n;
+    }catch(e){}
+    return "Min plats";
   }
 
   /* ---- Hämta & rendera väder ---- */
@@ -484,7 +569,9 @@
       const d=await r.json();
       render(d,name);
     }catch(e){
-      showStatus('<span class="big">⚠️</span>Kunde inte hämta vädret just nu. Försök igen om en stund.');
+      showStatus('<span class="big">⚠️</span>Kunde inte hämta vädret just nu.<br><button class="retry" id="retryBtn">Försök igen</button>');
+      const rb=el('retryBtn');
+      if(rb) rb.onclick=()=>loadWeather(lat,lon,name);
     }
   }
 
@@ -495,11 +582,12 @@
 
     /* Nuvarande */
     const sunrise=d.daily.sunrise?.[0], sunset=d.daily.sunset?.[0];
+    const tmax=Math.round(d.daily.temperature_2m_max[0]), tmin=Math.round(d.daily.temperature_2m_min[0]);
     el('now').innerHTML=`
       <div class="nowhead">
         <div>
           <div class="place"><span class="pin">📍</span>${esc(name)}</div>
-          <div class="updated">Uppdaterat ${fmtTime(c.time)}</div>
+          <div class="updated" id="updated" role="button" tabindex="0" title="Tryck för att uppdatera">Uppdaterat ${fmtTime(c.time)} <span class="rf">↻</span></div>
         </div>
         <button class="fav-star" id="favStar" aria-label="Spara som favorit">☆</button>
       </div>
@@ -508,7 +596,9 @@
         <span class="temp">${Math.round(c.temperature_2m)}<small>°</small></span>
       </div>
       <div class="desc">${w.desc}</div>
-      <div class="feels">Känns som ${Math.round(c.apparent_temperature)}°</div>
+      <div class="feels">Känns som ${Math.round(c.apparent_temperature)}°
+        <span class="hilo"><span class="hi">↑${tmax}°</span><span class="lo">↓${tmin}°</span></span>
+      </div>
       <div class="stats">
         <div class="stat"><div class="e">💧</div><div class="v">${c.relative_humidity_2m}%</div><div class="k">Fukt</div></div>
         <div class="stat"><div class="e">💨</div><div class="v">${Math.round(c.wind_speed_10m)} <span style="font-size:.7rem">m/s</span></div><div class="k">${windDir(c.wind_direction_10m)}</div></div>
@@ -520,8 +610,21 @@
     el('favStar').onclick=toggleFav;
     updateFavStar();
 
+    /* Uppdatera genom att trycka på tidsstämpeln */
+    const up=el('updated');
+    const refresh=()=>{ if(current) loadWeather(current.lat,current.lon,current.name); };
+    up.onclick=refresh;
+    up.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); refresh(); } };
+
     /* Roligt tips baserat på vädret */
     TIP_POOL=buildTips(c,isDay); TIP_LAST=-1; showTip();
+
+    /* Shopping-CTA baserad på vädret */
+    const g=gearFor(c,isDay), shop=el('shop');
+    shop.href=amazonLink(g.query);
+    shop.innerHTML=`<span class="sic">${g.emoji}</span>
+      <span class="stx"><span class="slbl">${g.label}</span><span class="scta">${g.cta} →</span></span>
+      <span class="samz">Amazon</span>`;
 
     /* Timmar – nästa 24h från nu */
     const H=d.hourly, nowIdx=nearestHourIndex(H.time,c.time);
@@ -604,8 +707,9 @@
   function isFav(lat,lon){ return FAVS.some(f=>favKey(f.lat,f.lon)===favKey(lat,lon)); }
 
   function renderFavs(){
+    const ck=current?favKey(current.lat,current.lon):null;
     el('favs').innerHTML=FAVS.map((f,i)=>
-      `<span class="fav-chip" data-i="${i}"><span class="lbl">⭐ ${esc(f.name)}</span>`+
+      `<span class="fav-chip ${favKey(f.lat,f.lon)===ck?'active':''}" data-i="${i}"><span class="lbl">⭐ ${esc(f.name)}</span>`+
       `<span class="x" data-rm="${i}" role="button" aria-label="Ta bort">✕</span></span>`
     ).join('');
     el('favs').querySelectorAll('.fav-chip').forEach(chip=>{
@@ -636,6 +740,7 @@
     star.textContent=on?'★':'☆';
     star.classList.toggle('on',on);
     star.title=on?'Ta bort favorit':'Spara som favorit';
+    renderFavs(); // uppdatera aktiv markering
   }
 
   /* ---- Start ---- */
