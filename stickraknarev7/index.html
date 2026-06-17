@@ -15,18 +15,24 @@
   <!-- React + Babel -->
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script>window.React||document.write('<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"><\/script>')</script>
 
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script>window.ReactDOM||document.write('<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"><\/script>')</script>
 
   <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+  <script>window.Babel||document.write('<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js"><\/script>')</script>
 
   <!-- Firebase compat -->
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script>window.firebase||document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-app-compat.js"><\/script>')</script>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script>(window.firebase&&firebase.auth)||document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-auth-compat.js"><\/script>')</script>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script>(window.firebase&&firebase.firestore)||document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-firestore-compat.js"><\/script>')</script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
@@ -483,9 +489,11 @@
       messagingSenderId: "411052324712",
       appId:             "1:411052324712:web:917f52b1ec23ccf51b88dd",
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db   = firebase.firestore();
+    // Keep working (and surviving reloads) even if the network drops.
+    try { db.enablePersistence({ synchronizeTabs: true }).catch(()=>{}); } catch (e) {}
 
     // ── helpers ──────────────────────────────────────────────────────────────
     const uid  = () => `${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
@@ -1578,10 +1586,15 @@
       };
 
       useEffect(()=>{
-        return auth.onAuthStateChanged(async u => {
+        let settled = false;
+        const unsub = auth.onAuthStateChanged(async u => {
+          settled = true;
           setUser(u||null);
           if (u) await migrateFromLocalStorage(u.uid);
-        });
+        }, err => { settled = true; console.error("Auth error:", err); setUser(null); });
+        // Never hang on the loading spinner forever if Firebase never responds.
+        const timer = setTimeout(()=>{ if(!settled) setUser(null); }, 10000);
+        return ()=>{ clearTimeout(timer); unsub(); };
       },[]);
 
       // Firestore listener — normalize every project on read so the UI never
@@ -1685,7 +1698,27 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+    // Catch render-time crashes in any component so one bad render can't
+    // white-screen the whole app. Data lives in Firestore, so a reload recovers.
+    class ErrorBoundary extends React.Component {
+      constructor(props){ super(props); this.state = { error: null }; }
+      static getDerivedStateFromError(error){ return { error }; }
+      componentDidCatch(error, info){ console.error("App crashed:", error, info); }
+      render(){
+        if(!this.state.error) return this.props.children;
+        return (
+          <div style={{fontFamily:"system-ui,sans-serif",maxWidth:520,margin:"14vh auto",padding:24,color:"#3d3028",lineHeight:1.5}}>
+            <div style={{fontSize:40}}>🧶</div>
+            <h1 style={{fontSize:18,margin:"12px 0 8px"}}>Något gick fel</h1>
+            <p style={{fontSize:14,color:"#5e5048"}}>Appen stötte på ett fel, men dina projekt är sparade. Ladda om för att fortsätta.</p>
+            <button onClick={()=>location.reload()} style={{marginTop:12,padding:"10px 18px",border:"none",borderRadius:9,background:"#18120e",color:"#fff",fontSize:14,cursor:"pointer"}}>Ladda om</button>
+            <pre style={{whiteSpace:"pre-wrap",wordBreak:"break-word",background:"#f9f6f1",border:"1px solid #e2ddd6",borderRadius:9,padding:12,fontSize:12,color:"#a0390f",marginTop:16}}>{String(this.state.error && (this.state.error.stack || this.state.error.message || this.state.error))}</pre>
+          </div>
+        );
+      }
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><App/></ErrorBoundary>);
   </script>
 
 </body>
