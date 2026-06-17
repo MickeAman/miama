@@ -12,9 +12,9 @@
   <link rel="apple-touch-icon" href="icon-512.png">
 
   <!-- React + Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 
   <!-- Firebase compat (works as globals, no build step needed) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -247,7 +247,41 @@
 <body>
   <div id="root"></div>
 
-  <script type="text/babel" data-presets="react,env">
+    <!-- Failsafe: turn a silent blank page into a visible error message. -->
+  <script>
+    (function () {
+      function showError(msg) {
+        var root = document.getElementById("root");
+        if (!root || root.childElementCount > 0) return;
+        root.innerHTML =
+          '<div style="font-family:system-ui,sans-serif;max-width:520px;margin:14vh auto;padding:24px;color:#3d3028;line-height:1.5">' +
+          '<div style="font-size:40px">🧶</div>' +
+          '<h1 style="font-size:18px;margin:12px 0 8px">Stickräknaren kunde inte starta</h1>' +
+          '<p style="font-size:14px;color:#5e5048">Något gick fel när sidan laddades. Försök ladda om. Visa gärna detta för support:</p>' +
+          '<pre style="white-space:pre-wrap;word-break:break-word;background:#f9f6f1;border:1px solid #e2ddd6;border-radius:9px;padding:12px;font-size:12px;color:#a0390f">' +
+          String(msg).replace(/[<>&]/g, function (c) { return { "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]; }) +
+          '</pre></div>';
+      }
+      window.addEventListener("error", function (e) {
+        showError((e && e.message) || "Script error: " + (e && e.filename || "okänd källa"));
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        showError("Promise: " + ((e && e.reason && (e.reason.message || e.reason)) || "okänt fel"));
+      });
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          var missing = [];
+          if (typeof React === "undefined" || typeof ReactDOM === "undefined") missing.push("React (unpkg)");
+          if (typeof Babel === "undefined") missing.push("Babel (unpkg)");
+          if (typeof firebase === "undefined") missing.push("Firebase (gstatic)");
+          if (missing.length) showError("Kunde inte ladda: " + missing.join(", ") + ". Kontrollera nätverk/brandvägg.");
+          else showError("Appen renderades inte. Se webbläsarens konsol för detaljer.");
+        }, 4000);
+      });
+    })();
+  </script>
+
+<script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useRef, useCallback } = React;
 
     // ── Firebase init ────────────────────────────────────────────────────────
