@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sommarträning – Sandarna BK</title>
+<style>
+  :root{
+    --black:#111113;
+    --black-soft:#1c1c20;
+    --red:#d2122e;          /* Sandarna rött */
+    --red-deep:#a50d23;
+    --chalk:#f4f4f2;
+    --line:#e2e2e6;
+    --ink:#16161a;
+    --muted:#6c6c75;
+    --card:#ffffff;
+    --steel:#3a3a42;
+    --radius:18px;
+    --font:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;font-family:var(--font);color:var(--ink);
+    background:var(--black);min-height:100vh;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px 80px}
+
+  /* ---- Header: svart/röd randig ---- */
+  header{
+    text-align:center;color:var(--chalk);position:relative;
+    margin:0 -16px 0;padding:26px 20px 22px;
+    background:repeating-linear-gradient(
+      115deg,
+      var(--black) 0 26px,
+      var(--red-deep) 26px 52px
+    );
+    border-bottom:4px solid var(--red);
+  }
+  header::after{content:"";position:absolute;inset:0;background:rgba(15,15,17,.55)}
+  header > *{position:relative;z-index:1}
+  .crest{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+    font-weight:bold;color:#fff;margin-bottom:8px
+  }
+  .crest .dot{width:11px;height:11px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+  h1{
+    margin:0;font-size:clamp(1.9rem,7.5vw,2.7rem);line-height:1;letter-spacing:-.01em;
+    text-transform:uppercase;text-shadow:0 2px 0 rgba(0,0,0,.4)
+  }
+  .heart{display:block;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-top:6px;font-weight:bold}
+  .sub{margin:12px auto 0;max-width:46ch;font-size:.92rem;opacity:.94;line-height:1.45}
+
+  .progress{
+    margin:18px auto 4px;background:rgba(255,255,255,.16);border-radius:99px;
+    height:14px;overflow:hidden;border:1px solid rgba(255,255,255,.28)
+  }
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--red-deep));border-radius:99px;transition:width .4s ease}
+  .progress-txt{color:var(--chalk);text-align:center;font-size:.82rem;margin-top:6px;opacity:.9}
+
+  /* ---- Principle cards ---- */
+  .principles{display:grid;gap:10px;margin:20px 0 8px}
+  .p{
+    background:var(--card);border-radius:var(--radius);padding:14px 16px;
+    display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;
+    box-shadow:0 6px 16px rgba(0,0,0,.35);border-left:5px solid var(--red)
+  }
+  .p .num{
+    width:42px;height:42px;border-radius:12px;background:var(--black);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:bold
+  }
+  .p h3{margin:2px 0 4px;font-size:1.05rem}
+  .p p{margin:0;font-size:.88rem;color:var(--muted);line-height:1.45}
+  .p .tip{
+    display:block;margin-top:8px;background:#fdeaed;border-left:3px solid var(--red);
+    padding:8px 10px;border-radius:8px;color:#7a0a1b;font-size:.82rem
+  }
+
+  /* ---- Weeks ---- */
+  .section-h{
+    color:var(--chalk);margin:26px 4px 10px;font-size:.78rem;letter-spacing:.18em;
+    text-transform:uppercase;font-weight:bold;display:flex;justify-content:space-between;align-items:center
+  }
+  .section-h button{
+    background:rgba(255,255,255,.12);color:var(--chalk);border:1px solid rgba(255,255,255,.3);
+    border-radius:99px;padding:5px 12px;font-size:.72rem;font-weight:bold;cursor:pointer;letter-spacing:.05em
+  }
+  .week{
+    background:var(--card);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;
+    box-shadow:0 5px 14px rgba(0,0,0,.3)
+  }
+  .week-top{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .week-no{font-size:1.4rem;font-weight:bold;color:var(--red);min-width:64px}
+  .week-no small{display:block;font-size:.62rem;color:var(--muted);font-weight:normal;letter-spacing:.1em}
+  .week-bar{flex:1;height:8px;background:#eee;border-radius:99px;overflow:hidden}
+  .week-bar > i{display:block;height:100%;width:0;background:var(--red);transition:width .3s}
+
+  .targets{padding:6px 12px 14px}
+  .row{display:flex;align-items:center;gap:8px;padding:8px 4px}
+  .row-label{font-size:.78rem;color:var(--muted);min-width:96px;font-weight:bold;text-transform:uppercase;letter-spacing:.04em}
+  .boxes{display:flex;gap:8px;flex-wrap:wrap}
+  .box{
+    width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:#fafafa;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.3rem;color:transparent;
+    transition:all .15s;user-select:none
+  }
+  .box.cond.on{background:var(--red);border-color:var(--red);color:#fff}
+  .box.stretch.on{background:var(--black);border-color:var(--black);color:#fff}
+  .box:active{transform:scale(.92)}
+  .ball{display:flex;align-items:center;gap:10px;padding:8px 4px;flex-wrap:wrap}
+  .ball .row-label{min-width:96px}
+  .counter{display:flex;align-items:center;gap:10px}
+  .counter button{
+    width:40px;height:40px;border-radius:50%;border:none;background:var(--black);color:#fff;
+    font-size:1.4rem;font-weight:bold;cursor:pointer;line-height:1
+  }
+  .counter button:active{transform:scale(.9)}
+  .counter .val{font-size:1.3rem;font-weight:bold;min-width:38px;text-align:center}
+  .counter .unit{font-size:.78rem;color:var(--muted)}
+
+  /* ---- Footer ---- */
+  .foot{margin-top:24px;text-align:center;color:var(--chalk);font-size:.85rem;line-height:1.6;opacity:.95}
+  .foot a{color:var(--red);text-decoration:none;font-weight:bold}
+  .foot .lycka{font-size:1.2rem;font-weight:bold;margin-top:10px;color:#fff}
+  .foot .lycka b{color:var(--red)}
+
+  /* ---- Print ---- */
+  @media print{
+    body{background:#fff;color:#000}
+    header{background:#fff;border-bottom:3px solid #000;color:#000}
+    header::after{display:none}
+    .crest,.heart{color:#000}.crest .dot{background:#000;box-shadow:none}
+    .progress,.progress-txt,.section-h button,.counter button{display:none}
+    .p,.week{box-shadow:none;border:1px solid #999;break-inside:avoid}
+    .p{border-left:4px solid #000}
+    .box{border-color:#000;color:#000!important;background:#fff!important}
+    .box.on::after{content:"✕"}
+    .foot{color:#000}.foot a,.foot .lycka,.foot .lycka b{color:#000}
+    h1{text-shadow:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crest"><span class="dot"></span>Sandarna BK · P14 · SBK</div>
+    <h1>Sommarträning</h1>
+    <span class="heart">Klubben med hjärtat i Majorna</span>
+    <p class="sub">Frivilligt. Enkelt. För den som vill komma starkare till hösten – längre matcher, större planer, mer kondition.</p>
+    <div class="progress" aria-label="Total framgång"><i id="totalBar"></i></div>
+    <div class="progress-txt" id="totalTxt">0 % klart</div>
+  </header>
+
+  <section class="principles">
+    <div class="p">
+      <div class="num">1</div>
+      <div>
+        <h3>Spela fotboll ⚽</h3>
+        <p>Så mycket du kan, hela sommaren. Med kompisar, på rasten, var som helst.</p>
+      </div>
+    </div>
+    <div class="p">
+      <div class="num">2</div>
+      <div>
+        <h3>Kondition · 2 ggr/vecka</h3>
+        <p>Minst 1 timme med jämn belastning. Spring lugnt, gå, cykla, paddla, åk inlines – eller driv en boll runt planen.</p>
+        <span class="tip">⚡ Rätt nivå: <b>trött men har mer att ge</b>. Inga ruscher – låg och jämn fart.</span>
+      </div>
+    </div>
+    <div class="p">
+      <div class="num">3</div>
+      <div>
+        <h3>Stretch · 2 ggr/vecka</h3>
+        <p>Ca 15 min. Behöver inte vara perfekt – det handlar om rutin. Fokus på <b>höfter och baksida lår</b>. Kan sitta ihop med konditionspasset.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-h">
+    <span>Bocka av veckan</span>
+    <button id="resetBtn">Nollställ</button>
+  </div>
+  <div id="weeks"></div>
+
+  <div class="foot">
+    Frågor? Ring <a href="tel:0704691455">070‑469 14 55</a><br>
+    <span class="lycka">Lycka till! / <b>Tränarna</b></span>
+  </div>
+</div>
+
+<script>
+  const WEEKS = [25,26,27,28,29,30,31,32,33];
+  let state = {};
+
+  async function load(){
+    try{
+      const r = await window.storage.get('sandarna_summer');
+      if(r && r.value) state = JSON.parse(r.value);
+    }catch(e){ state = {}; }
+    WEEKS.forEach(w=>{ if(!state[w]) state[w]={cond:[false,false],stretch:[false,false],ball:0}; });
+    render();
+  }
+  async function save(){
+    try{ await window.storage.set('sandarna_summer', JSON.stringify(state)); }catch(e){}
+  }
+  function weekDone(w){ return state[w].cond.filter(Boolean).length + state[w].stretch.filter(Boolean).length; }
+
+  function render(){
+    const host = document.getElementById('weeks');
+    host.innerHTML = '';
+    WEEKS.forEach(w=>{
+      const s = state[w];
+      const pct = Math.round(weekDone(w)/4*100);
+      const el = document.createElement('div');
+      el.className = 'week';
+      el.innerHTML = `
+        <div class="week-top">
+          <div class="week-no">v.${w}<small>VECKA</small></div>
+          <div class="week-bar"><i style="width:${pct}%"></i></div>
+        </div>
+        <div class="targets">
+          <div class="row">
+            <span class="row-label">Kondition</span>
+            <div class="boxes">
+              ${[0,1].map(i=>`<div class="box cond ${s.cond[i]?'on':''}" data-w="${w}" data-t="cond" data-i="${i}">✓</div>`).join('')}
+            </div>
+          </div>
+          <div class="row">
+            <span class="row-label">Stretch</span>
+            <div class="boxes">
+              ${[0,1].map(i=>`<div class="box stretch ${s.stretch[i]?'on':''}" data-w="${w}" data-t="stretch" data-i="${i}">✓</div>`).join('')}
+            </div>
+          </div>
+          <div class="ball">
+            <span class="row-label">Fotboll</span>
+            <div class="counter">
+              <button data-w="${w}" data-d="-1">−</button>
+              <span class="val">${s.ball}</span>
+              <button data-w="${w}" data-d="1">+</button>
+              <span class="unit">ggr</span>
+            </div>
+          </div>
+        </div>`;
+      host.appendChild(el);
+    });
+    bind();
+    updateTotal();
+  }
+
+  function bind(){
+    document.querySelectorAll('.box').forEach(b=>{
+      b.onclick = ()=>{ const {w,t,i}=b.dataset; state[w][t][i]=!state[w][t][i]; save(); render(); };
+    });
+    document.querySelectorAll('.counter button').forEach(btn=>{
+      btn.onclick = ()=>{ const w=btn.dataset.w, d=+btn.dataset.d; state[w].ball=Math.max(0,state[w].ball+d); save(); render(); };
+    });
+  }
+
+  function updateTotal(){
+    let done=0, total=WEEKS.length*4;
+    WEEKS.forEach(w=> done+=weekDone(w));
+    const pct = Math.round(done/total*100);
+    document.getElementById('totalBar').style.width = pct+'%';
+    document.getElementById('totalTxt').textContent = pct+' % klart';
+  }
+
+  document.getElementById('resetBtn').onclick = ()=>{
+    if(confirm('Nollställa alla bockar?')){
+      state={}; WEEKS.forEach(w=> state[w]={cond:[false,false],stretch:[false,false],ball:0});
+      save(); render();
+    }
+  };
+
+  load();
+</script>
+</body>
+</html>
