@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ganz schön clever – Svensk manual</title>
+<meta name="description" content="Svenska regler för tärningsspelet Ganz schön clever av Wolfgang Warsch.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#131318; --card:#1c1c24; --ink:#f0eee6; --dim:#a5a3b0;
+    --yellow:#f2c230; --blue:#4a9bd8; --green:#7bc043;
+    --orange:#f07f2d; --purple:#a66bc7; --fox:#e8483f;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:16px; line-height:1.6;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px 80px}
+
+  /* HERO */
+  header{
+    text-align:center; padding:64px 20px 40px;
+    background:radial-gradient(ellipse at top, #232330 0%, var(--bg) 65%);
+  }
+  .fox{font-size:56px;line-height:1;filter:drop-shadow(0 0 14px rgba(232,72,63,.55))}
+  h1{
+    font-family:'Baloo 2',cursive; font-weight:800;
+    font-size:clamp(2.2rem,7vw,3.4rem); letter-spacing:.5px; margin-top:8px;
+    color:#fff; text-shadow:0 0 22px rgba(74,155,216,.45);
+  }
+  .sub{color:var(--dim);margin-top:6px}
+  .facts{
+    display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px
+  }
+  .facts span{
+    background:var(--card);border:1px solid #2c2c38;border-radius:999px;
+    padding:6px 16px;font-size:.9rem;font-weight:600
+  }
+
+  /* NAV chips */
+  nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:28px 0 8px}
+  nav a{
+    text-decoration:none;font-weight:700;font-size:.85rem;
+    padding:6px 14px;border-radius:999px;color:var(--bg)
+  }
+  nav a.y{background:var(--yellow)} nav a.b{background:var(--blue)}
+  nav a.g{background:var(--green)} nav a.o{background:var(--orange)}
+  nav a.p{background:var(--purple);color:#fff}
+
+  h2{
+    font-family:'Baloo 2',cursive;font-weight:700;font-size:1.6rem;
+    margin:44px 0 14px;display:flex;align-items:center;gap:10px
+  }
+  h2::before{content:"";width:10px;height:26px;border-radius:4px;background:var(--fox)}
+  h3{font-family:'Baloo 2',cursive;font-size:1.15rem;margin:22px 0 8px}
+  p{margin:0 0 12px}
+  ul,ol{margin:0 0 14px 22px}
+  li{margin-bottom:6px}
+  strong{color:#fff}
+  .dim{color:var(--dim)}
+
+  .card{
+    background:var(--card);border:1px solid #2c2c38;border-radius:var(--radius);
+    padding:20px 22px;margin:14px 0
+  }
+  .tip{border-left:4px solid var(--yellow)}
+  .warn{border-left:4px solid var(--fox)}
+
+  /* Färgområden – signaturen */
+  .area{border-radius:var(--radius);padding:20px 22px;margin:16px 0;background:var(--card)}
+  .area h3{margin-top:0;display:flex;align-items:center;gap:10px}
+  .die{
+    width:26px;height:26px;border-radius:7px;display:inline-block;flex:none;
+    box-shadow:0 0 10px currentColor
+  }
+  .a-y{border:2px solid var(--yellow)} .a-y .die{background:var(--yellow);color:var(--yellow)}
+  .a-b{border:2px solid var(--blue)}   .a-b .die{background:var(--blue);color:var(--blue)}
+  .a-g{border:2px solid var(--green)}  .a-g .die{background:var(--green);color:var(--green)}
+  .a-o{border:2px solid var(--orange)} .a-o .die{background:var(--orange);color:var(--orange)}
+  .a-p{border:2px solid var(--purple)} .a-p .die{background:var(--purple);color:var(--purple)}
+  .a-w{border:2px solid #e6e6e6}       .a-w .die{background:#fff;color:#bbb}
+  .pts{margin-top:10px;font-weight:700;color:#fff}
+  .pts::before{content:"★ ";color:var(--yellow)}
+
+  table{width:100%;border-collapse:collapse;margin:10px 0 18px;font-size:.95rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid #2c2c38}
+  th{color:var(--dim);font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.06em}
+  tr:last-child td{border-bottom:none}
+
+  footer{
+    text-align:center;color:var(--dim);font-size:.85rem;
+    margin-top:60px;border-top:1px solid #2c2c38;padding-top:24px
+  }
+  a{color:var(--blue)}
+  :focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="fox" aria-hidden="true">🦊</div>
+  <h1>Ganz schön clever</h1>
+  <p class="sub">Svensk manual · Ett klurigt tärningsspel av Wolfgang Warsch</p>
+  <div class="facts">
+    <span>👥 1–4 spelare</span><span>🎂 8+</span><span>⏱️ ca 30 min</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav aria-label="Hoppa till färgområde">
+  <a class="y" href="#gul">Gul</a>
+  <a class="b" href="#bla">Blå</a>
+  <a class="g" href="#gron">Grön</a>
+  <a class="o" href="#orange">Orange</a>
+  <a class="p" href="#lila">Lila</a>
+</nav>
+
+<h2>Innehåll &amp; spelidé</h2>
+<ul>
+  <li>1 block med spelblad · 6 tärningar (gul, blå, grön, orange, lila, vit) · 4 pennor</li>
+  <li>Använd tärningarna smart för att fylla i de fem färgområdena, samla bonusar och rävar.</li>
+  <li><strong>Flest poäng efter sista rundan vinner!</strong></li>
+</ul>
+<p><strong>Förberedelser:</strong> Alla får ett spelblad och en penna. Den "klurigaste" spelaren får tärningarna och börjar.</p>
+
+<h2>Antal rundor</h2>
+<table>
+  <tr><th>Spelare</th><th>Rundor</th></tr>
+  <tr><td>1–2</td><td>6</td></tr>
+  <tr><td>3</td><td>5</td></tr>
+  <tr><td>4</td><td>4</td></tr>
+</table>
+<p>Varje runda: alla stryker rundans nummer och får <strong>aktionen</strong> som visas där (runda 1–3) eller <strong>en av två svarta bonusar</strong> (runda 4).</p>
+
+<h2>Spelets gång</h2>
+
+<h3>Den aktiva spelaren</h3>
+<ol>
+  <li><strong>Slå alla 6 tärningar.</strong></li>
+  <li><strong>Välj EN tärning</strong>, lägg den på ett av dina 3 tärningsfält och skriv/kryssa in värdet i rätt färgområde.</li>
+  <li>Alla tärningar med <strong>lägre värde</strong> läggs på <strong>silverbrickan</strong> – låsta för dig!</li>
+  <li><strong>Slå om</strong> resten. Välj en till, skriv in, lägre tärningar → brickan.</li>
+  <li><strong>Tredje slaget</strong>, välj en sista tärning. Allt som blir över → brickan.</li>
+</ol>
+<div class="card warn">
+  <strong>⚠️ Varning:</strong> Väljer du en hög tärning tidigt kan alla andra hamna på brickan – då får du färre än 3 slag! Kan du inte använda någon tärning ur ditt slag förfaller det och tärningsfältet lämnas tomt.
+</div>
+
+<h3>De passiva spelarna</h3>
+<ul>
+  <li>När den aktiva spelaren är klar väljer <strong>alla andra EN tärning från silverbrickan</strong> och skriver in den – samtidigt, och flera får välja <strong>samma</strong> tärning.</li>
+  <li><strong>Specialfall:</strong> Kan du inte använda <em>någon</em> tärning från brickan får du ta en från den aktiva spelarens tärningsfält. Att frivilligt avstå brickan är inte tillåtet.</li>
+</ul>
+<p>Sedan blir spelaren till vänster ny aktiv spelare. Rundan är slut när alla varit aktiva en gång.</p>
+
+<h2>Färgområdena</h2>
+
+<div class="area a-w">
+  <h3><span class="die"></span>Vit tärning – joker</h3>
+  <p>Kan användas som gul, grön, orange eller lila – eller kombineras med den blå (se blått område).</p>
+</div>
+
+<div class="area a-y" id="gul">
+  <h3><span class="die"></span>Gult område</h3>
+  <ul>
+    <li>Kryssa den slagna siffran, valfri ordning. Varje siffra finns två gånger – men bara ett kryss per tärning.</li>
+    <li>Komplett <strong>kolumn</strong> = ringa in poängen i stjärnan under.</li>
+  </ul>
+  <p class="pts">Poäng: summan av alla inringade tal.</p>
+</div>
+
+<div class="area a-b" id="bla">
+  <h3><span class="die"></span>Blått område</h3>
+  <ul>
+    <li>Kryssa <strong>summan av blå + vit tärning</strong> – gäller alltid, oavsett var den andra tärningen ligger.</li>
+    <li>Valfri ordning.</li>
+  </ul>
+  <p class="pts">Poäng: antal kryss → skalan överst (4 kryss = 7 p, 9 kryss = 37 p).</p>
+</div>
+
+<div class="area a-g" id="gron">
+  <h3><span class="die"></span>Grönt område</h3>
+  <ul>
+    <li>Kryssa från <strong>vänster till höger</strong>, inga hopp.</li>
+    <li>Tärningen måste vara <strong>minst</strong> lika hög som fältets krav (≥1, ≥2 …) – annars kan den inte väljas.</li>
+  </ul>
+  <p class="pts">Poäng: talet i stjärnan över sista krysset.</p>
+</div>
+
+<div class="area a-o" id="orange">
+  <h3><span class="die"></span>Orange område</h3>
+  <ul>
+    <li>Skriv in värdet från <strong>vänster till höger</strong>, inga hopp. Inga värdekrav.</li>
+    <li><strong>x2/x3-fält:</strong> multiplicera värdet innan du skriver in (en 6:a i ett x2-fält = 12).</li>
+  </ul>
+  <p class="pts">Poäng: summan av alla tal.</p>
+</div>
+
+<div class="area a-p" id="lila">
+  <h3><span class="die"></span>Lila område</h3>
+  <ul>
+    <li>Skriv in från <strong>vänster till höger</strong>, inga hopp.</li>
+    <li>Varje nytt tal måste vara <strong>större än föregående</strong>.</li>
+    <li><strong>Undantag: efter en 6:a är vilket tal som helst tillåtet!</strong></li>
+  </ul>
+  <p class="pts">Poäng: summan av alla tal.</p>
+</div>
+
+<h2>Bonusar</h2>
+<ul>
+  <li><strong>Bonus vid ett fält</strong> = löses in <strong>direkt</strong> när fältet fylls i.</li>
+  <li><strong>Bonus i slutet av rad/kolumn</strong> = löses in när <strong>alla</strong> fält där är ifyllda.</li>
+  <li><strong>Färgat X</strong> (gul/blå/grön): kryssa direkt ett valfritt fält i den färgen (grön = nästa lediga).</li>
+  <li><strong>Färgad siffra</strong> (lila/orange): skriv in siffran direkt i nästa lediga fält.</li>
+  <li><strong>Runda 4:</strong> välj EN – svart X (gul, blå eller grön) <em>eller</em> svart 6:a (lila eller orange).</li>
+  <li>Bonusar kan trigga nya bonusar = <strong>kedjeeffekter!</strong> 🔗 Bonusar kan inte sparas.</li>
+</ul>
+
+<h2>Aktioner</h2>
+<p>Låses upp via fält på bladet eller rundräknaren – ringa in i aktionslisten. Vid användning: stryk fältet. Obegränsat antal per tur.</p>
+<ul>
+  <li>🔄 <strong>Omslag:</strong> endast aktiv spelare. Slå om ALLA tillgängliga tärningar (inte de på brickan eller dina fält).</li>
+  <li>➕ <strong>Extratärning (+1):</strong> används i slutet av din tur. Välj valfri av de 6 tärningarna och skriv in den – även en redan använd! Flera +1 per tur okej, men varje tärning bara en gång som extratärning.</li>
+</ul>
+
+<h2>🦊 Rävarna</h2>
+<div class="card tip">
+  <p>Varje räv ger i slutet lika många poäng som ditt <strong>sämsta färgområde</strong>.</p>
+  <p class="dim" style="margin:0">0 poäng i ett område = rävarna är värda 0. Aj!</p>
+</div>
+
+<h2>Spelets slut</h2>
+<ul>
+  <li>Efter sista rundan får alla använda kvarvarande <strong>+1-aktioner</strong> (omslag förfaller).</li>
+  <li>Räkna poäng per färgområde + rävpoäng (antal rävar × lägsta områdespoäng).</li>
+  <li><strong>Flest totalpoäng vinner.</strong> Lika? Högst poäng i ett enskilt område avgör – annars flera vinnare.</li>
+</ul>
+
+<h2>Solospel</h2>
+<ul>
+  <li>6 rundor – du växlar mellan aktiv och passiv spelare.</li>
+  <li>Som passiv: slå alla 6 tärningar, lägg de <strong>3 lägsta</strong> på brickan (vid lika: den som landade närmast brickan). Välj sedan en av dem.</li>
+  <li>Ingen omslags-aktion som passiv.</li>
+</ul>
+
+<h3>Hur klurig är du?</h3>
+<table>
+  <tr><th>Poäng</th><th>Nivå</th></tr>
+  <tr><td>&gt; 280</td><td>Ganz schön clever! ⭐⭐⭐⭐⭐</td></tr>
+  <tr><td>260–280</td><td>Du heter inte Albert Einstein, va?</td></tr>
+  <tr><td>240–260</td><td>Vilket geni!</td></tr>
+  <tr><td>220–239</td><td>Imponerande!</td></tr>
+  <tr><td>200–219</td><td>Jag lyfter på hatten!</td></tr>
+  <tr><td>180–199</td><td>Toppenresultat!</td></tr>
+  <tr><td>160–179</td><td>Det gick riktigt bra.</td></tr>
+  <tr><td>140–159</td><td>Inte illa, men kan bli bättre.</td></tr>
+  <tr><td>&lt; 140</td><td>Utvecklingsbart!</td></tr>
+</table>
+
+<footer>
+  Inofficiell svensk sammanfattning · Spelet <em>Ganz schön clever</em> © Schmidt Spiele GmbH, av Wolfgang Warsch.<br>
+  Verifierad mot den officiella regelboken (schmidtspiele.de).
+</footer>
+
+</div>
+</body>
+</html>
