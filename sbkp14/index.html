@@ -23,20 +23,21 @@
 }
 @media print{.mobile-switcher,.mobile-nav{display:none!important}}
 .person-tools select:last-child:nth-child(3){width:100%}
+.cloud{border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:24px;background:var(--paper)}.cloud summary{cursor:pointer;font-weight:650;min-height:44px;display:list-item}.cloud-check{display:flex;align-items:center;gap:10px;margin:14px 0}.cloud-check input{width:22px;height:22px}.cloud-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}.cloud-row>div{min-width:0;overflow-wrap:anywhere}button:disabled{opacity:.55;cursor:wait}@media print{.cloud{display:none!important}}
 </style>
 </head>
 <body>
 <header><div class="header-inner"><div class="brand"><span class="badge" aria-hidden="true">14</span><div><div class="brand-name">SBKP14</div><div class="micro">Lagverkstan</div></div></div><div class="save" id="save-status" role="status">Ditt eget lagförslag</div></div></header>
 <main>
 <section class="hero"><div><div class="micro">Flera lag. Ett gäng.</div><h1>Hitta rätt balans.</h1><p>Utgå från grundlagen eller skapa ett extra matchlag. Flytta spelare, testa en idé och dela ditt förslag med tränarna.</p></div><a href="#overview">Se din lagöversikt ↓</a></section>
-<div class="toolbar"><div class="proposal"><label for="proposal-name">Förslagets namn</label><input id="proposal-name" maxlength="80" placeholder="T.ex. Mikaels förslag"></div><div class="actions"><button class="primary" id="export">Exportera förslag ↓</button><button id="import">Importera förslag ↑</button><input type="file" id="import-file" accept=".json,application/json" hidden><button id="reset">Börja om</button></div></div>
+<details class="cloud"><summary>Spara och dela med tränarna</summary><p>Logga in med mejl. Spara egna kopior eller dela dem med godkända tränare.</p><form id="cloud-login" class="add-form"><div><label for="cloud-email">Din e-postadress</label><input type="email" id="cloud-email" autocomplete="email" required></div><button id="cloud-login-button" type="submit">Skicka inloggningslänk</button></form><div id="cloud-account" hidden><p id="cloud-user"></p><div id="cloud-tools" hidden><label class="cloud-check"><input type="checkbox" id="cloud-share"> Dela denna kopia med godkända tränare</label><div class="actions"><button id="cloud-save" type="button">Spara ny kopia i molnet</button><button id="cloud-refresh" type="button">Hämta förslag</button></div><div id="cloud-list"></div></div><section id="cloud-admin" hidden><h3>Hantera tränare</h3><form id="approve-coach" class="add-form"><div><label for="approve-email">Godkänn e-postadress</label><input id="approve-email" type="email" required maxlength="254"></div><button type="submit">Godkänn</button></form><button type="button" id="admin-refresh">Hämta förfrågningar</button><div id="admin-list"></div></section><button id="access-refresh" type="button">Kontrollera min behörighet</button><button id="cloud-logout" type="button">Logga ut</button></div><p id="cloud-status" role="status">Ansluter… Lokalt sparande fungerar som vanligt.</p></details><div class="toolbar"><div class="proposal"><label for="proposal-name">Förslagets namn</label><input id="proposal-name" maxlength="80" placeholder="T.ex. Mikaels förslag"></div><div class="actions"><button class="primary" id="export">Exportera förslag ↓</button><button id="import">Importera förslag ↑</button><input type="file" id="import-file" accept=".json,application/json" hidden><button id="reset">Börja om</button></div></div>
 <section id="editor-section"><div class="section-title"><h2>Bygg lagen</h2><p>Dra mellan lagen eller välj lag i menyn.</p></div><form class="add-form team-form" id="add-team"><div><label for="team-name">Nytt lag</label><input id="team-name" required maxlength="40" placeholder="T.ex. Svårmatch lördag"></div><div><label for="team-level">Nivå</label><select id="team-level"><option>Lätt</option><option>Medel</option><option selected>Svår</option></select></div><button type="submit" class="primary">Skapa lag +</button></form><p class="team-help">Spelare flyttas från sitt nuvarande lag när du väljer ett nytt. Varje spelare finns i ett lag åt gången.</p><div id="team-status" role="status" aria-live="polite"></div><form class="add-form team-form" id="add-player"><div><label for="player-first">Förnamn</label><input id="player-first" required maxlength="40" autocomplete="off" placeholder="Förnamn"></div><div><label for="player-last">Initial (bara vid lika förnamn)</label><input id="player-last" maxlength="1" autocomplete="off" placeholder="T.ex. E"></div><div><label for="player-team">Lag för ny spelare</label><select id="player-team"></select></div><button type="submit">Lägg till spelare +</button></form><div id="player-status" role="status" aria-live="polite"></div><div class="mobile-switcher"><label for="mobile-team">Visa lag</label><select id="mobile-team"></select></div><div class="board" id="board"></div></section>
 <div class="extras"><section class="extra-panel drop-target" id="coach-section" data-team="coaches"><h3>Tränare · ej lagplacerade</h3><div class="coach-list" id="coaches"></div><form class="add-form" id="add-coach"><div><label for="coach-name">Lägg till tränare</label><input id="coach-name" maxlength="70" required placeholder="Förnamn, ev. initial"></div><button type="submit">Lägg till +</button></form></section><section class="extra-panel drop-target" data-team="pending"><h3>Att placera / oklart</h3><div id="pending"></div></section></div>
 <div class="status" id="status" role="status" aria-live="polite"></div>
 <section class="overview" id="overview"><div class="section-title"><div><div class="micro">Uppdateras när du flyttar spelare</div><h2 id="overview-title">Ditt lagförslag</h2></div><div class="actions"><button id="print">Skriv ut / spara PDF</button></div></div><div class="board" id="summary"></div></section>
 </main>
 <nav class="mobile-nav" aria-label="Genvägar"><a href="#editor-section">Spelare</a><a href="#coach-section">Tränare</a><a href="#overview">Lagöversikt</a></nav>
-<footer><span>SBKP14 · 9-manna</span><p>Förslaget sparas bara i den här webbläsaren. Exportera en fil för att dela eller säkerhetskopiera. Import ersätter ditt aktuella förslag. Ingen gemensam lagindelning ändras.</p></footer>
+<footer><span>SBKP14 · 9-manna</span><p>Ändringar sparas automatiskt i den här webbläsaren. Spara en kopia i molnet eller exportera en fil för att dela eller säkerhetskopiera. Import ersätter ditt aktuella förslag. Ingen gemensam lagindelning ändras.</p></footer>
 <script id="initial-roster" type="application/json">[{"id":"person-1","name":"David","role":"player","team":"green","note":"","position":"unset"},{"id":"person-2","name":"Ellis","role":"player","team":"green","note":"","position":"unset"},{"id":"person-3","name":"Kayode","role":"player","team":"green","note":"","position":"unset"},{"id":"person-4","name":"Love","role":"player","team":"green","note":"","position":"unset"},{"id":"person-5","name":"Mehras","role":"player","team":"green","note":"","position":"unset"},{"id":"person-6","name":"Naod amare","role":"player","team":"green","note":"","position":"unset"},{"id":"person-7","name":"Oscar","role":"player","team":"green","note":"","position":"unset"},{"id":"person-8","name":"Viktor","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-9","name":"Abraham","role":"keeper","team":"green","note":"","position":"keeper"},{"id":"person-10","name":"Martin","role":"coach","team":"coaches","note":"","position":"unset"},{"id":"person-11","name":"Elliot","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-12","name":"Neo","role":"player","team":"green","note":"Preliminärt lättlag","position":"unset"},{"id":"person-13","name":"Ivar","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-14","name":"Benjamin","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-15","name":"Elian","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-16","name":"Titus","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-17","name":"Vidar","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-18","name":"Simon","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-19","name":"Anton","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-20","name":"Vincent","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-21","name":"Holton","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-22","name":"Abbe","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-23","name":"Herman","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-24","name":"Kimchi","role":"player","team":"blue","note":"","position":"unset"},{"id":"person-25","name":"Mikael","role":"coach","team":"coaches","note":"","position":"unset"},{"id":"person-26","name":"Sebastian","role":"coach","team":"coaches","note":"","position":"unset"},{"id":"person-27","name":"Isak","role":"coach","team":"coaches","note":"","position":"unset"},{"id":"person-28","name":"Leon E","role":"player","team":"blue","note":"Preliminärt lag · oklart vilken Leon som är målvakt","position":"unset"},{"id":"person-29","name":"Marcel","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-30","name":"Dag","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-31","name":"Carl Wilhelm","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-32","name":"Otto","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-33","name":"Edwin","role":"player","team":"green","note":"","position":"unset"},{"id":"person-34","name":"Christian","role":"player","team":"green","note":"","position":"unset"},{"id":"person-35","name":"Lester","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-36","name":"Youssef Aziz","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-37","name":"Viggo","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-38","name":"Olle","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-39","name":"Lionel","role":"player","team":"yellow","note":"","position":"unset"},{"id":"person-40","name":"Henric","role":"coach","team":"coaches","note":"Henrik → Henric?","position":"unset"},{"id":"person-41","name":"Pär","role":"coach","team":"coaches","note":"Pelle → Pär?","position":"unset"},{"id":"person-42","name":"Leon R","role":"player","team":"yellow","note":"Preliminärt lag · oklart vilken Leon som är målvakt","position":"unset"},{"id":"person-43","name":"Jenny","role":"unknown","team":"yellow","note":"Oklart: spelare eller tränare · räknas inte som spelare","position":"unset"}]</script>
 <script>
 'use strict';
@@ -133,5 +134,66 @@ $('import-file').addEventListener('change',async e=>{const file=e.target.files[0
 $('reset').addEventListener('click',()=>{if(!confirm('Återgå till startfördelningen? Exportera först om du vill behålla ditt förslag.'))return;state=fresh();$('proposal-name').value=state.name;render();announce('Startfördelningen är återställd.');persist();});
 $('print').addEventListener('click',()=>window.print());
 render();if(loadWarning){announce(loadWarning);$('save-status').textContent='Sparandet behöver kontrolleras';}
+// Cloud features are optional. Local editing works even if the SDK/network is unavailable.
+(async()=>{
+ const status=$('cloud-status');const say=text=>{status.textContent=text;};
+ const controls=['cloud-login-button','cloud-save','cloud-refresh','cloud-logout'];
+ let client,user=null,busy=false,generation=0;
+ function lock(value){busy=value;controls.forEach(id=>$(id).disabled=value);}
+ function errorText(error){if(error?.code==='PGRST205'||error?.code==='42P01')return 'Databasen behöver aktiveras. Kör setup-skriptet i Supabase först.';return error?.message||'Anslutningen misslyckades. Ditt lokala förslag är kvar.';}
+ async function refresh(){
+  const current=++generation;$('cloud-list').replaceChildren();if(!user)return;
+  const {data,error}=await client.from('sbkp14_proposals').select('id,name,owner_id,shared,created_at').order('created_at',{ascending:false}).limit(50);
+  if(current!==generation)return;if(error)throw error;
+  if(!data.length)$('cloud-list').append(node('p','Inga sparade förslag ännu.'));
+  for(const item of data){
+   const row=node('div',undefined,'cloud-row');const label=node('div');label.append(node('strong',item.name),node('div',(item.owner_id===user.id?'Mitt förslag':'Delat av tränare')+' · '+new Date(item.created_at).toLocaleString('sv-SE'),'level'));row.append(label);
+   const open=node('button','Öppna');open.type='button';open.onclick=()=>run(async()=>{
+    const {data,error}=await client.from('sbkp14_proposals').select('payload').eq('id',item.id).single();if(error)throw error;
+    const next=validate(data.payload);if(!confirm('Öppna ”'+item.name+'”? Det ersätter ditt lokala förslag. Exportera eller spara en kopia först om du vill behålla det.'))return;
+    state=next;$('proposal-name').value=state.name;render();persist();say('Förslaget öppnat. Ändringar sker i din lokala kopia.');
+   });row.append(open);$('cloud-list').append(row);
+  }
+ }
+ async function run(fn){if(busy)return;lock(true);try{await fn();}catch(e){say(errorText(e));}finally{lock(false);}}
+ async function refreshAdmin(){
+  const {data,error}=await client.rpc('sbkp14_list_access');if(error)throw error;
+  $('admin-list').replaceChildren();
+  for(const entry of data){const row=node('div',undefined,'cloud-row');const label=node('div');label.append(node('strong',entry.email),node('div',entry.is_admin?'Administratör':({pending:'Väntar på godkännande',approved:'Godkänd',revoked:'Åtkomst återkallad'})[entry.status],'level'));row.append(label);
+   if(!entry.is_admin){const approve=entry.status!=='approved';const button=node('button',approve?'Godkänn':'Återkalla');button.type='button';button.onclick=()=>run(async()=>{if(!approve&&!confirm('Återkalla åtkomsten för '+entry.email+'?'))return;const {error}=await client.rpc('sbkp14_set_access',{target_email:entry.email,new_status:approve?'approved':'revoked'});if(error)throw error;await refreshAdmin();say('Behörigheten är uppdaterad.');});row.append(button);}$('admin-list').append(row);
+  }
+ }
+ async function sessionChanged(session){
+  user=session?.user||null;generation++;$('cloud-list').replaceChildren();$('admin-list').replaceChildren();$('cloud-admin').hidden=true;$('cloud-account').hidden=true;$('cloud-tools').hidden=true;$('cloud-login').hidden=!!user;
+  if(!user){say('Logga in för att spara och dela förslag med godkända tränare.');return;}
+  const id=user.id;const {data,error}=await client.rpc('sbkp14_request_access');
+  if(user?.id!==id)return;$('cloud-account').hidden=false;$('cloud-user').textContent=user.email||'Inloggad';
+  if(error){say(errorText(error));return;}
+  if(data.status!=='approved'){say(data.status==='revoked'?'Din åtkomst är återkallad. Kontakta administratören.':'Väntar på godkännande. Administratören ser din förfrågan.');return;}
+  $('cloud-tools').hidden=false;$('cloud-admin').hidden=!data.is_admin;
+  say('Ansluten. Spara en ny kopia när du vill behålla ett förslag.');await refresh();if(data.is_admin)await refreshAdmin();
+ }
+ try{
+  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.102.0/+esm');
+  client=createClient('https://jmzjahnztmlpvitgfayj.supabase.co','sb_publishable_rr3KicTE3PmCFtnbtpEUmg_MhG07rmS');
+  $('cloud-login').addEventListener('submit',e=>{e.preventDefault();run(async()=>{
+   const {error}=await client.auth.signInWithOtp({email:$('cloud-email').value.trim(),options:{emailRedirectTo:'https://mickeaman.github.io/miama/sbkp14/'}});if(error)throw error;
+   say('Inloggningslänk skickad. Öppna länken i mejlet.');
+  });});
+  $('cloud-save').onclick=()=>run(async()=>{
+   if(!user)throw Error('Logga in först.');const payload=validate({...state,people:cleanPeople(state.people)});const name=payload.name.trim()||'Mitt lagförslag';payload.name=name;
+   const {error}=await client.from('sbkp14_proposals').insert({owner_id:user.id,name,payload,shared:$('cloud-share').checked});if(error)throw error;
+   await refresh();say('En ny kopia har sparats'+($('cloud-share').checked?' och delats med godkända tränare.':'. Bara du kan öppna den.'));
+  });
+  $('approve-coach').addEventListener('submit',e=>{e.preventDefault();run(async()=>{const {error}=await client.rpc('sbkp14_set_access',{target_email:$('approve-email').value.trim(),new_status:'approved'});if(error)throw error;$('approve-email').value='';await refreshAdmin();say('Tränaren är godkänd och kan logga in.');});});
+  $('admin-refresh').onclick=()=>run(refreshAdmin);
+  $('access-refresh').onclick=()=>run(async()=>{const {data,error}=await client.auth.getSession();if(error)throw error;await sessionChanged(data.session);});
+  $('cloud-refresh').onclick=()=>run(refresh);
+  $('cloud-logout').onclick=()=>run(async()=>{const {error}=await client.auth.signOut({scope:'local'});if(error)throw error;await sessionChanged(null);});
+  const {data,error}=await client.auth.getSession();if(error)throw error;await sessionChanged(data.session);
+  client.auth.onAuthStateChange((event,session)=>{setTimeout(()=>sessionChanged(session).catch(e=>say(errorText(e))),0);});
+ }catch(e){say('Molnanslutningen är inte klar: '+errorText(e));}
+})();
+
 </script>
 </body></html>
