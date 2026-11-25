@@ -30,3 +30,7 @@ test('editor and summaries have no level controls or labels', () => {
  assert.ok(!source.includes('t.level'));
  new vm.Script(source);
 });
+test('all outfield positions are available and survive validation', () => {
+ assert.deepEqual(JSON.parse(evaluate('JSON.stringify(Object.values(POSITIONS))')).filter(v => ['Back','Mittfältare','Yttermittfältare','Anfallare'].includes(v)), ['Back','Mittfältare','Yttermittfältare','Anfallare']);
+ assert.equal(evaluate("var p2=fresh();p2.people[0].position='winger';validate(p2).people[0].position"), 'winger');
+});
