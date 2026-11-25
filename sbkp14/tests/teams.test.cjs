@@ -34,3 +34,8 @@ test('all outfield positions are available and survive validation', () => {
  assert.deepEqual(JSON.parse(evaluate('JSON.stringify(Object.values(POSITIONS))')).filter(v => ['Back','Mittfältare','Yttermittfältare','Anfallare'].includes(v)), ['Back','Mittfältare','Yttermittfältare','Anfallare']);
  assert.equal(evaluate("var p2=fresh();p2.people[0].position='winger';validate(p2).people[0].position"), 'winger');
 });
+test('removed players stay removed, old saves still get missing active players', () => {
+ assert.equal(evaluate("var p4=fresh();p4.people=p4.people.filter(p=>p.name!=='Zubeyr');validate(p4).people.some(p=>p.name==='Zubeyr')"), false);
+ assert.equal(evaluate("var p3=fresh();p3.version=3;p3.people=p3.people.filter(p=>p.name!=='Zubeyr');validate(p3).people.some(p=>p.name==='Zubeyr')"), true);
+ assert.equal(evaluate('validate(fresh()).version'), 4);
+});
